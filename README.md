@@ -1,9 +1,12 @@
-# AIS CII SEEMP FE
+# ais-its-web (MVP, branch `mvp-version`)
+
+MVP web app of AIS Maritime Intelligence, formerly `ais-its-cii-seemp-fe`. It
+uses the MVP API `ais-its-mvp-api` (`/api/v1`) until the cut-over to v2.
 
 ## Phase 0 hardening
 
 - **Configuration** (`.env`, see `.env.example`): `VITE_BACKEND_URI` is the
-  legacy API base URL including `/api/v1`, `VITE_STADIA_MAPS_API_KEY` the map
+  MVP API base URL including `/api/v1`, `VITE_STADIA_MAPS_API_KEY` the map
   tiles key. Phase 0 adds no new variables.
 - **Polling**: fleet lists (`GET /ais`) refresh every 10 s, detail panels of
   the selected vessel every 5 s (`src/hooks/use-polling.ts`). Every response
@@ -15,8 +18,11 @@
   as an empty state.
 - **Access token**: there is no login screen yet. Mutating API routes need a
   token from `POST /api/v1/auth/login`; when one is stored under
-  `localStorage["seemp.accessToken"]` it is sent as
-  `Authorization: Bearer <token>` with every backend request.
+  `localStorage["aisits.accessToken"]` it is sent as
+  `Authorization: Bearer <token>` with every backend request. A token stored
+  under the former key `seemp.accessToken` is moved to it once, at startup.
+  Logging in and writing from the browser also need the app's origin in the
+  API's `ALLOWED_ORIGINS`; reads work from any origin.
 
 # React + TypeScript + Vite
 

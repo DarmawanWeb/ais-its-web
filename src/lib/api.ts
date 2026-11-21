@@ -6,7 +6,24 @@ import { VITE_BACKEND_URI } from './env';
  * has no login screen; when a token is stored it is sent with every backend
  * request (reads are public, writes need it).
  */
-export const ACCESS_TOKEN_STORAGE_KEY = 'seemp.accessToken';
+export const ACCESS_TOKEN_STORAGE_KEY = 'aisits.accessToken';
+/** The key before the platform was renamed to AIS Maritime Intelligence. */
+const LEGACY_ACCESS_TOKEN_STORAGE_KEY = 'seemp.accessToken';
+
+/** Moves a token stored under the legacy key; runs once, at startup. */
+const migrateLegacyAccessToken = (): void => {
+  try {
+    const storage = window.localStorage;
+    const legacyToken = storage.getItem(LEGACY_ACCESS_TOKEN_STORAGE_KEY);
+    if (legacyToken === null) return;
+    storage.removeItem(LEGACY_ACCESS_TOKEN_STORAGE_KEY);
+    if (storage.getItem(ACCESS_TOKEN_STORAGE_KEY) === null) {
+      storage.setItem(ACCESS_TOKEN_STORAGE_KEY, legacyToken);
+    }
+  } catch {
+    // storage unavailable (private mode, blocked cookies)
+  }
+};
 
 export const getStoredAccessToken = (): string | null => {
   try {
@@ -28,6 +45,7 @@ let interceptorInstalled = false;
 export const installAuthInterceptor = (): void => {
   if (interceptorInstalled) return;
   interceptorInstalled = true;
+  migrateLegacyAccessToken();
   axios.interceptors.request.use((config) => {
     const token = getStoredAccessToken();
     if (token && isBackendRequest(config.url)) {
