@@ -1,0 +1,14 @@
+{
+  "seemp": {
+    "title": "SEEMP",
+    "description": "Ship Energy Efficiency Management Plan: energy efficiency measure recommendations and their simulated CII impact.",
+    "capabilities": [
+      "SEEMP measure recommendations per vessel",
+      "Reduction factor simulation (seemp:simulate)",
+      "Projected CII per year chart"
+    ]
+  },
+  "nav": {
+    "seemp": "SEEMP"
+  }
+}

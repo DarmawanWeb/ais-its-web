@@ -1,0 +1,15 @@
+{
+  "telemetry": {
+    "title": "Telemetri Bahan Bakar",
+    "description": "Pembacaan konsumsi bahan bakar mesin utama dan bantu dari perangkat, API dan input manual.",
+    "capabilities": [
+      "Grafik pembacaan per jam / hari",
+      "Status aktif perangkat per kapal",
+      "Input manual pembacaan (telemetry:write)",
+      "Ekspor CSV"
+    ]
+  },
+  "nav": {
+    "telemetry": "Telemetri"
+  }
+}

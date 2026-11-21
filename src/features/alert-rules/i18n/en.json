@@ -1,0 +1,14 @@
+{
+  "rules": {
+    "title": "Alert Rules",
+    "description": "Configure who is notified, for which alerts and through which channel (e-mail, Telegram, webhook).",
+    "capabilities": [
+      "Rules by type, domain, minimum severity, vessel and zone",
+      "E-mail, Telegram and signed webhook channels",
+      "Send a test notification (POST /api/v2/notifications/test)"
+    ]
+  },
+  "nav": {
+    "rules": "Alert Rules"
+  }
+}

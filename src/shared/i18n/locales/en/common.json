@@ -1,0 +1,237 @@
+{
+  "app": {
+    "name": "AIS Maritime Intelligence",
+    "shortName": "AIS MI",
+    "tagline": "AIS-based maritime intelligence for vessel safety, surveillance and emissions"
+  },
+  "nav": {
+    "sections": {
+      "operations": "Operations",
+      "safety": "Safety",
+      "surveillance": "Surveillance",
+      "fleet": "Fleet",
+      "settings": "Settings",
+      "knowledge": "Knowledge"
+    },
+    "collapse": "Collapse sidebar",
+    "expand": "Expand sidebar",
+    "openMenu": "Open navigation menu",
+    "mainNavigation": "Main navigation"
+  },
+  "shell": {
+    "search": "Search pages or vessels…",
+    "searchShort": "Search…",
+    "skipToContent": "Skip to content",
+    "theme": {
+      "label": "Theme",
+      "dark": "Dark",
+      "light": "Light",
+      "system": "System",
+      "toggle": "Toggle theme"
+    },
+    "language": {
+      "label": "Language",
+      "id": "Bahasa Indonesia",
+      "en": "English",
+      "toggle": "Change language"
+    },
+    "userMenu": "User menu",
+    "profile": "Profile & security",
+    "logout": "Sign out",
+    "loggingOut": "Signing out…",
+    "organization": {
+      "label": "Organization",
+      "switch": "Switch organization",
+      "switching": "Switching organization…",
+      "switched": "Active organization: {{name}}",
+      "none": "No organization",
+      "platform": "Platform",
+      "search": "Search organizations…",
+      "empty": "No other organizations",
+      "failed": "Could not switch organization"
+    },
+    "alerts": {
+      "label": "Alerts",
+      "empty": "No new alerts",
+      "viewAll": "View all alerts",
+      "pending": "Realtime alerts will appear here."
+    },
+    "realtime": {
+      "connected": "Realtime connected",
+      "connecting": "Connecting realtime…",
+      "reconnecting": "Reconnecting realtime…",
+      "disconnected": "Realtime disconnected",
+      "idle": "Realtime idle",
+      "error": "Realtime connection failed"
+    },
+    "version": "Version {{version}}"
+  },
+  "command": {
+    "placeholder": "Type a command, page, vessel name or MMSI…",
+    "empty": "No results.",
+    "pages": "Pages",
+    "vessels": "Vessels",
+    "actions": "Actions",
+    "searchingVessels": "Searching vessels…",
+    "vesselSearchUnavailable": "Vessel search is not available yet",
+    "toggleTheme": "Toggle light/dark theme",
+    "switchLanguage": "Ganti ke Bahasa Indonesia",
+    "logout": "Sign out",
+    "title": "Command palette",
+    "description": "Search pages, vessels and actions"
+  },
+  "actions": {
+    "save": "Save",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "add": "Add",
+    "close": "Close",
+    "back": "Back",
+    "retry": "Try again",
+    "refresh": "Refresh",
+    "search": "Search",
+    "filter": "Filter",
+    "reset": "Reset",
+    "export": "Export",
+    "exportCsv": "Export CSV",
+    "copy": "Copy",
+    "copied": "Copied",
+    "more": "More",
+    "apply": "Apply",
+    "clear": "Clear",
+    "continue": "Continue",
+    "goHome": "Go home",
+    "learnMore": "Learn more"
+  },
+  "status": {
+    "loading": "Loading…",
+    "saving": "Saving…",
+    "noData": "No data",
+    "comingSoon": "Coming soon",
+    "underConstruction": "This page is under construction",
+    "underConstructionDescription": "The {{module}} module is being built. The page frame, permissions and navigation are ready.",
+    "plannedScope": "Module scope"
+  },
+  "errors": {
+    "generic": "Something went wrong",
+    "genericDescription": "Sorry, an unexpected error occurred. Please try again.",
+    "network": "Cannot reach the server",
+    "networkDescription": "Check your connection and try again.",
+    "timeout": "The request timed out",
+    "unauthorized": "Your session has expired",
+    "unauthorizedDescription": "Please sign in again.",
+    "forbidden": "Access denied",
+    "forbiddenDescription": "Your account is not allowed to open this page.",
+    "notFound": "Page not found",
+    "notFoundDescription": "The page you are looking for does not exist or has moved.",
+    "validation": "Please check the form",
+    "rateLimited": "Too many attempts",
+    "rateLimitedRetry": "Try again in {{seconds}} seconds.",
+    "server": "The server is having trouble",
+    "traceId": "Trace ID",
+    "requestId": "Request ID",
+    "details": "Technical details",
+    "boundaryTitle": "This page could not be displayed",
+    "boundaryDescription": "An error occurred while rendering this page."
+  },
+  "table": {
+    "columns": "Columns",
+    "toggleColumns": "Show/hide columns",
+    "rowsPerPage": "Rows per page",
+    "pageOf": "Page {{page}} of {{pageCount}}",
+    "pageNoTotal": "Page {{page}}",
+    "total": "{{total}} rows",
+    "previous": "Previous",
+    "next": "Next",
+    "first": "First page",
+    "last": "Last page",
+    "sortAscending": "Sort ascending",
+    "sortDescending": "Sort descending",
+    "noResults": "No matching rows.",
+    "loadMore": "Load more",
+    "selected": "{{count}} selected"
+  },
+  "dateRange": {
+    "placeholder": "Pick a date range",
+    "last24h": "Last 24 hours",
+    "last7d": "Last 7 days",
+    "last30d": "Last 30 days",
+    "thisYear": "This year"
+  },
+  "domain": {
+    "mmsi": "MMSI",
+    "imo": "IMO",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "position": "Position",
+    "copyMmsi": "Copy MMSI",
+    "copyCoordinates": "Copy coordinates",
+    "ciiGrade": "CII rating {{grade}}",
+    "ewsStatus": "EWS status",
+    "severity": "Severity",
+    "navstatus": "Navigational status",
+    "units": {
+      "knots": "kn",
+      "nm": "nm",
+      "tonnes": "t",
+      "kw": "kW",
+      "m": "m",
+      "km": "km",
+      "minutes": "min",
+      "percent": "%",
+      "deg": "°",
+      "gkwh": "g/kWh"
+    }
+  },
+  "method": {
+    "trigger": "Method source: {{name}}",
+    "source": "Source",
+    "formula": "Formula",
+    "variables": "Variables",
+    "constants": "Constants",
+    "references": "References",
+    "unit": "Unit",
+    "openMethodology": "Open in Methodology & References",
+    "pending": "Method source pending",
+    "pendingDescription": "The methodology catalog entry for \"{{methodId}}\" is not loaded yet. Sources will appear once the catalog is available.",
+    "needsCitation": "Needs citation",
+    "needsCitationDescription": "The value comes from the thesis and has no verified external source yet.",
+    "status": "Status"
+  },
+  "map": {
+    "basemap": "Basemap",
+    "basemaps": {
+      "vector": "Dark (vector)",
+      "osm": "OpenStreetMap",
+      "satellite": "Satellite"
+    },
+    "legend": "Legend",
+    "layers": "Layers",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "resetView": "Reset view",
+    "fullscreen": "Fullscreen",
+    "vessels": "Vessels",
+    "vesselCount": "{{count}} vessels",
+    "safety": {
+      "danger": "EWS danger",
+      "warning": "EWS warning",
+      "collisionHigh": "High collision risk",
+      "collisionMedium": "Medium collision risk",
+      "normal": "Normal"
+    },
+    "noWebgl": "The map needs WebGL",
+    "noWebglDescription": "This browser or device does not support WebGL, so the map cannot be displayed."
+  },
+  "attribution": {
+    "weather": "Weather data by Open-Meteo.com",
+    "license": "License {{license}}"
+  },
+  "time": {
+    "justNow": "just now"
+  }
+}

@@ -1,0 +1,9 @@
+# pnpm settings of this single-package repository (no workspace packages).
+# Install scripts are disabled except for the packages listed in onlyBuiltDependencies;
+# the others ship prebuilt binaries through optional platform packages or are optional.
+onlyBuiltDependencies:
+  - msw
+ignoredBuiltDependencies:
+  - core-js
+  - esbuild
+  - protobufjs

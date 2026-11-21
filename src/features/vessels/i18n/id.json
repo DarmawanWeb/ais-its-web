@@ -1,0 +1,24 @@
+{
+  "list": {
+    "title": "Kapal",
+    "description": "Data induk kapal armada Anda: identitas, dimensi, mesin, bahan bakar dan foto.",
+    "capabilities": [
+      "Daftar kapal dengan pencarian nama / MMSI / IMO (page pagination)",
+      "Halaman detail di /vessels/:mmsi",
+      "Form kapal, dimensi, mesin dan pelabuhan (vessel:write)",
+      "Unggah foto kapal (≤ 5 MB)"
+    ]
+  },
+  "nav": {
+    "list": "Kapal"
+  },
+  "detail": {
+    "title": "Detail Kapal",
+    "description": "Identitas, posisi live, keselamatan, emisi dan telemetri satu kapal.",
+    "capabilities": [
+      "Posisi dan status keselamatan live (useVesselLive)",
+      "Partikular, dimensi dan mesin",
+      "Ringkasan CII dan telemetri"
+    ]
+  }
+}

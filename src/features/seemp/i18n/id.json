@@ -1,0 +1,14 @@
+{
+  "seemp": {
+    "title": "SEEMP",
+    "description": "Ship Energy Efficiency Management Plan: rekomendasi langkah efisiensi energi dan simulasi dampaknya terhadap CII.",
+    "capabilities": [
+      "Rekomendasi langkah SEEMP per kapal",
+      "Simulasi faktor reduksi (seemp:simulate)",
+      "Grafik proyeksi CII per tahun"
+    ]
+  },
+  "nav": {
+    "seemp": "SEEMP"
+  }
+}

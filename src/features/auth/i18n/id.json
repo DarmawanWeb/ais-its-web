@@ -1,0 +1,84 @@
+{
+  "visual": {
+    "headline": "Intelijen maritim real-time untuk perairan Indonesia",
+    "description": "Pantau pergerakan kapal dari AIS, deteksi risiko keselamatan dan aktivitas ilegal, serta kelola emisi armada dalam satu konsol operasi.",
+    "capabilities": {
+      "tracking": "Pelacakan live",
+      "ews": "EWS pipa bawah laut",
+      "surveillance": "Pengawasan ilegal",
+      "emission": "Emisi CII & SEEMP"
+    },
+    "secure": "Akses terbatas · Aktivitas tercatat di log audit"
+  },
+  "login": {
+    "title": "Masuk ke konsol",
+    "subtitle": "Gunakan akun organisasi Anda untuk mengakses AIS Maritime Intelligence.",
+    "email": "Email",
+    "emailPlaceholder": "nama@perusahaan.co.id",
+    "password": "Kata sandi",
+    "showPassword": "Tampilkan kata sandi",
+    "hidePassword": "Sembunyikan kata sandi",
+    "forgot": "Lupa kata sandi?",
+    "submit": "Masuk",
+    "submitting": "Memeriksa…",
+    "sessionExpired": "Sesi Anda telah berakhir. Silakan masuk kembali.",
+    "loggedOut": "Anda telah keluar dengan aman.",
+    "help": "Belum punya akun? Hubungi admin organisasi Anda untuk undangan."
+  },
+  "mfa": {
+    "title": "Verifikasi dua langkah",
+    "subtitle": "Masukkan kode 6 digit dari aplikasi autentikator Anda.",
+    "code": "Kode verifikasi",
+    "submit": "Verifikasi",
+    "submitting": "Memverifikasi…",
+    "back": "Kembali ke halaman masuk",
+    "expired": "Waktu verifikasi habis. Silakan masuk kembali."
+  },
+  "forgot": {
+    "title": "Atur ulang kata sandi",
+    "subtitle": "Masukkan email akun Anda. Kami akan mengirim tautan untuk membuat kata sandi baru.",
+    "submit": "Kirim tautan",
+    "submitting": "Mengirim…",
+    "successTitle": "Periksa email Anda",
+    "success": "Jika {{email}} terdaftar, tautan untuk mengatur ulang kata sandi telah dikirim. Tautan berlaku 30 menit.",
+    "backToLogin": "Kembali ke halaman masuk"
+  },
+  "reset": {
+    "title": "Buat kata sandi baru",
+    "subtitle": "Kata sandi minimal 10 karakter dan berisi huruf serta angka.",
+    "password": "Kata sandi baru",
+    "confirm": "Ulangi kata sandi",
+    "submit": "Simpan kata sandi",
+    "submitting": "Menyimpan…",
+    "successTitle": "Kata sandi diperbarui",
+    "success": "Kata sandi Anda telah diganti. Silakan masuk dengan kata sandi baru.",
+    "missingToken": "Tautan tidak lengkap",
+    "missingTokenDescription": "Tautan atur ulang tidak berisi token. Buka kembali tautan dari email Anda atau minta tautan baru.",
+    "requestNew": "Minta tautan baru",
+    "goToLogin": "Masuk"
+  },
+  "invite": {
+    "title": "Aktifkan akun Anda",
+    "subtitle": "Anda diundang ke AIS Maritime Intelligence. Buat kata sandi untuk mengaktifkan akun.",
+    "submit": "Aktifkan akun",
+    "successTitle": "Akun aktif",
+    "success": "Akun Anda sudah aktif. Silakan masuk."
+  },
+  "validation": {
+    "emailRequired": "Email wajib diisi",
+    "emailInvalid": "Format email tidak valid",
+    "passwordRequired": "Kata sandi wajib diisi",
+    "passwordMin": "Minimal 10 karakter",
+    "passwordComplexity": "Harus berisi huruf dan angka",
+    "passwordMismatch": "Kata sandi tidak sama",
+    "codeInvalid": "Masukkan 6 digit angka"
+  },
+  "errors": {
+    "invalidCredentials": "Email atau kata sandi salah.",
+    "invalidMfaCode": "Kode verifikasi salah atau sudah kedaluwarsa.",
+    "accountDisabled": "Akun Anda dinonaktifkan. Hubungi admin organisasi.",
+    "invalidToken": "Tautan tidak valid atau sudah kedaluwarsa. Minta tautan baru.",
+    "throttled": "Terlalu banyak percobaan. Coba lagi dalam {{seconds}} detik.",
+    "throttledNoTime": "Terlalu banyak percobaan. Coba lagi beberapa saat lagi."
+  }
+}

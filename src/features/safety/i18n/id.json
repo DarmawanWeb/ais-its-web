@@ -1,0 +1,26 @@
+{
+  "ews": {
+    "title": "Peringatan Dini Pipa Bawah Laut",
+    "description": "Status EWS kapal di sekitar koridor pipa: aman, peringatan (≤ 1.750 m) dan bahaya (≤ 500 m), memakai prediksi status labuh jangkar.",
+    "capabilities": [
+      "Peta koridor pipa (zona geo) dan kapal berwarna sesuai status EWS",
+      "Daftar kejadian EWS (GET /api/v2/safety/events?detector=ews)",
+      "Detail kapal: jarak ke pipa, status navigasi dan riwayat posisi",
+      "Popover ⓘ sumber metode EWS"
+    ]
+  },
+  "nav": {
+    "ews": "EWS Pipa",
+    "collision": "Risiko Tubrukan"
+  },
+  "collision": {
+    "title": "Risiko Tubrukan (CPA/TCPA)",
+    "description": "Pertemuan kapal dengan jarak titik terdekat (CPA) dan waktu menuju CPA (TCPA) yang berisiko.",
+    "capabilities": [
+      "Peta pertemuan kapal dan garis CPA",
+      "Riwayat encounter (GET /api/v2/safety/encounters)",
+      "Pita risiko rendah / sedang / tinggi dari detektor",
+      "Popover ⓘ untuk CPA dan TCPA"
+    ]
+  }
+}

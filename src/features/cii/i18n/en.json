@@ -1,0 +1,15 @@
+{
+  "cii": {
+    "title": "Emissions & CII",
+    "description": "Year-to-date Carbon Intensity Indicator per vessel: attained, required, rating and grade A–E.",
+    "capabilities": [
+      "Fleet CII summary and A–E grade distribution",
+      "CII history per vessel and year",
+      "Realtime cii:updated updates (useCiiUpdates)",
+      "ⓘ method sources (cii.attained, cii.required, …)"
+    ]
+  },
+  "nav": {
+    "cii": "Emissions & CII"
+  }
+}

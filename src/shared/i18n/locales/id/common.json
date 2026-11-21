@@ -1,0 +1,237 @@
+{
+  "app": {
+    "name": "AIS Maritime Intelligence",
+    "shortName": "AIS MI",
+    "tagline": "Intelijen maritim berbasis AIS untuk keselamatan, pengawasan dan emisi kapal"
+  },
+  "nav": {
+    "sections": {
+      "operations": "Operasi",
+      "safety": "Keselamatan",
+      "surveillance": "Pengawasan",
+      "fleet": "Armada",
+      "settings": "Pengaturan",
+      "knowledge": "Pengetahuan"
+    },
+    "collapse": "Ciutkan sidebar",
+    "expand": "Perluas sidebar",
+    "openMenu": "Buka menu navigasi",
+    "mainNavigation": "Navigasi utama"
+  },
+  "shell": {
+    "search": "Cari halaman atau kapal…",
+    "searchShort": "Cari…",
+    "skipToContent": "Lewati ke konten",
+    "theme": {
+      "label": "Tema",
+      "dark": "Gelap",
+      "light": "Terang",
+      "system": "Ikuti sistem",
+      "toggle": "Ganti tema"
+    },
+    "language": {
+      "label": "Bahasa",
+      "id": "Bahasa Indonesia",
+      "en": "English",
+      "toggle": "Ganti bahasa"
+    },
+    "userMenu": "Menu pengguna",
+    "profile": "Profil & keamanan",
+    "logout": "Keluar",
+    "loggingOut": "Sedang keluar…",
+    "organization": {
+      "label": "Organisasi",
+      "switch": "Ganti organisasi",
+      "switching": "Mengganti organisasi…",
+      "switched": "Organisasi aktif: {{name}}",
+      "none": "Tanpa organisasi",
+      "platform": "Platform",
+      "search": "Cari organisasi…",
+      "empty": "Tidak ada organisasi lain",
+      "failed": "Gagal mengganti organisasi"
+    },
+    "alerts": {
+      "label": "Alert",
+      "empty": "Belum ada alert baru",
+      "viewAll": "Lihat semua alert",
+      "pending": "Alert realtime akan tampil di sini."
+    },
+    "realtime": {
+      "connected": "Realtime terhubung",
+      "connecting": "Menghubungkan realtime…",
+      "reconnecting": "Menyambung ulang realtime…",
+      "disconnected": "Realtime terputus",
+      "idle": "Realtime tidak aktif",
+      "error": "Realtime gagal terhubung"
+    },
+    "version": "Versi {{version}}"
+  },
+  "command": {
+    "placeholder": "Ketik perintah, nama halaman, nama kapal atau MMSI…",
+    "empty": "Tidak ada hasil.",
+    "pages": "Halaman",
+    "vessels": "Kapal",
+    "actions": "Aksi",
+    "searchingVessels": "Mencari kapal…",
+    "vesselSearchUnavailable": "Pencarian kapal belum tersedia",
+    "toggleTheme": "Ganti tema terang/gelap",
+    "switchLanguage": "Switch to English",
+    "logout": "Keluar",
+    "title": "Palet perintah",
+    "description": "Cari halaman, kapal dan aksi"
+  },
+  "actions": {
+    "save": "Simpan",
+    "saving": "Menyimpan…",
+    "cancel": "Batal",
+    "confirm": "Konfirmasi",
+    "delete": "Hapus",
+    "edit": "Ubah",
+    "create": "Buat",
+    "add": "Tambah",
+    "close": "Tutup",
+    "back": "Kembali",
+    "retry": "Coba lagi",
+    "refresh": "Muat ulang",
+    "search": "Cari",
+    "filter": "Filter",
+    "reset": "Atur ulang",
+    "export": "Ekspor",
+    "exportCsv": "Ekspor CSV",
+    "copy": "Salin",
+    "copied": "Disalin",
+    "more": "Lainnya",
+    "apply": "Terapkan",
+    "clear": "Bersihkan",
+    "continue": "Lanjutkan",
+    "goHome": "Ke beranda",
+    "learnMore": "Pelajari lebih lanjut"
+  },
+  "status": {
+    "loading": "Memuat…",
+    "saving": "Menyimpan…",
+    "noData": "Tidak ada data",
+    "comingSoon": "Segera hadir",
+    "underConstruction": "Halaman ini sedang dibangun",
+    "underConstructionDescription": "Modul {{module}} sedang dikerjakan. Kerangka halaman, izin dan navigasi sudah siap.",
+    "plannedScope": "Cakupan modul"
+  },
+  "errors": {
+    "generic": "Terjadi kesalahan",
+    "genericDescription": "Maaf, terjadi kesalahan tak terduga. Silakan coba lagi.",
+    "network": "Tidak dapat terhubung ke server",
+    "networkDescription": "Periksa koneksi Anda lalu coba lagi.",
+    "timeout": "Permintaan melebihi batas waktu",
+    "unauthorized": "Sesi Anda telah berakhir",
+    "unauthorizedDescription": "Silakan masuk kembali.",
+    "forbidden": "Akses ditolak",
+    "forbiddenDescription": "Akun Anda tidak memiliki izin untuk membuka halaman ini.",
+    "notFound": "Halaman tidak ditemukan",
+    "notFoundDescription": "Halaman yang Anda cari tidak ada atau sudah dipindahkan.",
+    "validation": "Periksa kembali isian formulir",
+    "rateLimited": "Terlalu banyak percobaan",
+    "rateLimitedRetry": "Coba lagi dalam {{seconds}} detik.",
+    "server": "Server mengalami gangguan",
+    "traceId": "ID jejak",
+    "requestId": "ID permintaan",
+    "details": "Detail teknis",
+    "boundaryTitle": "Halaman gagal ditampilkan",
+    "boundaryDescription": "Terjadi kesalahan saat menampilkan halaman ini."
+  },
+  "table": {
+    "columns": "Kolom",
+    "toggleColumns": "Tampilkan/sembunyikan kolom",
+    "rowsPerPage": "Baris per halaman",
+    "pageOf": "Halaman {{page}} dari {{pageCount}}",
+    "pageNoTotal": "Halaman {{page}}",
+    "total": "{{total}} data",
+    "previous": "Sebelumnya",
+    "next": "Berikutnya",
+    "first": "Halaman pertama",
+    "last": "Halaman terakhir",
+    "sortAscending": "Urutkan naik",
+    "sortDescending": "Urutkan turun",
+    "noResults": "Tidak ada data yang cocok.",
+    "loadMore": "Muat lebih banyak",
+    "selected": "{{count}} dipilih"
+  },
+  "dateRange": {
+    "placeholder": "Pilih rentang tanggal",
+    "last24h": "24 jam terakhir",
+    "last7d": "7 hari terakhir",
+    "last30d": "30 hari terakhir",
+    "thisYear": "Tahun ini"
+  },
+  "domain": {
+    "mmsi": "MMSI",
+    "imo": "IMO",
+    "latitude": "Lintang",
+    "longitude": "Bujur",
+    "position": "Posisi",
+    "copyMmsi": "Salin MMSI",
+    "copyCoordinates": "Salin koordinat",
+    "ciiGrade": "Peringkat CII {{grade}}",
+    "ewsStatus": "Status EWS",
+    "severity": "Tingkat",
+    "navstatus": "Status navigasi",
+    "units": {
+      "knots": "kn",
+      "nm": "nm",
+      "tonnes": "t",
+      "kw": "kW",
+      "m": "m",
+      "km": "km",
+      "minutes": "mnt",
+      "percent": "%",
+      "deg": "°",
+      "gkwh": "g/kWh"
+    }
+  },
+  "method": {
+    "trigger": "Sumber metode: {{name}}",
+    "source": "Sumber",
+    "formula": "Rumus",
+    "variables": "Variabel",
+    "constants": "Konstanta",
+    "references": "Referensi",
+    "unit": "Satuan",
+    "openMethodology": "Buka di Metodologi & Referensi",
+    "pending": "Sumber metode belum tersedia",
+    "pendingDescription": "Katalog metodologi untuk \"{{methodId}}\" belum dimuat. Sumber akan ditampilkan setelah katalog tersedia.",
+    "needsCitation": "Perlu sitasi",
+    "needsCitationDescription": "Nilai berasal dari tesis dan belum memiliki sumber eksternal terverifikasi.",
+    "status": "Status"
+  },
+  "map": {
+    "basemap": "Peta dasar",
+    "basemaps": {
+      "vector": "Gelap (vektor)",
+      "osm": "OpenStreetMap",
+      "satellite": "Satelit"
+    },
+    "legend": "Legenda",
+    "layers": "Lapisan",
+    "zoomIn": "Perbesar",
+    "zoomOut": "Perkecil",
+    "resetView": "Kembali ke tampilan awal",
+    "fullscreen": "Layar penuh",
+    "vessels": "Kapal",
+    "vesselCount": "{{count}} kapal",
+    "safety": {
+      "danger": "EWS bahaya",
+      "warning": "EWS peringatan",
+      "collisionHigh": "Risiko tubrukan tinggi",
+      "collisionMedium": "Risiko tubrukan sedang",
+      "normal": "Normal"
+    },
+    "noWebgl": "Peta membutuhkan WebGL",
+    "noWebglDescription": "Browser atau perangkat ini tidak mendukung WebGL sehingga peta tidak dapat ditampilkan."
+  },
+  "attribution": {
+    "weather": "Data cuaca oleh Open-Meteo.com",
+    "license": "Lisensi {{license}}"
+  },
+  "time": {
+    "justNow": "baru saja"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "nav": { "dashboard": "Dashboard" },
+  "title": "Fleet Dashboard",
+  "description": "Fleet operations at a glance: tracked vessels, safety, alerts and emission performance.",
+  "stats": {
+    "trackedVessels": "Tracked vessels (live)",
+    "trackedHint": "From the current realtime stream",
+    "openAlerts": "Open alerts",
+    "fleetCii": "Average CII rating",
+    "fuel30d": "Fuel, last 30 days",
+    "pending": "Waiting for the {{service}} service"
+  },
+  "ciiDistribution": {
+    "title": "CII grade distribution",
+    "description": "Vessels per grade A–E, year to date."
+  },
+  "activity": {
+    "title": "Recent activity",
+    "description": "Latest alerts and safety events of your fleet.",
+    "empty": "No activity yet",
+    "emptyDescription": "EWS, collision risk and surveillance events will appear here in real time."
+  },
+  "quickLinks": {
+    "title": "Quick access",
+    "map": "Open the live map",
+    "alerts": "View alerts",
+    "cii": "CII report",
+    "methodology": "Methodology & references"
+  }
+}

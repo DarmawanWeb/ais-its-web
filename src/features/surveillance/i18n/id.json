@@ -1,0 +1,44 @@
+{
+  "transhipment": {
+    "title": "Transhipment Ilegal",
+    "description": "Deteksi pasangan kapal yang berdampingan di laut dalam waktu lama — indikasi transhipment ilegal.",
+    "capabilities": [
+      "Daftar kejadian transhipment beserta skor dan akurasi",
+      "Rute kedua kapal (GET /api/v2/ais/pairs/track)",
+      "Review kejadian oleh otoritas (surveillance:review)"
+    ]
+  },
+  "nav": {
+    "transhipment": "Transhipment",
+    "fishing": "Illegal Fishing",
+    "dark": "Dark Vessel",
+    "anomaly": "Anomali Navstatus"
+  },
+  "fishing": {
+    "title": "Penangkapan Ikan Ilegal",
+    "description": "Peta panas aktivitas penangkapan ikan mencurigakan dan pelanggaran historis.",
+    "capabilities": [
+      "Heatmap grid (GET /api/v2/surveillance/heatmap)",
+      "Lapisan pelanggaran historis per tahun",
+      "Deteksi loitering di daerah penangkapan ikan"
+    ]
+  },
+  "dark": {
+    "title": "Kapal Gelap (AIS Terputus)",
+    "description": "Kapal yang berhenti memancarkan AIS di area pengawasan.",
+    "capabilities": [
+      "Daftar celah AIS dengan durasi dan posisi terakhir",
+      "Peta posisi hilang dan posisi muncul kembali",
+      "Alert bertipe dark"
+    ]
+  },
+  "anomaly": {
+    "title": "Anomali Status Navigasi",
+    "description": "Kapal yang status navigasi AIS-nya tidak sesuai dengan prediksi dari pergerakannya.",
+    "capabilities": [
+      "Daftar anomali: status dilaporkan vs status prediksi",
+      "Riwayat posisi untuk verifikasi",
+      "Review oleh otoritas"
+    ]
+  }
+}

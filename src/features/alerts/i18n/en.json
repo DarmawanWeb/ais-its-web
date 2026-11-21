@@ -1,0 +1,15 @@
+{
+  "alerts": {
+    "title": "Alerts",
+    "description": "Realtime inbox of safety and surveillance alerts: acknowledge, resolve and trace incidents.",
+    "capabilities": [
+      "Alert list filtered by status, type, domain, severity and vessel (cursor pagination)",
+      "Acknowledge and resolve alerts with the alert:ack permission",
+      "Realtime alert:raised / alert:updated notifications in the top bar bell (slot topbar.alerts)",
+      "Open alert summary by severity, type and domain"
+    ]
+  },
+  "nav": {
+    "alerts": "Alerts"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "list": {
+    "title": "Vessels",
+    "description": "Master data of your fleet: identity, dimensions, engines, fuel and photo.",
+    "capabilities": [
+      "Vessel list with name / MMSI / IMO search (page pagination)",
+      "Detail page at /vessels/:mmsi",
+      "Vessel, dimensions, engines and ports forms (vessel:write)",
+      "Vessel photo upload (≤ 5 MB)"
+    ]
+  },
+  "nav": {
+    "list": "Vessels"
+  },
+  "detail": {
+    "title": "Vessel Details",
+    "description": "Identity, live position, safety, emissions and telemetry of one vessel.",
+    "capabilities": [
+      "Live position and safety state (useVesselLive)",
+      "Particulars, dimensions and engines",
+      "CII and telemetry summary"
+    ]
+  }
+}

@@ -1,13 +1,24 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="id" class="dark" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/logo.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AIS ITS | CII Estimation</title>
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#070d17" />
+    <meta
+      name="description"
+      content="AIS Maritime Intelligence — live vessel tracking, maritime safety, surveillance and CII/SEEMP emissions."
+    />
+    <title>AIS Maritime Intelligence</title>
+    <!-- Runtime configuration (written from the container environment at start, see docker/). -->
+    <script src="/config.js"></script>
+    <!-- Applies the saved theme before the first paint (no flash of the wrong theme). -->
+    <script src="/theme-init.js"></script>
   </head>
   <body>
     <div id="root"></div>
+    <noscript>AIS Maritime Intelligence membutuhkan JavaScript. / JavaScript is required.</noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

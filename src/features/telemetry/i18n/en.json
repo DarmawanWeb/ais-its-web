@@ -1,0 +1,15 @@
+{
+  "telemetry": {
+    "title": "Fuel Telemetry",
+    "description": "Main and auxiliary engine fuel consumption readings from devices, APIs and manual entry.",
+    "capabilities": [
+      "Hourly / daily readings charts",
+      "Device activity per vessel",
+      "Manual readings (telemetry:write)",
+      "CSV export"
+    ]
+  },
+  "nav": {
+    "telemetry": "Telemetry"
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "organizations": {
+    "title": "Organizations",
+    "description": "Manage platform organizations: shipping companies, authorities, platform and research.",
+    "capabilities": ["Organization list and search", "Create and edit organizations (org:manage)"]
+  },
+  "nav": {
+    "organizations": "Organizations",
+    "members": "Members",
+    "apiKeys": "API Keys",
+    "referenceData": "Reference Data",
+    "devices": "Devices",
+    "auditLog": "Audit Log"
+  },
+  "members": {
+    "title": "Members",
+    "description": "Invite users and manage the roles and status of organization members.",
+    "capabilities": [
+      "Invite members by e-mail",
+      "Change roles: org_admin, fleet_manager, authority, viewer",
+      "Disable or remove members"
+    ]
+  },
+  "apiKeys": {
+    "title": "API Keys",
+    "description": "API keys for AIS pushers, telemetry devices and partners. A key is shown only once when created.",
+    "capabilities": [
+      "Create keys with scopes ais:ingest, telemetry:ingest, ais:read",
+      "Copy the key shown once",
+      "Revoke keys"
+    ]
+  },
+  "referenceData": {
+    "title": "Reference Data",
+    "description": "Vessel types, fuels, engines, fuel formulas and ports with their sources.",
+    "capabilities": [
+      "Tables per kind of reference data",
+      "Edit data (reference:write, super admin)",
+      "Source of every value (MEPC.353(78), MEPC.364(79), …)"
+    ]
+  },
+  "devices": {
+    "title": "Devices",
+    "description": "Registry of telemetry devices (flow meters, MQTT gateways) and when they were last seen.",
+    "capabilities": [
+      "Devices per vessel",
+      "Add devices and link an API key",
+      "MQTT topic aisits/telemetry/<deviceId>"
+    ]
+  },
+  "auditLog": {
+    "title": "Audit Log",
+    "description": "Audit trail of every service: who did what, when and from where.",
+    "capabilities": [
+      "Filter by actor, action, target and time range",
+      "Cursor pagination",
+      "CSV export"
+    ]
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "transhipment": {
+    "title": "Illegal Transhipment",
+    "description": "Detects vessel pairs staying alongside at sea for a long time — an indication of illegal transhipment.",
+    "capabilities": [
+      "Transhipment events with score and accuracy",
+      "Tracks of both vessels (GET /api/v2/ais/pairs/track)",
+      "Event review by authorities (surveillance:review)"
+    ]
+  },
+  "nav": {
+    "transhipment": "Transhipment",
+    "fishing": "Illegal Fishing",
+    "dark": "Dark Vessels",
+    "anomaly": "Navstatus Anomaly"
+  },
+  "fishing": {
+    "title": "Illegal Fishing",
+    "description": "Heatmap of suspicious fishing activity and historical violations.",
+    "capabilities": [
+      "Grid heatmap (GET /api/v2/surveillance/heatmap)",
+      "Historical violations layer per year",
+      "Loitering detection in fishing grounds"
+    ]
+  },
+  "dark": {
+    "title": "Dark Vessels (AIS Gaps)",
+    "description": "Vessels that stopped transmitting AIS inside monitored areas.",
+    "capabilities": [
+      "AIS gaps with duration and last position",
+      "Map of disappearance and reappearance positions",
+      "Alerts of type dark"
+    ]
+  },
+  "anomaly": {
+    "title": "Navigational Status Anomaly",
+    "description": "Vessels whose AIS navigational status contradicts the status predicted from their movement.",
+    "capabilities": [
+      "Anomalies: reported vs predicted status",
+      "Position history for verification",
+      "Review by authorities"
+    ]
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "nav": { "methodology": "Methodology & References" },
+  "title": "Methodology & References",
+  "description": "Every formula, constant, threshold and rule of the platform with its scientific and regulatory sources (spec §17).",
+  "search": "Search methods, e.g. CII or CPA…",
+  "allDomains": "All domains",
+  "methods": "{{count}} methods",
+  "references": "References",
+  "variables": "Variables",
+  "constants": "Constants",
+  "implementedBy": "Implementation",
+  "noResults": "No matching methods.",
+  "pending": "The methodology catalog is not available",
+  "pendingDescription": "The catalog is loaded from the contracts package (@darmawanweb/ais-its-contracts/references)."
+}

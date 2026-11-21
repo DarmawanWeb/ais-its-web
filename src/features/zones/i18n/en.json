@@ -1,0 +1,14 @@
+{
+  "zones": {
+    "title": "Zones & Geofences",
+    "description": "Manage pipeline corridors, transhipment areas, fishing grounds, protected areas, restricted areas and custom zones.",
+    "capabilities": [
+      "Draw and edit zones on the map (terra-draw)",
+      "GeoJSON import (≤ 50,000 vertices)",
+      "Global and organization zones (zone:write)"
+    ]
+  },
+  "nav": {
+    "zones": "Zones"
+  }
+}

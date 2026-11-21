@@ -1,0 +1,31 @@
+{
+  "nav": {
+    "live": "Live Map"
+  },
+  "title": "Live Map",
+  "panel": {
+    "title": "Live Map",
+    "subtitle": "Realtime AIS positions in the current view",
+    "vessels": "Vessels",
+    "zoom": "Zoom",
+    "connection": "Link",
+    "hint": "Click a vessel to see its details."
+  },
+  "vessel": {
+    "title": "Vessel details",
+    "unknownName": "Unnamed vessel",
+    "position": "Position",
+    "sog": "Speed (SOG)",
+    "cog": "Course (COG)",
+    "heading": "Heading",
+    "navstatus": "Navigational status",
+    "ews": "EWS status",
+    "collision": "Collision risk",
+    "cpa": "CPA",
+    "tcpa": "TCPA",
+    "source": "Source",
+    "updated": "Updated",
+    "noData": "Waiting for this vessel's position…",
+    "openVessel": "Open vessel page"
+  }
+}

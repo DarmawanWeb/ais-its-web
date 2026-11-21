@@ -1,0 +1,84 @@
+{
+  "visual": {
+    "headline": "Real-time maritime intelligence for Indonesian waters",
+    "description": "Track vessels from AIS, detect safety risks and illegal activity, and manage fleet emissions from one operations console.",
+    "capabilities": {
+      "tracking": "Live tracking",
+      "ews": "Subsea pipeline EWS",
+      "surveillance": "Illegal activity surveillance",
+      "emission": "CII & SEEMP emissions"
+    },
+    "secure": "Restricted access · Activity is audit-logged"
+  },
+  "login": {
+    "title": "Sign in to the console",
+    "subtitle": "Use your organization account to access AIS Maritime Intelligence.",
+    "email": "Email",
+    "emailPlaceholder": "name@company.com",
+    "password": "Password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "forgot": "Forgot password?",
+    "submit": "Sign in",
+    "submitting": "Checking…",
+    "sessionExpired": "Your session has expired. Please sign in again.",
+    "loggedOut": "You have been signed out safely.",
+    "help": "No account yet? Ask your organization admin for an invitation."
+  },
+  "mfa": {
+    "title": "Two-step verification",
+    "subtitle": "Enter the 6-digit code from your authenticator app.",
+    "code": "Verification code",
+    "submit": "Verify",
+    "submitting": "Verifying…",
+    "back": "Back to sign in",
+    "expired": "The verification timed out. Please sign in again."
+  },
+  "forgot": {
+    "title": "Reset your password",
+    "subtitle": "Enter your account e-mail. We will send a link to create a new password.",
+    "submit": "Send link",
+    "submitting": "Sending…",
+    "successTitle": "Check your e-mail",
+    "success": "If {{email}} is registered, a password reset link has been sent. The link is valid for 30 minutes.",
+    "backToLogin": "Back to sign in"
+  },
+  "reset": {
+    "title": "Create a new password",
+    "subtitle": "At least 10 characters, with letters and digits.",
+    "password": "New password",
+    "confirm": "Repeat password",
+    "submit": "Save password",
+    "submitting": "Saving…",
+    "successTitle": "Password updated",
+    "success": "Your password has been changed. Sign in with your new password.",
+    "missingToken": "Incomplete link",
+    "missingTokenDescription": "The reset link has no token. Open the link from your e-mail again or request a new one.",
+    "requestNew": "Request a new link",
+    "goToLogin": "Sign in"
+  },
+  "invite": {
+    "title": "Activate your account",
+    "subtitle": "You were invited to AIS Maritime Intelligence. Create a password to activate your account.",
+    "submit": "Activate account",
+    "successTitle": "Account active",
+    "success": "Your account is active. Please sign in."
+  },
+  "validation": {
+    "emailRequired": "E-mail is required",
+    "emailInvalid": "Invalid e-mail address",
+    "passwordRequired": "Password is required",
+    "passwordMin": "At least 10 characters",
+    "passwordComplexity": "Must contain letters and digits",
+    "passwordMismatch": "Passwords do not match",
+    "codeInvalid": "Enter 6 digits"
+  },
+  "errors": {
+    "invalidCredentials": "Incorrect e-mail or password.",
+    "invalidMfaCode": "The verification code is wrong or has expired.",
+    "accountDisabled": "Your account is disabled. Contact your organization admin.",
+    "invalidToken": "The link is invalid or has expired. Request a new one.",
+    "throttled": "Too many attempts. Try again in {{seconds}} seconds.",
+    "throttledNoTime": "Too many attempts. Try again in a moment."
+  }
+}

@@ -1,0 +1,18 @@
+# Allow-list: only what the image build needs is sent to the Docker daemon
+# (no .env, no .git, no local node_modules, dist, tests or reports).
+*
+!package.json
+!pnpm-lock.yaml
+!pnpm-workspace.yaml
+!.npmrc
+!index.html
+!vite.config.ts
+!tsconfig.json
+!tsconfig.app.json
+!tsconfig.node.json
+!public/
+!src/
+!docker/
+src/test/
+src/**/*.test.ts
+src/**/*.test.tsx

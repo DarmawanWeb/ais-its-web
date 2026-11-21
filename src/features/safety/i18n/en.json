@@ -1,0 +1,26 @@
+{
+  "ews": {
+    "title": "Subsea Pipeline Early Warning",
+    "description": "EWS status of vessels near pipeline corridors: safe, warning (≤ 1,750 m) and danger (≤ 500 m), using the predicted anchoring status.",
+    "capabilities": [
+      "Map of pipeline corridors (geo zones) and vessels coloured by EWS status",
+      "EWS events (GET /api/v2/safety/events?detector=ews)",
+      "Vessel details: distance to the pipeline, navigational status and track",
+      "ⓘ method source popovers"
+    ]
+  },
+  "nav": {
+    "ews": "Pipeline EWS",
+    "collision": "Collision Risk"
+  },
+  "collision": {
+    "title": "Collision Risk (CPA/TCPA)",
+    "description": "Vessel encounters with a risky closest point of approach (CPA) and time to CPA (TCPA).",
+    "capabilities": [
+      "Map of encounters and CPA lines",
+      "Encounter history (GET /api/v2/safety/encounters)",
+      "Low / medium / high risk bands from the detector",
+      "ⓘ popovers for CPA and TCPA"
+    ]
+  }
+}

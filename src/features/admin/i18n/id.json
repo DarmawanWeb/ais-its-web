@@ -1,0 +1,60 @@
+{
+  "organizations": {
+    "title": "Organisasi",
+    "description": "Kelola organisasi platform: perusahaan pelayaran, otoritas, platform dan riset.",
+    "capabilities": ["Daftar dan pencarian organisasi", "Buat dan ubah organisasi (org:manage)"]
+  },
+  "nav": {
+    "organizations": "Organisasi",
+    "members": "Anggota",
+    "apiKeys": "API Keys",
+    "referenceData": "Data Referensi",
+    "devices": "Perangkat",
+    "auditLog": "Audit Log"
+  },
+  "members": {
+    "title": "Anggota",
+    "description": "Undang pengguna, atur peran dan status anggota organisasi.",
+    "capabilities": [
+      "Undang anggota melalui email",
+      "Ubah peran: org_admin, fleet_manager, authority, viewer",
+      "Nonaktifkan atau hapus anggota"
+    ]
+  },
+  "apiKeys": {
+    "title": "API Keys",
+    "description": "Kunci API untuk pengirim AIS, perangkat telemetri dan mitra. Kunci hanya ditampilkan sekali saat dibuat.",
+    "capabilities": [
+      "Buat kunci dengan scope ais:ingest, telemetry:ingest, ais:read",
+      "Salin kunci sekali tampil",
+      "Cabut kunci"
+    ]
+  },
+  "referenceData": {
+    "title": "Data Referensi",
+    "description": "Tipe kapal, bahan bakar, mesin, formula bahan bakar dan pelabuhan beserta sumbernya.",
+    "capabilities": [
+      "Tabel per jenis data referensi",
+      "Ubah data (reference:write, super admin)",
+      "Sumber setiap nilai (MEPC.353(78), MEPC.364(79), …)"
+    ]
+  },
+  "devices": {
+    "title": "Perangkat",
+    "description": "Registri perangkat telemetri (flow meter, gateway MQTT) dan status terakhir terlihat.",
+    "capabilities": [
+      "Daftar perangkat per kapal",
+      "Tambah perangkat dan kaitkan API key",
+      "Topik MQTT aisits/telemetry/<deviceId>"
+    ]
+  },
+  "auditLog": {
+    "title": "Audit Log",
+    "description": "Jejak audit seluruh layanan: siapa melakukan apa, kapan dan dari mana.",
+    "capabilities": [
+      "Filter aktor, aksi, target dan rentang waktu",
+      "Cursor pagination",
+      "Ekspor CSV"
+    ]
+  }
+}

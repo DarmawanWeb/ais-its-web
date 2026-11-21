@@ -1,0 +1,30 @@
+{
+  "nav": { "dashboard": "Dashboard" },
+  "title": "Dashboard Armada",
+  "description": "Ringkasan operasi armada: kapal terlacak, keselamatan, alert dan performa emisi.",
+  "stats": {
+    "trackedVessels": "Kapal terlacak (live)",
+    "trackedHint": "Dari aliran realtime saat ini",
+    "openAlerts": "Alert terbuka",
+    "fleetCii": "Rata-rata rating CII",
+    "fuel30d": "Bahan bakar 30 hari",
+    "pending": "Menunggu layanan {{service}}"
+  },
+  "ciiDistribution": {
+    "title": "Distribusi peringkat CII",
+    "description": "Jumlah kapal per peringkat A–E tahun berjalan."
+  },
+  "activity": {
+    "title": "Aktivitas terbaru",
+    "description": "Alert dan kejadian keselamatan terakhir di armada Anda.",
+    "empty": "Belum ada aktivitas",
+    "emptyDescription": "Kejadian EWS, risiko tubrukan dan pengawasan akan muncul di sini secara realtime."
+  },
+  "quickLinks": {
+    "title": "Akses cepat",
+    "map": "Buka peta live",
+    "alerts": "Lihat alert",
+    "cii": "Laporan CII",
+    "methodology": "Metodologi & referensi"
+  }
+}

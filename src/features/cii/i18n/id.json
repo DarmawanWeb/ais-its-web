@@ -1,0 +1,15 @@
+{
+  "cii": {
+    "title": "Emisi & CII",
+    "description": "Carbon Intensity Indicator tahun berjalan per kapal: attained, required, rating dan peringkat A–E.",
+    "capabilities": [
+      "Ringkasan CII armada dan distribusi peringkat A–E",
+      "Riwayat CII per kapal dan tahun",
+      "Pembaruan realtime cii:updated (useCiiUpdates)",
+      "Popover ⓘ sumber metode (cii.attained, cii.required, …)"
+    ]
+  },
+  "nav": {
+    "cii": "Emisi & CII"
+  }
+}

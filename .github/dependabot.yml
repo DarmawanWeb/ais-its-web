@@ -1,0 +1,48 @@
+version: 2
+
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 10
+    versioning-strategy: increase
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      platform:
+        patterns: ['@darmawanweb/*']
+      map:
+        patterns: ['maplibre-gl', '@deck.gl/*', '@luma.gl/*', '@loaders.gl/*', 'terra-draw*']
+      dev-dependencies:
+        dependency-type: development
+        update-types: [minor, patch]
+      runtime-dependencies:
+        dependency-type: production
+        update-types: [minor, patch]
+    ignore:
+      # Versions fixed by the platform spec (docs/PLATFORM_SPEC.md §2); upgrade deliberately.
+      - dependency-name: typescript
+        update-types: [version-update:semver-major, version-update:semver-minor]
+      - dependency-name: eslint
+        update-types: [version-update:semver-major]
+      - dependency-name: '@eslint/js'
+        update-types: [version-update:semver-major]
+      - dependency-name: react-router
+        update-types: [version-update:semver-major]
+      - dependency-name: msw
+        update-types: [version-update:semver-major]
+      - dependency-name: vitest
+        update-types: [version-update:semver-major]
+      # Pinned to the Playwright version of the build VM / CI browsers.
+      - dependency-name: '@playwright/test'
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: ci

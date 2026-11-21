@@ -1,0 +1,15 @@
+{
+  "nav": { "methodology": "Metodologi & Referensi" },
+  "title": "Metodologi & Referensi",
+  "description": "Setiap rumus, konstanta, ambang dan aturan platform beserta sumber ilmiah dan regulasinya (spesifikasi §17).",
+  "search": "Cari metode, misalnya CII atau CPA…",
+  "allDomains": "Semua domain",
+  "methods": "{{count}} metode",
+  "references": "Referensi",
+  "variables": "Variabel",
+  "constants": "Konstanta",
+  "implementedBy": "Implementasi",
+  "noResults": "Tidak ada metode yang cocok.",
+  "pending": "Katalog metodologi belum tersedia",
+  "pendingDescription": "Katalog dimuat dari paket kontrak (@darmawanweb/ais-its-contracts/references)."
+}

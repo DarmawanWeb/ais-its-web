@@ -1,0 +1,15 @@
+{
+  "alerts": {
+    "title": "Alert",
+    "description": "Kotak masuk alert keselamatan dan pengawasan secara realtime: konfirmasi, selesaikan dan telusuri kejadian.",
+    "capabilities": [
+      "Daftar alert dengan filter status, tipe, domain, tingkat dan kapal (cursor pagination)",
+      "Konfirmasi (ack) dan penyelesaian alert dengan izin alert:ack",
+      "Notifikasi realtime alert:raised / alert:updated pada lonceng di top bar (slot topbar.alerts)",
+      "Ringkasan alert terbuka per tingkat, tipe dan domain"
+    ]
+  },
+  "nav": {
+    "alerts": "Alert"
+  }
+}

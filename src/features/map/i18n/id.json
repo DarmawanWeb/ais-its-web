@@ -1,0 +1,31 @@
+{
+  "nav": {
+    "live": "Peta Live"
+  },
+  "title": "Peta Live",
+  "panel": {
+    "title": "Peta Live",
+    "subtitle": "Posisi AIS realtime di area tampilan",
+    "vessels": "Kapal",
+    "zoom": "Zoom",
+    "connection": "Koneksi",
+    "hint": "Klik kapal untuk melihat detail."
+  },
+  "vessel": {
+    "title": "Detail kapal",
+    "unknownName": "Kapal tanpa nama",
+    "position": "Posisi",
+    "sog": "Kecepatan (SOG)",
+    "cog": "Haluan (COG)",
+    "heading": "Heading",
+    "navstatus": "Status navigasi",
+    "ews": "Status EWS",
+    "collision": "Risiko tubrukan",
+    "cpa": "CPA",
+    "tcpa": "TCPA",
+    "source": "Sumber",
+    "updated": "Diperbarui",
+    "noData": "Menunggu data posisi kapal ini…",
+    "openVessel": "Buka halaman kapal"
+  }
+}

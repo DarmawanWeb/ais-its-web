@@ -1,0 +1,14 @@
+{
+  "rules": {
+    "title": "Aturan Alert",
+    "description": "Atur siapa yang diberi tahu, untuk alert apa, dan melalui kanal mana (email, Telegram, webhook).",
+    "capabilities": [
+      "Aturan per tipe, domain, tingkat minimum, kapal dan zona",
+      "Kanal email, Telegram dan webhook bertanda tangan",
+      "Kirim notifikasi uji (POST /api/v2/notifications/test)"
+    ]
+  },
+  "nav": {
+    "rules": "Aturan Alert"
+  }
+}

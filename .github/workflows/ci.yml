@@ -1,22 +1,164 @@
-name: CI Pipeline Controller
+name: CI
 
 on:
   push:
     branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  IMAGE: ghcr.io/darmawanweb/ais-its-web
 
 jobs:
-  lint:
-    uses: ./.github/workflows/lint.yml
+  verify:
+    name: Format, lint, typecheck, test, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      HUSKY: '0'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
 
-  build:
-    needs: lint
-    uses: ./.github/workflows/build.yml
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
 
-  deploy:
-    needs: build
-    uses: ./.github/workflows/deploy.yml
-    secrets:
-      VPS_HOST: ${{ secrets.VPS_HOST }}
-      VPS_USERNAME: ${{ secrets.VPS_USERNAME }}
-      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
-      APP_PATH: ${{ secrets.APP_PATH }}
+      # @darmawanweb packages come from GitHub Packages; the package settings must grant
+      # this repository read access ("Manage Actions access").
+      - name: Setup Node.js (GitHub Packages for @darmawanweb)
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+          registry-url: https://npm.pkg.github.com
+          scope: '@darmawanweb'
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Format
+        run: pnpm format:check
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Unit tests
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build
+
+  e2e:
+    name: E2E smoke (Playwright, headless)
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      HUSKY: '0'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js (GitHub Packages for @darmawanweb)
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+          registry-url: https://npm.pkg.github.com
+          scope: '@darmawanweb'
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Smoke tests
+        run: pnpm test:e2e
+
+      - name: Upload report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-results
+          path: test-results/
+          retention-days: 7
+
+  image:
+    name: Docker image
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write
+    env:
+      PUSH: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        if: env.PUSH == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # The npmrc BuildKit secret: registry mapping and token, never stored in a layer.
+      - name: Registry credentials for the build
+        run: |
+          umask 077
+          printf '@darmawanweb:registry=https://npm.pkg.github.com/\n//npm.pkg.github.com/:_authToken=%s\n' \
+            "$NODE_AUTH_TOKEN" > "$RUNNER_TEMP/npmrc"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Image metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=ref,event=branch
+            type=sha,format=short
+
+      - name: Build (and push on main)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: ${{ env.PUSH == 'true' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            APP_VERSION=${{ github.sha }}
+          secret-files: |
+            npmrc=${{ runner.temp }}/npmrc
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Remove registry credentials
+        if: always()
+        run: rm -f "$RUNNER_TEMP/npmrc"

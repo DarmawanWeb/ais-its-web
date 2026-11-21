@@ -1,0 +1,14 @@
+{
+  "zones": {
+    "title": "Zona & Geofence",
+    "description": "Kelola koridor pipa, area transhipment, daerah tangkapan ikan, kawasan konservasi, area terlarang dan zona khusus.",
+    "capabilities": [
+      "Gambar dan ubah zona di peta (terra-draw)",
+      "Impor GeoJSON (≤ 50.000 titik)",
+      "Zona global dan zona milik organisasi (zone:write)"
+    ]
+  },
+  "nav": {
+    "zones": "Zona"
+  }
+}

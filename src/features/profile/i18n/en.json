@@ -1,0 +1,20 @@
+{
+  "title": "Profile & Security",
+  "description": "Account details, password, two-step verification (MFA) and active sessions.",
+  "account": {
+    "title": "Account",
+    "name": "Name",
+    "email": "E-mail",
+    "userId": "User ID",
+    "organization": "Active organization",
+    "roles": "Roles",
+    "permissions": "Permissions",
+    "sessionExpires": "Access token expires"
+  },
+  "capabilities": [
+    "Change your name (PATCH /api/v2/me)",
+    "Change your password (POST /api/v2/auth/password/change) — other sessions are revoked",
+    "Enable / disable MFA with a QR code (authApi.mfaSetup, qrcode)",
+    "List and revoke active sessions (GET/DELETE /api/v2/auth/sessions)"
+  ]
+}

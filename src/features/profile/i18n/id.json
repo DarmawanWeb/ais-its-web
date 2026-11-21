@@ -1,0 +1,20 @@
+{
+  "title": "Profil & Keamanan",
+  "description": "Informasi akun, kata sandi, autentikasi dua langkah (MFA) dan sesi aktif.",
+  "account": {
+    "title": "Akun",
+    "name": "Nama",
+    "email": "Email",
+    "userId": "ID pengguna",
+    "organization": "Organisasi aktif",
+    "roles": "Peran",
+    "permissions": "Jumlah izin",
+    "sessionExpires": "Token akses berakhir"
+  },
+  "capabilities": [
+    "Ubah nama (PATCH /api/v2/me)",
+    "Ganti kata sandi (POST /api/v2/auth/password/change) — sesi lain dicabut",
+    "Aktifkan / nonaktifkan MFA dengan kode QR (authApi.mfaSetup, qrcode)",
+    "Daftar dan cabut sesi aktif (GET/DELETE /api/v2/auth/sessions)"
+  ]
+}
