@@ -1,3 +1,23 @@
+# AIS CII SEEMP FE
+
+## Phase 0 hardening
+
+- **Configuration** (`.env`, see `.env.example`): `VITE_BACKEND_URI` is the
+  legacy API base URL including `/api/v1`, `VITE_STADIA_MAPS_API_KEY` the map
+  tiles key. Phase 0 adds no new variables.
+- **Polling**: fleet lists (`GET /ais`) refresh every 10 s, detail panels of
+  the selected vessel every 5 s (`src/hooks/use-polling.ts`). Every response
+  replaces the previous data (it used to be appended in chunks, which grew
+  without bound), at most one request per panel is in flight, and timers and
+  requests are cancelled on unmount and when the selection changes.
+- **CII not available**: the backend answers `404 { code: "CII_NOT_AVAILABLE" }`
+  when a vessel has no CII yet; the CII and SEEMP pages then show the message
+  as an empty state.
+- **Access token**: there is no login screen yet. Mutating API routes need a
+  token from `POST /api/v1/auth/login`; when one is stored under
+  `localStorage["seemp.accessToken"]` it is sent as
+  `Authorization: Bearer <token>` with every backend request.
+
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.

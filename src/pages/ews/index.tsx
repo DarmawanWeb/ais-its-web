@@ -1,45 +1,22 @@
-import axios from "axios";
 import { FC, useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import EarlyWarningSystemCard from "./components/ews-card";
-import { VITE_BACKEND_URI } from "../../lib/env";
-import { MarkerData } from "../../components/common/map";
 import MapComponent from "../../components/common/map";
+import { useFleetPositions } from "../../hooks/use-fleet-positions";
 
 const EWSPage: FC = () => {
-  const [shipData, setShipData] = useState<MarkerData[]>([]);
   const [selectedMmsi, setSelectedMmsi] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const location = useLocation();
+  // Loaded once, as before; the response replaces the list.
+  const { ships: shipData, isLoading } = useFleetPositions({
+    intervalMs: null,
+  });
 
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
     const mmsiParam = urlParams.get("mmsi");
     if (mmsiParam) setSelectedMmsi(mmsiParam);
   }, [location.search]);
-
-  useEffect(() => {
-    const fetchAisData = async () => {
-      try {
-        const res = await axios.get(`${VITE_BACKEND_URI}/ais`);
-        const allData = res.data.data;
-        let i = 0;
-        const chunkSize = 10;
-        const interval = setInterval(() => {
-          setShipData((prev) => [...prev, ...allData.slice(i, i + chunkSize)]);
-          i += chunkSize;
-          if (i >= allData.length) {
-            clearInterval(interval);
-            setIsLoading(false);
-          }
-        }, 80);
-      } catch (error) {
-        console.error("Error fetching AIS data:", error);
-        setIsLoading(false);
-      }
-    };
-    fetchAisData();
-  }, []);
 
   return (
     <main className="h-screen w-screen relative bg-gray-300 overflow-hidden z-1">

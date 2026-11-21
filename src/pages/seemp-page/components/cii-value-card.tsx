@@ -33,9 +33,11 @@ export interface AnnualCIIWithDDVector {
 
 export interface CiiValueCardProps {
   ciis: AnnualCIIWithDDVector[];
+  /** Backend message when the vessel has no annual CII (404). */
+  unavailableMessage?: string | null;
 }
 
-const CiiValueCard: FC<CiiValueCardProps> = ({ ciis }) => {
+const CiiValueCard: FC<CiiValueCardProps> = ({ ciis, unavailableMessage }) => {
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const handleYearChange = (year: string) => {
     const newYear = Number(year);
@@ -123,7 +125,7 @@ const CiiValueCard: FC<CiiValueCardProps> = ({ ciis }) => {
           ) : null
         ) : (
           <div className={isDataAvailable ? "h-32" : "h-52"}>
-            <DataNotFound />
+            <DataNotFound message={unavailableMessage ?? undefined} />
           </div>
         )}
       </CardContent>

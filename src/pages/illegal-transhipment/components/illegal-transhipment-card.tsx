@@ -1,7 +1,11 @@
-import { FC, useEffect, useState, useCallback, useRef } from "react";
+import { FC, useState, useCallback, useRef } from "react";
 import { Card, CardHeader, CardContent } from "../../../components/ui/card";
 import { VITE_BACKEND_URI } from "../../../lib/env";
 import axios from "axios";
+import { usePolling } from "../../../hooks/use-polling";
+import { isRequestCanceled } from "../../../lib/api";
+
+const RESULTS_POLL_INTERVAL_MS = 30_000;
 
 export interface IllegalTranshipmentResult {
   _id: string;
@@ -72,87 +76,88 @@ const IllegalTranshipmentCard: FC<IllegalTranshipmentCardProps> = ({
   }, []);
 
   const fetchShipDetails = useCallback(
-    async (mmsi: string): Promise<ShipDetails | null> => {
+    async (mmsi: string, signal: AbortSignal): Promise<ShipDetails | null> => {
       try {
         const response = await axios.get(
-          `${VITE_BACKEND_URI}/ships/data/secondary/mmsi/${mmsi}`
+          `${VITE_BACKEND_URI}/ships/data/secondary/mmsi/${mmsi}`,
+          { signal }
         );
         return response.data?.data || null;
       } catch (error) {
-        console.error(`Error fetching ship details for MMSI ${mmsi}:`, error);
+        if (!isRequestCanceled(error)) {
+          console.error(`Error fetching ship details for MMSI ${mmsi}:`, error);
+        }
         return null;
       }
     },
     []
   );
 
-  useEffect(() => {
-    const fetchResults = async () => {
-      const requestId = ++resultsRequestIdRef.current;
-      setIsLoading(true);
-      setError(null);
-      
-      try {
-        const response = await axios.get(
-          `${VITE_BACKEND_URI}/illegal-transhipment/results`
-        );
+  // Refreshed every 30 s; the next request starts after the previous one
+  // finished, and the request in flight is aborted on unmount.
+  usePolling(async (signal) => {
+    const requestId = ++resultsRequestIdRef.current;
+    setIsLoading(true);
+    setError(null);
 
-        if (resultsRequestIdRef.current !== requestId) return;
+    try {
+      const response = await axios.get(
+        `${VITE_BACKEND_URI}/illegal-transhipment/results`,
+        { signal }
+      );
 
-        if (response.data?.success && Array.isArray(response.data.data)) {
-          setResults(response.data.data);
-          setIsLoading(false);
+      if (resultsRequestIdRef.current !== requestId) return;
 
-          const uniqueMMSIs = new Set<string>();
-          response.data.data.forEach((result: IllegalTranshipmentResult) => {
-            if (result?.ship1MMSI) uniqueMMSIs.add(result.ship1MMSI);
-            if (result?.ship2MMSI) uniqueMMSIs.add(result.ship2MMSI);
+      if (response.data?.success && Array.isArray(response.data.data)) {
+        setResults(response.data.data);
+        setIsLoading(false);
+
+        const uniqueMMSIs = new Set<string>();
+        response.data.data.forEach((result: IllegalTranshipmentResult) => {
+          if (result?.ship1MMSI) uniqueMMSIs.add(result.ship1MMSI);
+          if (result?.ship2MMSI) uniqueMMSIs.add(result.ship2MMSI);
+        });
+
+        const mmsiArray = Array.from(uniqueMMSIs);
+        const missingMmsi = mmsiArray.filter((mmsi) => !shipDetailsCacheRef.current[mmsi]);
+        const detailsPromises = missingMmsi.map(async (mmsi) => {
+          const details = await fetchShipDetails(mmsi, signal);
+          return {
+            mmsi,
+            name: details?.NAME || undefined,
+            typeName: details?.TYPENAME || undefined,
+          };
+        });
+
+        if (detailsPromises.length > 0) {
+          const detailsList = await Promise.allSettled(detailsPromises);
+          if (resultsRequestIdRef.current !== requestId) return;
+          detailsList.forEach((result) => {
+            if (result.status !== "fulfilled") return;
+            const { mmsi, name, typeName } = result.value;
+            if (name || typeName) {
+              shipDetailsCacheRef.current[mmsi] = { name, typeName };
+            }
           });
-
-          const mmsiArray = Array.from(uniqueMMSIs);
-          const missingMmsi = mmsiArray.filter((mmsi) => !shipDetailsCacheRef.current[mmsi]);
-          const detailsPromises = missingMmsi.map(async (mmsi) => {
-            const details = await fetchShipDetails(mmsi);
-            return {
-              mmsi,
-              name: details?.NAME || undefined,
-              typeName: details?.TYPENAME || undefined,
-            };
-          });
-
-          if (detailsPromises.length > 0) {
-            const detailsList = await Promise.allSettled(detailsPromises);
-            if (resultsRequestIdRef.current !== requestId) return;
-            detailsList.forEach((result) => {
-              if (result.status !== "fulfilled") return;
-              const { mmsi, name, typeName } = result.value;
-              if (name || typeName) {
-                shipDetailsCacheRef.current[mmsi] = { name, typeName };
-              }
-            });
-          }
-          if (resultsRequestIdRef.current === requestId) {
-            setShipDetailsMap({ ...shipDetailsCacheRef.current });
-          }
-        } else {
-          setResults([]);
-          setIsLoading(false);
         }
-      } catch (error) {
-        console.error("Error fetching illegal transhipment results:", error);
-        setError("Failed to load detection results");
-        setResults([]);
-      } finally {
         if (resultsRequestIdRef.current === requestId) {
-          setIsLoading(false);
+          setShipDetailsMap({ ...shipDetailsCacheRef.current });
         }
+      } else {
+        setResults([]);
+        setIsLoading(false);
       }
-    };
-
-    fetchResults();
-    const interval = setInterval(fetchResults, 30000);
-    return () => clearInterval(interval);
-  }, [fetchShipDetails]);
+    } catch (error) {
+      if (signal.aborted || isRequestCanceled(error)) return;
+      console.error("Error fetching illegal transhipment results:", error);
+      setError("Failed to load detection results");
+      setResults([]);
+    } finally {
+      if (resultsRequestIdRef.current === requestId && !signal.aborted) {
+        setIsLoading(false);
+      }
+    }
+  }, RESULTS_POLL_INTERVAL_MS);
 
   const getAccuracyColor = useCallback((accuracy: number): string => {
     if (accuracy >= 90) return "text-red-700";

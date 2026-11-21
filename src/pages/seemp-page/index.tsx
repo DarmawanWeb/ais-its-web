@@ -1,4 +1,3 @@
-import axios from "axios";
 import { FC, useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Input } from "../../components/ui/input";
@@ -11,21 +10,55 @@ import { AnnualCIIWithDDVector } from "./components/cii-value-card";
 import CiiValueCard from "./components/cii-value-card";
 import SEEMPChart from "./components/seemp-chart";
 import SeempTable from "./components/seemp-table";
+import DataNotFound from "../../components/common/data-not-found";
 import { ISeempTableProps } from "./components/seemp-table";
 import { Seemp } from "../../types/seemp";
+import { useFleetPositions } from "../../hooks/use-fleet-positions";
+import { FLEET_POLL_INTERVAL_MS } from "../../hooks/use-polling";
+import { useVesselResource } from "../../hooks/use-vessel-resource";
+import { useSafeTimeout } from "../../hooks/use-safe-timeout";
 
 import { ShipData } from "./components/ship-info-card";
 
+const FLEET_PARAMS = { hours: 12 };
+
 const SEEMPPage: FC = () => {
-  const [shipData, setShipData] = useState<MarkerData[]>([]);
-  const [shipDetail, setShipDetail] = useState<ShipData | null>(null);
-  const [ciiData, setCiiData] = useState<AnnualCIIWithDDVector[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredShips, setFilteredShips] = useState<MarkerData[]>([]);
   const [selectedMmsi, setSelectedMmsi] = useState<string | null>(null);
   const [showTable, setShowTable] = useState(false);
-  const [seempData, setSeempData] = useState<ISeempTableProps | null>(null);
   const location = useLocation();
+  const schedule = useSafeTimeout();
+
+  // Map markers: refreshed every 10 s, each response replaces the list.
+  const { ships: shipData } = useFleetPositions({
+    intervalMs: FLEET_POLL_INTERVAL_MS,
+    params: FLEET_PARAMS,
+  });
+
+  // Loaded once per selected vessel, as before.
+  const shipDetail = useVesselResource(
+    selectedMmsi,
+    (mmsi) => `${VITE_BACKEND_URI}/ships/data/secondary/mmsi/${mmsi}`,
+    (body) => (body.data ?? null) as ShipData | null,
+    null
+  ).data;
+  // 404: no annual CII for this vessel.
+  const annualCii = useVesselResource(
+    selectedMmsi,
+    (mmsi) => `${VITE_BACKEND_URI}/cii/annual/${mmsi}/ddvector`,
+    (body) => (body.data ?? []) as AnnualCIIWithDDVector[],
+    null
+  );
+  const ciiData = annualCii.data ?? [];
+  // 404 CII_NOT_AVAILABLE: SEEMP needs a computed CII.
+  const seemp = useVesselResource(
+    selectedMmsi,
+    (mmsi) => `${VITE_BACKEND_URI}/seemp/${mmsi}`,
+    (body) => body as unknown as ISeempTableProps,
+    null
+  );
+  const seempData = seemp.data;
 
   const [itemsPerPage] = useState(5);
   const [currentItems, setCurrentItems] = useState<Seemp[] | null>(null);
@@ -74,53 +107,6 @@ const SEEMPPage: FC = () => {
     }
   }, [location.search]);
 
-  useEffect(() => {
-    if (!selectedMmsi) return setShipDetail(null);
-    const fetchDetails = async () => {
-      try {
-        const { data } = await axios.get(
-          `${VITE_BACKEND_URI}/ships/data/secondary/mmsi/${selectedMmsi}`
-        );
-        setShipDetail(data.data);
-      } catch (error) {
-        console.error("Error fetching ship detail:", error);
-      }
-    };
-    fetchDetails();
-  }, [selectedMmsi]);
-
-  useEffect(() => {
-    if (!selectedMmsi) return setCiiData([]);
-    const fetchDetails = async () => {
-      try {
-        const { data } = await axios.get(
-          `${VITE_BACKEND_URI}/cii/annual/${selectedMmsi}/ddvector`
-        );
-        setCiiData(data.data);
-      } catch (error) {
-        setCiiData([]);
-        console.error("Error fetching CII data:", error);
-      }
-    };
-    fetchDetails();
-  }, [selectedMmsi]);
-
-  useEffect(() => {
-    if (!selectedMmsi) return setSeempData(null);
-    const fetchSeempData = async () => {
-      try {
-        const { data } = await axios.get(
-          `${VITE_BACKEND_URI}/seemp/${selectedMmsi}`
-        );
-        setSeempData(data);
-      } catch (error) {
-        setSeempData(null);
-        console.error("Error fetching SEEMP data:", error);
-      }
-    };
-    fetchSeempData();
-  }, [selectedMmsi]);
-
   // Fixed search function
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -155,34 +141,10 @@ const SEEMPPage: FC = () => {
   };
 
   const handleInputBlur = () => {
-  
-    setTimeout(() => {
+    schedule(() => {
       setFilteredShips([]);
     }, 200);
   };
-
-   useEffect(() => {
-    const fetchShipData = async () => {
-      try {
-        const response = await axios.get(`${VITE_BACKEND_URI}/ais`, {
-          params: { hours: 12 },
-        });
-        const allData = response.data.data;
-        let i = 0;
-        const chunkSize = 10;
-        const interval = setInterval(() => {
-          setShipData((prev) => [...prev, ...allData.slice(i, i + chunkSize)]);
-          i += chunkSize;
-          if (i >= allData.length) clearInterval(interval);
-        }, 80);
-      } catch (error) {
-        console.error("Error fetching ship data:", error);
-      }
-    };
-    fetchShipData();
-    const interval = setInterval(fetchShipData, 10000);
-    return () => clearInterval(interval);
-  }, []);
 
   const totalPages =
     seempData?.data && seempData.data.length
@@ -234,11 +196,15 @@ const SEEMPPage: FC = () => {
         <div className="grid grid-rows-9 gap-4 mb-4 mr-16 h-[90vh]">
           <ShipInfoCard shipData={shipDetail} />
           <div className="grid grid-cols-2 gap-2 row-span-4">
-            <CiiValueCard ciis={ciiData || []} />
+            <CiiValueCard
+              ciis={ciiData}
+              unavailableMessage={annualCii.notFoundMessage}
+            />
             <SEEMPChart
-              ciis={ciiData || []}
+              ciis={ciiData}
               showTable={showTable}
               toggleTableVisibility={toggleTableVisibility}
+              unavailableMessage={annualCii.notFoundMessage}
             />
           </div>
         </div>
@@ -251,7 +217,11 @@ const SEEMPPage: FC = () => {
       />
       {showTable && (
         <section className="h-64 absolute bottom-0 w-13/20 z-100 left-0 bg-slate-300 p-3 text-xs pl-5">
-          <SeempTable data={currentItems} pageCount={totalPages} />
+          {seemp.notFoundMessage ? (
+            <DataNotFound message={seemp.notFoundMessage} />
+          ) : (
+            <SeempTable data={currentItems} pageCount={totalPages} />
+          )}
         </section>
       )}
     </main>

@@ -30,12 +30,19 @@ export type ciiGrafik = {
 export interface ICIISectionProps {
   ciiGrafik: ciiGrafik;
   ciiData: ICIICalculation | null;
+  /** Backend message when no CII exists for the vessel (404 CII_NOT_AVAILABLE). */
+  unavailableMessage?: string | null;
   show: boolean;
 }
 
-const CIISection: FC<ICIISectionProps> = ({ ciiGrafik, ciiData, show }) => {
+const CIISection: FC<ICIISectionProps> = ({
+  ciiGrafik,
+  ciiData,
+  unavailableMessage,
+  show,
+}) => {
   const chartData =
-    ciiGrafik?.ciiData.map((data) => ({
+    ciiGrafik?.ciiData?.map((data) => ({
       timestamp: data.timestamp,
       ciiAttained: data.ciiAttained,
       d1: ciiGrafik.ddVector.d1,
@@ -56,7 +63,7 @@ const CIISection: FC<ICIISectionProps> = ({ ciiGrafik, ciiData, show }) => {
         </CardHeader>
         <CardContent className="px-3 space-y-2 bg-white rounded-b-xl h-full">
           {chartData.length === 0 ? (
-            <DataNotFound />
+            <DataNotFound message={unavailableMessage ?? undefined} />
           ) : (
             <ResponsiveContainer>
               <RechartsLineChart data={chartData}>
@@ -155,7 +162,7 @@ const CIISection: FC<ICIISectionProps> = ({ ciiGrafik, ciiData, show }) => {
           )}
         </CardContent>
       </Card>
-      <CiiValueCard cii={ciiData} />
+      <CiiValueCard cii={ciiData} unavailableMessage={unavailableMessage} />
     </section>
   );
 };

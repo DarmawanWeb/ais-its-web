@@ -9,6 +9,8 @@ import { VITE_BACKEND_URI } from "../../lib/env";
 import IllegalTranshipmentCard, {
   IllegalTranshipmentResult,
 } from "./components/illegal-transhipment-card";
+import { useFleetPositions } from "../../hooks/use-fleet-positions";
+import { FLEET_POLL_INTERVAL_MS } from "../../hooks/use-polling";
 
 type RawRoutePosition = {
   navstatus: number;
@@ -31,11 +33,22 @@ type RoutesApiResponse = {
   success: boolean;
 };
 
+const FLEET_PARAMS = { hours: 12 };
+
+/** Timestamps as Date objects, for the map logic. */
+const normalizeTimestamps = (ships: MarkerData[]): MarkerData[] =>
+  ships.map((m) => ({
+    ...m,
+    positions: (m.positions ?? []).map((p) => ({
+      ...p,
+      timestamp: new Date(p.timestamp as unknown as string),
+    })),
+  }));
+
 export default function IllegalTranshipmentPage() {
   const [selectedResult, setSelectedResult] =
     useState<IllegalTranshipmentResult | null>(null);
   const [routes, setRoutes] = useState<ShipRoute[] | null>(null);
-  const [shipData, setShipData] = useState<MarkerData[]>([]);
   const [selectedMmsi, setSelectedMmsi] = useState<string | null>(null);
   const [isLoadingRoutes, setIsLoadingRoutes] = useState(false);
   const [routesLoaded, setRoutesLoaded] = useState(false);
@@ -45,55 +58,29 @@ export default function IllegalTranshipmentPage() {
     new Map<string, { routes: ShipRoute[]; selectedMmsi: string; routesLoaded: boolean }>(),
   );
 
+  // Map markers: refreshed every 10 s, each response replaces the list.
+  const { ships: shipData } = useFleetPositions({
+    intervalMs: FLEET_POLL_INTERVAL_MS,
+    params: FLEET_PARAMS,
+    normalize: normalizeTimestamps,
+  });
+
+  const abortRouteRequest = useCallback(() => {
+    routeAbortRef.current?.abort();
+    routeAbortRef.current = null;
+  }, []);
+
+  // Abort a pending route request when leaving the page.
+  useEffect(() => abortRouteRequest, [abortRouteRequest]);
+
   const onClearRoutes = useCallback(() => {
-    if (routeAbortRef.current) {
-      routeAbortRef.current.abort();
-      routeAbortRef.current = null;
-    }
+    abortRouteRequest();
     setIsLoadingRoutes(false);
     setRoutes(null);
     setRoutesLoaded(false);
     setSelectedResult(null);
     setSelectedMmsi(null);
-  }, []);
-
-  useEffect(() => {
-    const fetchShipData = async () => {
-      try {
-        const response = await axios.get(`${VITE_BACKEND_URI}/ais`, {
-          params: { hours: 12 },
-        });
-
-        const allData = (response.data?.data ?? []) as MarkerData[];
-
-        // Normalize timestamps to Date objects for map logic
-        const normalized: MarkerData[] = allData.map((m) => ({
-          ...m,
-          positions: (m.positions ?? []).map((p) => ({
-            ...p,
-            timestamp: new Date(p.timestamp as unknown as string),
-          })),
-        }));
-
-        // Keep the original “stream in chunks” behavior for rendering responsiveness
-        let i = 0;
-        const chunkSize = 10;
-        setShipData([]);
-
-        const interval = window.setInterval(() => {
-          setShipData((prev) => [...prev, ...normalized.slice(i, i + chunkSize)]);
-          i += chunkSize;
-          if (i >= normalized.length) window.clearInterval(interval);
-        }, 80);
-      } catch (error) {
-        console.error("Error fetching ship data:", error);
-      }
-    };
-
-    fetchShipData();
-    const interval = window.setInterval(fetchShipData, 10000);
-    return () => window.clearInterval(interval);
-  }, []);
+  }, [abortRouteRequest]);
 
   const toAisPosition = useCallback((p: RawRoutePosition): IAisPosition => {
     return {
@@ -111,9 +98,7 @@ export default function IllegalTranshipmentPage() {
 
   const loadRoutesForResult = useCallback(async (result: IllegalTranshipmentResult) => {
     const requestId = ++routeRequestIdRef.current;
-    if (routeAbortRef.current) {
-      routeAbortRef.current.abort();
-    }
+    abortRouteRequest();
     const controller = new AbortController();
     routeAbortRef.current = controller;
 
@@ -218,7 +203,7 @@ export default function IllegalTranshipmentPage() {
         setIsLoadingRoutes(false);
       }
     }
-  }, [toAisPosition]);
+  }, [toAisPosition, abortRouteRequest]);
 
   const onSelectResult = useCallback(
     (result: IllegalTranshipmentResult) => {

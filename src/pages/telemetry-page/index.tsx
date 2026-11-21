@@ -1,4 +1,3 @@
-import axios from "axios";
 import { FC, useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Input } from "../../components/ui/input";
@@ -9,6 +8,13 @@ import { MarkerData } from "../../components/common/map";
 import MapComponent from "../../components/common/map";
 import TelemetryChart from "./components/telemetry-chart";
 import { IFuelConsumption } from "./components/telemetry-chart";
+import { useFleetPositions } from "../../hooks/use-fleet-positions";
+import {
+  DETAIL_POLL_INTERVAL_MS,
+  FLEET_POLL_INTERVAL_MS,
+} from "../../hooks/use-polling";
+import { useVesselResource } from "../../hooks/use-vessel-resource";
+import { useSafeTimeout } from "../../hooks/use-safe-timeout";
 
 import { ShipData } from "./components/ship-info-card";
 
@@ -31,19 +37,61 @@ interface FuelDataResponse {
   __v: number;
 }
 
-interface ApiFuelResponse {
-  data: FuelDataResponse[];
-}
+const FLEET_PARAMS = { hours: 12 };
+
+/** Fuel logs of one vessel, oldest first. */
+const toFuelSeries = (
+  rows: FuelDataResponse[],
+  mmsi: string | null
+): IFuelConsumption[] => {
+  const fuelLogs: IFuelConsumption[] = [];
+  rows
+    .filter((ship) => ship.mmsi === mmsi)
+    .forEach((ship) => {
+      ship.fuelLogs.forEach((log) => {
+        fuelLogs.push({
+          timestamp: log.timestamp,
+          fuelME: parseFloat(log.fuelME.$numberDecimal),
+          fuelAE: parseFloat(log.fuelAE.$numberDecimal),
+        });
+      });
+    });
+  return fuelLogs.sort(
+    (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+  );
+};
 
 const TelemetryPage: FC = () => {
-  const [shipData, setShipData] = useState<MarkerData[]>([]);
-  const [shipDetail, setShipDetail] = useState<ShipData | null>(null);
-  const [fuelData, setFuelData] = useState<IFuelConsumption[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredShips, setFilteredShips] = useState<MarkerData[]>([]);
   const [selectedMmsi, setSelectedMmsi] = useState<string | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
+  const schedule = useSafeTimeout();
+
+  // Map markers: refreshed every 10 s, each response replaces the list.
+  const { ships: shipData } = useFleetPositions({
+    intervalMs: FLEET_POLL_INTERVAL_MS,
+    params: FLEET_PARAMS,
+  });
+
+  // Loaded once per selected vessel, as before.
+  const shipDetail = useVesselResource(
+    selectedMmsi,
+    (mmsi) => `${VITE_BACKEND_URI}/ships/data/secondary/mmsi/${mmsi}`,
+    (body) => (body.data ?? null) as ShipData | null,
+    null
+  ).data;
+
+  // Fuel chart of the selected vessel: refreshed every 5 s (was 500 ms).
+  const fuelData =
+    useVesselResource(
+      selectedMmsi,
+      () => `${VITE_BACKEND_URI}/ships/fuel-data`,
+      (body) =>
+        toFuelSeries((body.data ?? []) as FuelDataResponse[], selectedMmsi),
+      DETAIL_POLL_INTERVAL_MS
+    ).data ?? [];
 
   useEffect(() => {
     setFilteredShips(shipData);
@@ -56,21 +104,6 @@ const TelemetryPage: FC = () => {
       setSelectedMmsi(mmsiParam);
     }
   }, [location.search]);
-
-  useEffect(() => {
-    if (!selectedMmsi) return setShipDetail(null);
-    const fetchDetails = async () => {
-      try {
-        const { data } = await axios.get(
-          `${VITE_BACKEND_URI}/ships/data/secondary/mmsi/${selectedMmsi}`
-        );
-        setShipDetail(data.data);
-      } catch (error) {
-        console.error("Error fetching ship detail:", error);
-      }
-    };
-    fetchDetails();
-  }, [selectedMmsi]);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -102,86 +135,10 @@ const TelemetryPage: FC = () => {
   };
 
   const handleInputBlur = () => {
-    setTimeout(() => {
+    schedule(() => {
       setFilteredShips([]);
     }, 200);
   };
-
-  useEffect(() => {
-    const fetchShipData = async () => {
-      try {
-        const response = await axios.get(`${VITE_BACKEND_URI}/ais`, {
-          params: { hours: 12 },
-        });
-        const allData = response.data.data;
-        let i = 0;
-        const chunkSize = 10;
-        const interval = setInterval(() => {
-          setShipData((prev) => [...prev, ...allData.slice(i, i + chunkSize)]);
-          i += chunkSize;
-          if (i >= allData.length) clearInterval(interval);
-        }, 80);
-      } catch (error) {
-        console.error("Error fetching ship data:", error);
-      }
-    };
-    fetchShipData();
-    const interval = setInterval(fetchShipData, 10000);
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    const fetchFuelData = async () => {
-      if (!selectedMmsi) {
-        setFuelData([]);
-        return;
-      }
-      
-      try {
-        const response = await axios.get<ApiFuelResponse>(
-          `${VITE_BACKEND_URI}/ships/fuel-data`
-        );
-        
-        const shipFuelData = response.data.data.filter(
-          (ship) => ship.mmsi === selectedMmsi
-        );
-        
-        if (shipFuelData.length === 0) {
-          setFuelData([]);
-          return;
-        }
-        
-        const allFuelLogs: IFuelConsumption[] = [];
-        
-        shipFuelData.forEach((ship) => {
-          ship.fuelLogs.forEach((log) => {
-            allFuelLogs.push({
-              timestamp: log.timestamp,
-              fuelME: parseFloat(log.fuelME.$numberDecimal),
-              fuelAE: parseFloat(log.fuelAE.$numberDecimal),
-            });
-          });
-        });
-        
-        allFuelLogs.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
-        
-        setFuelData(allFuelLogs);
-      } catch (error) {
-        setFuelData([]);
-        console.error("Error fetching fuel data:", error);
-      }
-    };
-    
-    if (!selectedMmsi) {
-      setFuelData([]);
-      return;
-    }
-
-    fetchFuelData();
-    const interval = setInterval(fetchFuelData, 500);
-
-    return () => clearInterval(interval);
-  }, [selectedMmsi]);
 
   return (
     <main className="h-screen w-screen relative bg-gray-300 overflow-hidden z-1">

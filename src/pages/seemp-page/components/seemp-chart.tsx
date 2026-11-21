@@ -16,12 +16,15 @@ interface SEEMPChartProps {
   showTable: boolean;
   toggleTableVisibility: () => void;
   ciis: AnnualCIIWithDDVector[];
+  /** Backend message when the vessel has no annual CII (404). */
+  unavailableMessage?: string | null;
 }
 
 const SEEMPChart: FC<SEEMPChartProps> = ({
   ciis,
   showTable,
   toggleTableVisibility,
+  unavailableMessage,
 }) => {
   const chartData = ciis.map((cii) => ({
     year: cii.year,
@@ -40,7 +43,7 @@ const SEEMPChart: FC<SEEMPChartProps> = ({
       <CardContent className="px-3 h-44 space-y-2 text-xs">
         {chartData.length === 0 ? (
           <div className="flex items-center justify-center h-full">
-            <DataNotFound />
+            <DataNotFound message={unavailableMessage ?? undefined} />
           </div>
         ) : (
           <>

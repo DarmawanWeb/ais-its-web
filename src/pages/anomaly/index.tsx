@@ -1,18 +1,14 @@
-import axios from "axios";
 import { FC, useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import NavstatusAnomalyCard from "./components/navstatus-anomaly-card";
-import { VITE_BACKEND_URI } from "../../lib/env";
-import { MarkerData } from "../../components/common/map";
 import MapComponent from "../../components/common/map";
-
-
-
+import { useFleetPositions } from "../../hooks/use-fleet-positions";
 
 const AnomalyPage: FC = () => {
-  const [shipData, setShipData] = useState<MarkerData[]>([]);
   const [selectedMmsi, setSelectedMmsi] = useState<string | null>(null);
   const location = useLocation();
+  // Loaded once, as before.
+  const { ships: shipData } = useFleetPositions({ intervalMs: null });
 
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
@@ -21,22 +17,6 @@ const AnomalyPage: FC = () => {
       setSelectedMmsi(mmsiParam);
     }
   }, [location.search]);
-
-
-  useEffect(() => {
-    const fetchShipData = async () => {
-      try {
-        const response = await axios.get(`${VITE_BACKEND_URI}/ais`);
-        setShipData(response.data.data);
-      } catch (error) {
-        console.error("Error fetching ship data:", error);
-      }
-    };
-
-    fetchShipData();
-  }, []);
-
-  console.log("Ship Data:", shipData);
 
 
   return (

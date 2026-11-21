@@ -1,15 +1,21 @@
-import { FC, useState, useEffect, useRef, useCallback } from "react";
+import { FC, useState, useEffect, useCallback } from "react";
 import MapComponent from "../../components/common/map";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Input } from "../../components/ui/input";
 import CIISection from "./components/cii-section";
 import { Search } from "lucide-react";
 import ShipInfoCard from "./components/ship-info-card";
-import axios from "axios";
 import { VITE_BACKEND_URI } from "../../lib/env";
 import { MarkerData } from "../../components/common/map";
 import { ShipData } from "./components/ship-info-card";
 import { ICIICalculation } from "./cii-value-card";
+import { useFleetPositions } from "../../hooks/use-fleet-positions";
+import {
+  DETAIL_POLL_INTERVAL_MS,
+  FLEET_POLL_INTERVAL_MS,
+} from "../../hooks/use-polling";
+import { useVesselResource } from "../../hooks/use-vessel-resource";
+import { useSafeTimeout } from "../../hooks/use-safe-timeout";
 
 export type ciiGrafik = {
   ciiData: {
@@ -24,23 +30,48 @@ export type ciiGrafik = {
   };
 } | null;
 
+type LatestDailyCii = { cii?: { cii: ICIICalculation }[] };
+
+const FLEET_PARAMS = { hours: 12 };
+
 const CIIPage: FC = () => {
-  const [shipData, setShipData] = useState<MarkerData[]>([]);
-  const [shipDetailData, setShipDetailData] = useState<ShipData | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [ciiData, setCiiData] = useState<ICIICalculation | null>(null);
-  const [ciiGrafik, setCiiGrafik] = useState<ciiGrafik>(null);
   const [filteredShips, setFilteredShips] = useState<MarkerData[]>([]);
   const [selectedMmsi, setSelectedMmsi] = useState<string | null>(null);
   const [showCiiSection, setShowCiiSection] = useState(false);
   const [isSearchActive, setIsSearchActive] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  
-  const aisDataIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const ciiDataIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const ciiGrafikIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const shipDetailIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const schedule = useSafeTimeout();
+
+  // Map markers: refreshed every 10 s, each response replaces the list.
+  const { ships: shipData } = useFleetPositions({
+    intervalMs: FLEET_POLL_INTERVAL_MS,
+    params: FLEET_PARAMS,
+  });
+
+  // Detail panels of the selected vessel: refreshed every 5 s.
+  const shipDetail = useVesselResource(
+    selectedMmsi,
+    (mmsi) => `${VITE_BACKEND_URI}/ships/data/secondary/mmsi/${mmsi}`,
+    (body) => (body.data ?? null) as ShipData | null,
+    DETAIL_POLL_INTERVAL_MS
+  );
+  // 404 CII_NOT_AVAILABLE: no CII computed for this vessel yet.
+  const ciiLatest = useVesselResource(
+    selectedMmsi,
+    (mmsi) => `${VITE_BACKEND_URI}/cii/daily/${mmsi}/latest`,
+    (body) => (body.data as LatestDailyCii | undefined)?.cii?.[0]?.cii ?? null,
+    DETAIL_POLL_INTERVAL_MS
+  );
+  const ciiAttained = useVesselResource(
+    selectedMmsi,
+    (mmsi) => `${VITE_BACKEND_URI}/cii/daily/${mmsi}/attained`,
+    (body) => (body.data ?? null) as ciiGrafik,
+    DETAIL_POLL_INTERVAL_MS
+  );
+  const ciiUnavailableMessage =
+    ciiLatest.notFoundMessage ?? ciiAttained.notFoundMessage;
 
   const performSearch = useCallback((query: string, ships: MarkerData[]) => {
     if (query.trim() === "") {
@@ -83,156 +114,9 @@ const CIIPage: FC = () => {
     }
   }, [location.search]);
 
-  const fetchShipData = useCallback(async () => {
-         try {
-        const response = await axios.get(`${VITE_BACKEND_URI}/ais`, {
-          params: { hours: 12 },
-        });
-        const allData = response.data.data;
-        let i = 0;
-        const chunkSize = 10;
-        const interval = setInterval(() => {
-          setShipData((prev) => [...prev, ...allData.slice(i, i + chunkSize)]);
-          i += chunkSize;
-          if (i >= allData.length) clearInterval(interval);
-        }, 80);
-      } catch (error) {
-        console.error("Error fetching ship data:", error);
-      }
-  }, []);
-
-
-
-  const fetchShipDetail = useCallback(async (mmsi: string) => {
-    try {
-      const response = await axios.get(
-        `${VITE_BACKEND_URI}/ships/data/secondary/mmsi/${mmsi}`
-      );
-      setShipDetailData(response.data.data);
-    } catch (error) {
-      console.error("Error fetching ship detail:", error);
-    }
-  }, []);
-
-  const fetchCiiData = useCallback(async (mmsi: string) => {
-    try {
-      const response = await axios.get(
-        `${VITE_BACKEND_URI}/cii/daily/${mmsi}/latest`
-      );
-      setCiiData(response.data.data.cii[0].cii);
-    } catch (error) {
-      console.error("Error fetching CII data:", error);
-    }
-  }, []);
-
-  const fetchCiiGrafik = useCallback(async (mmsi: string) => {
-    try {
-      const response = await axios.get(
-        `${VITE_BACKEND_URI}/cii/daily/${mmsi}/attained`
-      );
-      setCiiGrafik(response.data.data);
-    } catch (error) {
-      console.error("Error fetching CII grafik:", error);
-    }
-  }, []);
-
-  // Setup AIS data fetching (real-time untuk peta)
   useEffect(() => {
-    fetchShipData();
-    
-    aisDataIntervalRef.current = setInterval(fetchShipData, 100);
-
-    return () => {
-      if (aisDataIntervalRef.current) {
-        clearInterval(aisDataIntervalRef.current);
-      }
-    };
-  }, [fetchShipData]);
-
-  useEffect(() => {
-    if (shipDetailIntervalRef.current) {
-      clearInterval(shipDetailIntervalRef.current);
-    }
-
-    if (selectedMmsi) {
-      fetchShipDetail(selectedMmsi);
-      
-      shipDetailIntervalRef.current = setInterval(() => {
-        fetchShipDetail(selectedMmsi);
-      }, 5000);
-    } else {
-      setShipDetailData(null);
-    }
-
-    return () => {
-      if (shipDetailIntervalRef.current) {
-        clearInterval(shipDetailIntervalRef.current);
-      }
-    };
-  }, [selectedMmsi, fetchShipDetail]);
-
-  useEffect(() => {
-    if (ciiDataIntervalRef.current) {
-      clearInterval(ciiDataIntervalRef.current);
-    }
-
-    if (selectedMmsi) {
-      setShowCiiSection(false);
-      
-      fetchCiiData(selectedMmsi);
-      
-      ciiDataIntervalRef.current = setInterval(() => {
-        fetchCiiData(selectedMmsi);
-      }, 1000);
-    } else {
-      setCiiData(null);
-    }
-
-    return () => {
-      if (ciiDataIntervalRef.current) {
-        clearInterval(ciiDataIntervalRef.current);
-      }
-    };
-  }, [selectedMmsi, fetchCiiData]);
-
-  useEffect(() => {
-    if (ciiGrafikIntervalRef.current) {
-      clearInterval(ciiGrafikIntervalRef.current);
-    }
-
-    if (selectedMmsi) {
-      fetchCiiGrafik(selectedMmsi);
-      
-      ciiGrafikIntervalRef.current = setInterval(() => {
-        fetchCiiGrafik(selectedMmsi);
-      }, 2000);
-    } else {
-      setCiiGrafik(null);
-    }
-
-    return () => {
-      if (ciiGrafikIntervalRef.current) {
-        clearInterval(ciiGrafikIntervalRef.current);
-      }
-    };
-  }, [selectedMmsi, fetchCiiGrafik]);
-
-  useEffect(() => {
-    return () => {
-      if (aisDataIntervalRef.current) {
-        clearInterval(aisDataIntervalRef.current);
-      }
-      if (ciiDataIntervalRef.current) {
-        clearInterval(ciiDataIntervalRef.current);
-      }
-      if (ciiGrafikIntervalRef.current) {
-        clearInterval(ciiGrafikIntervalRef.current);
-      }
-      if (shipDetailIntervalRef.current) {
-        clearInterval(shipDetailIntervalRef.current);
-      }
-    };
-  }, []);
+    if (selectedMmsi) setShowCiiSection(false);
+  }, [selectedMmsi]);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -254,7 +138,7 @@ const CIIPage: FC = () => {
   };
 
   const handleInputBlur = () => {
-    setTimeout(() => {
+    schedule(() => {
       setFilteredShips([]);
       setIsSearchActive(false);
     }, 200);
@@ -308,15 +192,16 @@ const CIIPage: FC = () => {
         </div>
         <div className="mr-16 h-[90vh] ">
           <ShipInfoCard
-            shipData={shipDetailData}
+            shipData={shipDetail.data}
             toogleCiiSection={toggleCiiSection}
             showCiiSection={showCiiSection}
           />
         </div>
       </aside>
       <CIISection
-        ciiGrafik={ciiGrafik}
-        ciiData={ciiData}
+        ciiGrafik={ciiAttained.data}
+        ciiData={ciiLatest.data}
+        unavailableMessage={ciiUnavailableMessage}
         show={showCiiSection}
       />
 

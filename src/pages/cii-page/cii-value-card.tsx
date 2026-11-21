@@ -20,9 +20,11 @@ export interface ICIICalculation {
 
 export interface CiiValueCardProps {
   cii: ICIICalculation | null;
+  /** Shown instead of the placeholder when the backend has no CII (404). */
+  unavailableMessage?: string | null;
 }
 
-const CiiValueCard: FC<CiiValueCardProps> = ({ cii }) => {
+const CiiValueCard: FC<CiiValueCardProps> = ({ cii, unavailableMessage }) => {
   const renderCiiContent = (cii: ICIICalculation) => (
     <section className="text-xs flex justify-between flex-col h-full">
       <div className=" ml-4">
@@ -67,7 +69,9 @@ const CiiValueCard: FC<CiiValueCardProps> = ({ cii }) => {
         ) : (
           <div className="flex flex-col items-center justify-center space-y-2 h-full">
             <Database className="text-gray-400" size={40} />
-            <div className="text-sm text-gray-600">Data will appear here</div>
+            <div className="text-sm text-gray-600 text-center">
+              {unavailableMessage ?? "Data will appear here"}
+            </div>
           </div>
         )}
       </CardContent>
