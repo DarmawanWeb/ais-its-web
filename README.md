@@ -43,17 +43,17 @@ the e2e tests (`VITE_DEV_PROXY_TARGET=http://localhost:8787 pnpm dev`; accounts
 
 ## Scripts
 
-| Script                                                               | What it does                                                                    |
-| -------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| `pnpm dev` / `pnpm preview`                                          | Vite dev server (5173) / preview of the production build (4173)                 |
-| `pnpm build`                                                         | `tsc -b` + production bundle in `dist/` (hidden source maps)                    |
-| `pnpm lint` / `pnpm typecheck` / `pnpm format` / `pnpm format:check` | ESLint (0 warnings), TypeScript project references, Prettier                    |
-| `pnpm test` / `pnpm test:watch` / `pnpm test:coverage`               | vitest + jsdom + MSW                                                            |
-| `pnpm test:e2e`                                                      | Playwright smoke tests, headless (builds, starts `vite preview` + mock gateway) |
-| `pnpm screenshots`                                                   | refreshes `docs/screenshots/*.png`                                              |
-| `pnpm api:generate`                                                  | orval clients for every service with an `openapi.json`; prints the skipped ones |
-| `pnpm methodology:sync`                                              | copies `docs/references/{methods,references}.json` into `public/methodology/`   |
-| `pnpm e2e:mock`                                                      | mock gateway on :8787                                                           |
+| Script                                                               | What it does                                                                                   |
+| -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `pnpm dev` / `pnpm preview`                                          | Vite dev server (5173) / preview of the production build (4173)                                |
+| `pnpm build`                                                         | `tsc -b` + production bundle in `dist/` (hidden source maps)                                   |
+| `pnpm lint` / `pnpm typecheck` / `pnpm format` / `pnpm format:check` | ESLint (0 warnings), TypeScript project references, Prettier                                   |
+| `pnpm test` / `pnpm test:watch` / `pnpm test:coverage`               | vitest + jsdom + MSW                                                                           |
+| `pnpm test:e2e`                                                      | every `e2e/**/*.spec.ts` (smoke, session, map, axe in both themes, layout), headless           |
+| `pnpm screenshots`                                                   | refreshes `docs/screenshots/*.png`                                                             |
+| `pnpm api:generate`                                                  | orval clients for every service with an `openapi.json` (all 10 today); prints the skipped ones |
+| `pnpm methodology:sync`                                              | copies `docs/references/{methods,references}.json` into `public/methodology/`                  |
+| `pnpm e2e:mock`                                                      | mock gateway on :8787                                                                          |
 
 ## Environment
 
@@ -83,8 +83,9 @@ src/
   app/                     the shell (foundation-owned)
     features.ts            discovers src/features/*/routes.tsx (import.meta.glob) + registers i18n
     router.tsx             route tree: public feature routes | RequireAuth → AppShell → feature routes | 404
-    navigation.ts          sidebar sections/items, commands and slots from the feature modules
+    navigation.ts          sidebar sections/items, commands, ordered shell slots, feature validation
     providers.tsx          QueryClient, tooltips, theme sync, toasts, devtools, cache guard (logout/org switch)
+    logout-pending-notice.tsx  toast + retry when a sign-out did not reach the server
     shell/                 AppShell, Sidebar, Topbar, CommandPalette, OrgSwitcher, UserMenu, alerts bell placeholder
     pages/                 404 and error boundaries
   features/<id>/           feature modules (routes.tsx, i18n/, pages/, components/, api/, hooks/)
@@ -100,7 +101,9 @@ src/
     i18n/ config/ theme/ stores/ hooks/ lib/
   styles/globals.css       design tokens (CSS variables, Tailwind @theme)
   test/                    vitest setup, MSW handlers, render helpers, token factory
-e2e/                       Playwright smoke + screenshot specs, mock gateway
+e2e/                       Playwright specs (*.spec.ts), fixtures (login, axe), screenshots
+  mock-server/             mock gateway: server.mjs (auth core) + routes/<feature>.mjs (auto-loaded)
+scripts/                   api:generate, methodology:sync, ESLint boundaries rule (ais/boundaries)
 docker/                    nginx config, runtime config script
 ```
 
@@ -116,9 +119,18 @@ rules are in **[docs/FEATURE_GUIDE.md](docs/FEATURE_GUIDE.md)**.
 - The access token lives **in memory only** (Zustand vanilla store); the refresh token is the
   HttpOnly `aisits_rt` cookie. On page load `POST /api/v2/auth/refresh` restores the session.
 - Refresh is single-flight (one request for concurrent 401s), serialized across tabs with the
-  Web Locks API (rotating refresh tokens + reuse detection), shared with other tabs through a
-  BroadcastChannel, and scheduled one minute before expiry. A 401 is retried once with the new
-  token; a rejected refresh ends the session ("session expired" notice on the login page).
+  Web Locks API (rotating refresh tokens + reuse detection; outside secure contexts a
+  localStorage lease with expiry takes over — serve the console over HTTPS or localhost), shared
+  with other tabs through a BroadcastChannel, and scheduled one minute before expiry. The expiry
+  comes from `expiresIn` (never `exp` against the local clock, so skewed clocks do not cause a
+  refresh storm). A 401 is retried once with the new token; a rejected refresh ends the session
+  ("session expired" notice on the login page).
+- Sign-out ends the local session at once (all tabs) and revokes the refresh family with
+  `POST /auth/logout` (fetch `keepalive`, under the same cross-tab lock as refreshes). A session
+  generation counter drops every refresh result that arrives after a sign-out. When the server
+  cannot be reached, a non-secret marker (`ais-auth:logout-pending` in localStorage) keeps the
+  session from being restored from the cookie — page loads call `/auth/logout` instead of
+  `/auth/refresh` — a toast offers a retry and the revocation is retried in the background.
 - `useSession()` exposes the decoded claims (`sub`, `org`, `roles`, `email`, `name`);
   `usePermission(perm)` uses contracts `ROLE_PERMISSIONS` (super_admin: everything);
   `useCanAccessOrg(orgId)` applies the tenant rule; `RequireAuth`, `RequirePermission`, `Can`.
@@ -133,14 +145,22 @@ One axios instance (`src/shared/api/http.ts`, same-origin base URL): bearer toke
 4xx, two retries for network/5xx, cache cleared on logout and reset on org switch.
 orval (`orval.config.ts`, `pnpm api:generate`) generates per service TanStack Query hooks +
 plain TS types into `src/shared/api/generated/<service>/` from
-`../../services/<service>/openapi.json` (override with `OPENAPI_SERVICES_DIR`), using the shared
+`../../services/<service>/openapi.json` (the pipeline publishes `openapi.processor.json` and
+`openapi.ingestor.json`; override the directory with `OPENAPI_SERVICES_DIR`), using the shared
 mutator; services without a document are skipped and reported (`generated/manifest.json`).
+Clients exist for auth, fleet, ais-processor, ais-ingestor, telemetry, emission, geo, safety,
+surveillance and notification. The session endpoints (login, MFA, refresh, logout, switch-org,
+password, /me) stay hand-written in `src/shared/auth/auth-api.ts` (per-request control, zod
+validation); `auth-api.test.ts` parses fixtures typed with the generated DTOs, so a contract
+change fails the typecheck.
 
 ### Realtime (spec §9)
 
 `src/shared/realtime`: one socket.io connection per tab on `/ws` while signed in; the handshake
 token is read on every (re)connection and `connect_error UNAUTHORIZED` triggers a refresh and
-reconnect. The viewport (`viewport:set`, zoom-6 tile rooms) and vessel subscriptions are
+reconnect. Rejected handshakes and server-side disconnects (which socket.io never retries) are
+retried with backoff (2 s → 60 s), a newly adopted token reconnects a socket that is down, and
+a change of user, organization or roles re-handshakes (rooms are joined at handshake). The viewport (`viewport:set`, zoom-6 tile rooms) and vessel subscriptions are
 replayed after reconnects. Positions and safety states are merged into a normalized store
 (Map by MMSI, out-of-order messages ignored, pruned after 30 min) read through throttled
 snapshots. Hooks: `useRealtimeConnection`, `useViewportPositions`, `useVesselSnapshot`,
@@ -151,10 +171,15 @@ snapshots. Hooks: `useRealtimeConnection`, `useViewportPositions`, `useVesselSna
 `<MapView>` = MapLibre GL + **`@deck.gl/mapbox` `MapboxOverlay` in overlaid mode**
 (`interleaved: false`), chosen so deck.gl layers survive basemap switches; a layer registry
 (`useDeckLayers`, `useMapLibreLayers`) lets features add layers without touching the map.
+`src/shared/map/maplibre-setup.ts` registers MapLibre's web worker (`setWorkerUrl` with the
+`?url` import, emitted as `assets/maplibre-gl-worker-<hash>.mjs`) before any map exists — GeoJSON
+sources, vector basemaps and Martin tiles depend on it; `e2e/map.spec.ts` checks it.
 Basemaps: dark vector style (`VITE_MAP_STYLE_URL`), OpenStreetMap raster fallback (inverted in
 the dark theme), Esri World Imagery; persisted per user. Vessel icons come from the legacy
-ship-type PNGs packed into an atlas at runtime, rotated by heading/COG, with a ring for EWS
-danger/warning and collision risk. Attributions are always visible (non-compact control);
+ship-type PNGs packed into an atlas at runtime, rotated by heading/COG, with a safety ring
+encoded by colour **and** line style (`SAFETY_RING_STYLES`): EWS danger red and collision high
+magenta (solid, 3 px), EWS warning amber (solid, 2 px), collision medium pink (dashed) — and a
+separate cyan halo for the selected vessel, which keeps its safety ring. Attributions are always visible (non-compact control);
 `<DataAttribution provider="open-meteo" />` for weather values. Default view: Batam.
 
 ### Design system
@@ -166,7 +191,10 @@ E `#dc2626`), exposed as Tailwind colours (`bg-surface`, `text-primary`, `bg-gra
 Inter Variable for UI, JetBrains Mono Variable (tabular, slashed zero) for MMSI, coordinates
 and figures — both self-hosted via @fontsource. Radius scale from `--radius`, 3 px focus rings,
 `prefers-reduced-motion` respected. Theme (dark/light/system) and language toggles in the top
-bar; `public/theme-init.js` applies the theme before the first paint.
+bar; `public/theme-init.js` applies the theme before the first paint. The semantic colours are
+also text colours: in the light theme they are dark enough for WCAG AA (≥ 4.5:1 as text on the
+background, surfaces and their own 15 % tint, and white text on the solid colour);
+`e2e/a11y.spec.ts` runs axe on every sidebar page in both themes.
 
 ### Methodology (spec §17)
 
@@ -178,13 +206,19 @@ sources with a link to `/methodology#<methodId>`. The catalog is read from
 ## Testing
 
 - **Unit/component** (`pnpm test`): session (bootstrap, single-flight refresh, 401 retry,
-  login/MFA/org switch/logout), token claims, permissions and guards, problem details mapping
-  and retry policy, realtime store merge/prune, navigation, login/reset pages, methodology
-  loader. Helpers in `src/test` (`renderApp`, `renderWithProviders`, MSW `server`, `makeAccessToken`).
-- **E2E** (`pnpm test:e2e`): login (incl. wrong password), shell, sidebar navigation, live map
-  with seeded vessels, command palette, session restore after reload (no token in storage),
-  language switch, logout and permission gating — headless Chromium against the production
-  build and `e2e/mock-server/server.mjs`.
+  login/MFA/org switch/logout, unfinished sign-out, refresh racing a sign-out, cross-tab
+  messages, skewed clocks), cross-tab lock fallback, safe redirects, auth contract fixtures,
+  token claims, permissions and guards, problem details mapping and retry policy, realtime
+  reconnection (fake socket) and store merge/prune, vessel layers, navigation and shell slots,
+  login/reset pages, methodology loader, the ESLint boundaries rule. Helpers in `src/test`
+  (`renderApp`, `renderWithProviders`, MSW `server`, `makeAccessToken`, a Web Locks polyfill).
+- **E2E** (`pnpm test:e2e`, every `e2e/**/*.spec.ts` except the screenshots): smoke (login,
+  shell, navigation, dashboard KPIs, live map, command palette, session restore, language,
+  logout, permissions), session (sign-out the server did not receive, refresh racing a sign-out,
+  unsafe post-login redirects, palette focus), map (MapLibre worker renders a GeoJSON layer),
+  axe WCAG 2.1 AA on every sidebar page in both themes, and no horizontal scroll at 1280/390 px —
+  headless Chromium against the production build (`VITE_E2E_HOOKS=true`) and the mock gateway
+  (`e2e/mock-server/server.mjs` + `routes/*.mjs`).
 
 ## Docker
 
@@ -195,7 +229,9 @@ docker run --rm -p 8080:8080 -e VITE_MAP_STYLE_URL=https://… ais-its-web
 
 Multi-stage: `node:24-alpine` builds (pnpm via corepack, registry credentials only as the
 BuildKit secret `npmrc`, optional `ca` secret), `nginx:1.29-alpine` serves as user `nginx`
-on **8080** with SPA fallback, gzip, immutable caching for `/assets/*`, `no-cache` for
+on **8080** with SPA fallback, gzip, immutable caching for `/assets/*` (a `^~` prefix location,
+so hashed fonts and the MapLibre worker are immutable too; a missing asset answers 404 with
+`no-store`, never an immutable error), `no-cache` for
 `index.html`/`config.js`, security headers + CSP, `/healthz`, and `/config.js` generated from
 the environment at start (`docker/40-runtime-config.sh`). The gateway (stack mode) proxies `/`
 to `web:8080`.

@@ -6,6 +6,48 @@ All notable changes to this project are documented in this file. The format foll
 
 ## [Unreleased]
 
+### Fixed
+
+- Map: MapLibre's web worker is registered (`setWorkerUrl` + `?url` import) before any map is
+  created; GeoJSON sources (`useMapLibreLayers`), vector basemaps and `/tiles` render again.
+- Sign-out: a failed `POST /auth/logout` is reported (toast with retry, background retries); a
+  non-secret pending marker stops page loads from restoring the session from the refresh
+  cookie (they call `/auth/logout` instead) until the revocation succeeds. The request uses
+  fetch `keepalive` and the cross-tab refresh lock.
+- Session: a refresh that completes after a sign-out is dropped (session generation counter;
+  token broadcasts carry their source and are ignored while signed out or a sign-out is
+  pending). Token expiry is derived from `expiresIn` only (skewed client clocks no longer cause
+  a refresh every 5 s). Outside secure contexts a localStorage lease replaces the Web Locks API.
+- Realtime: rejected handshakes and server-side disconnects are retried with backoff, a newly
+  adopted token reconnects a socket that is down, and user/role changes re-handshake.
+- Post-login redirects resolve the target as a URL (backslashes, control characters and other
+  origins fall back to the dashboard instead of crashing).
+- Accessibility: light-theme semantic colours meet WCAG AA as text, badge tint and button fill;
+  names of the language toggle, search button and user menu contain their visible text; map
+  pages have an h1 (`MapPageLayout` `title`); method cards use h2; the command palette moves
+  focus to the page after a selection; scrolling formulas are keyboard focusable.
+- Methodology page no longer scrolls horizontally (grid items `min-w-0`, formulas scroll in
+  their box).
+- Map legend and rings: medium collision risk is pink and dashed (high risk stays magenta and
+  solid); the selected vessel keeps its safety ring under a separate selection halo.
+- Dashboard: "Kapal terlacak" counts the platform's active vessels (`GET /ais/stats`), and
+  "Alert terbuka" shows `GET /alerts/summary` (refreshed by the alert stream).
+- nginx: `/assets/` is a `^~` location (hashed fonts get the immutable cache) and missing assets
+  answer 404 with `no-store`.
+
+### Changed
+
+- Shell slots `topbar.actions` and `sidebar.footer` take any number of contributions
+  (`{ component, order }`); `topbar.alerts` has a single owner and a second claim fails at
+  start-up.
+- ESLint: the local rule `ais/boundaries` (scripts/eslint-boundaries.mjs) enforces feature
+  isolation for aliases and relative paths.
+- E2E: the `e2e` project runs every `e2e/**/*.spec.ts` except the screenshots (`pnpm test:e2e`,
+  CI); the mock gateway loads `e2e/mock-server/routes/*.mjs` (one file per feature); axe-core
+  checks every sidebar page in both themes and a layout spec checks horizontal overflow.
+- API clients generated for every service (auth, fleet, ais-processor, ais-ingestor,
+  telemetry, emission, geo, safety, surveillance, notification).
+
 ## [0.1.0] - 2026-11-21
 
 Foundation of the v2 web application (AIS Maritime Intelligence). Replaces the MVP frontend

@@ -7,12 +7,6 @@
  */
 
 export * from './accessTokenDto';
-export * from './addedMemberDto';
-export * from './addedMemberDtoRole';
-export * from './addedMemberDtoStatus';
-export * from './addMemberDto';
-export * from './addMemberDtoLocale';
-export * from './addMemberDtoRole';
 export * from './apiKeyDto';
 export * from './apiKeyDtoScopesItem';
 export * from './apiKeyIntrospectionDto';
@@ -38,6 +32,13 @@ export * from './directoryUserDtoStatus';
 export * from './forgotPasswordDto';
 export * from './forgotPasswordDtoLocale';
 export * from './introspectApiKeyDto';
+export * from './invitationDto';
+export * from './invitationDtoRole';
+export * from './invitationsControllerList200';
+export * from './invitationsControllerListParams';
+export * from './inviteMemberDto';
+export * from './inviteMemberDtoLocale';
+export * from './inviteMemberDtoRole';
 export * from './jwkDto';
 export * from './jwkDtoAlg';
 export * from './jwkDtoCrv';
@@ -78,6 +79,8 @@ export * from './pageMetaDto';
 export * from './problemDetails';
 export * from './problemDetailsErrorsItem';
 export * from './resetPasswordDto';
+export * from './sentInvitationDto';
+export * from './sentInvitationDtoRole';
 export * from './sessionDto';
 export * from './sessionsControllerList200';
 export * from './sessionsControllerListParams';

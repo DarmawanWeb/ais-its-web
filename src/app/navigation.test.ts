@@ -1,10 +1,16 @@
 import { describe, expect, it } from 'vitest';
 
 import { permissionsOfRoles } from '@/shared/auth/permissions';
+import { defineFeature, type FeatureModule } from '@/shared/feature';
 import { i18n } from '@/shared/i18n';
 
 import { features } from './features';
-import { buildNavigation } from './navigation';
+import {
+  buildNavigation,
+  singleSlotComponent,
+  slotContributions,
+  validateFeatures,
+} from './navigation';
 
 describe('feature modules', () => {
   it('discovers every feature folder', () => {
@@ -93,5 +99,76 @@ describe('buildNavigation', () => {
 
   it('always shows the methodology to signed-in users', () => {
     expect(Object.fromEntries(labels(['viewer'])).knowledge).toEqual(['/methodology']);
+  });
+});
+
+describe('shell slots', () => {
+  const A = () => null;
+  const B = () => null;
+  const C = () => null;
+  const modules: FeatureModule[] = [
+    defineFeature({ id: 'alert-rules', slots: { 'topbar.actions': { component: B, order: 20 } } }),
+    defineFeature({
+      id: 'alerts',
+      slots: {
+        'topbar.alerts': A,
+        'topbar.actions': [
+          { component: A, order: 10 },
+          { component: C, order: 20 },
+        ],
+      },
+    }),
+    defineFeature({ id: 'zones', slots: { 'sidebar.footer': C } }),
+  ];
+
+  it('renders every contribution of a shared slot in order, then by feature id', () => {
+    expect(
+      slotContributions(modules, 'topbar.actions').map(({ featureId, order, component }) => [
+        featureId,
+        order,
+        component,
+      ]),
+    ).toEqual([
+      ['alerts', 10, A],
+      ['alert-rules', 20, B],
+      ['alerts', 20, C],
+    ]);
+    expect(slotContributions(modules, 'sidebar.footer')).toMatchObject([
+      { featureId: 'zones', order: 100, component: C, key: 'zones:0' },
+    ]);
+  });
+
+  it('keeps a single owner for the alert bell', () => {
+    expect(singleSlotComponent(modules, 'topbar.alerts')).toBe(A);
+    const twice = [...modules, defineFeature({ id: 'safety', slots: { 'topbar.alerts': B } })];
+    expect(() => singleSlotComponent(twice, 'topbar.alerts')).toThrow(/"alerts" and "safety"/);
+  });
+
+  it('validates the discovered feature modules at startup', () => {
+    const at = (id: string) => `../features/${id}/routes.tsx`;
+    expect(
+      validateFeatures([
+        { path: at('zones'), feature: defineFeature({ id: 'zones' }) },
+        { path: at('alerts'), feature: defineFeature({ id: 'alerts' }) },
+      ]).map((feature) => feature.id),
+    ).toEqual(['alerts', 'zones']);
+    expect(() => validateFeatures([{ path: at('cii'), feature: undefined }])).toThrow(
+      /must export "feature"/,
+    );
+    expect(() =>
+      validateFeatures([{ path: at('cii'), feature: defineFeature({ id: 'emission' }) }]),
+    ).toThrow(/must equal its folder name "cii"/);
+    expect(() =>
+      validateFeatures([
+        {
+          path: at('alerts'),
+          feature: defineFeature({ id: 'alerts', slots: { 'topbar.alerts': A } }),
+        },
+        {
+          path: at('safety'),
+          feature: defineFeature({ id: 'safety', slots: { 'topbar.alerts': B } }),
+        },
+      ]),
+    ).toThrow(/single owner/);
   });
 });

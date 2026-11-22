@@ -237,6 +237,7 @@ export const useAuthControllerVerifyMfa = <
   return useMutation(getAuthControllerVerifyMfaMutationOptions(options), queryClient);
 };
 /**
+ * Reads the refresh token from the HttpOnly cookie aisits_rt (Path=/api/v2/auth, SameSite=Strict; set by login, MFA verify and refresh). Browsers send it automatically; an Origin header, when present, must be one of CORS_ORIGINS or PUBLIC_BASE_URL.
  * @summary Rotate the refresh cookie and get a new access token
  */
 export const authControllerRefresh = (
@@ -291,7 +292,10 @@ export type AuthControllerRefreshMutationResult = NonNullable<
 
 export type AuthControllerRefreshMutationError = ErrorType<void | ProblemDetails>;
 
-/** @summary Rotate the refresh cookie and get a new access token */
+/**
+ * Reads the refresh token from the HttpOnly cookie aisits_rt (Path=/api/v2/auth, SameSite=Strict; set by login, MFA verify and refresh). Browsers send it automatically; an Origin header, when present, must be one of CORS_ORIGINS or PUBLIC_BASE_URL.
+ * @summary Rotate the refresh cookie and get a new access token
+ */
 export const useAuthControllerRefresh = <
   TError = ErrorType<void | ProblemDetails>,
   TContext = unknown,
@@ -310,6 +314,7 @@ export const useAuthControllerRefresh = <
   return useMutation(getAuthControllerRefreshMutationOptions(options), queryClient);
 };
 /**
+ * Reads the refresh token from the HttpOnly cookie aisits_rt (Path=/api/v2/auth, SameSite=Strict; set by login, MFA verify and refresh). Browsers send it automatically; an Origin header, when present, must be one of CORS_ORIGINS or PUBLIC_BASE_URL.
  * @summary Sign out: revoke the session of the refresh cookie and clear it
  */
 export const authControllerLogout = (
@@ -361,7 +366,10 @@ export type AuthControllerLogoutMutationResult = NonNullable<
 
 export type AuthControllerLogoutMutationError = ErrorType<ProblemDetails>;
 
-/** @summary Sign out: revoke the session of the refresh cookie and clear it */
+/**
+ * Reads the refresh token from the HttpOnly cookie aisits_rt (Path=/api/v2/auth, SameSite=Strict; set by login, MFA verify and refresh). Browsers send it automatically; an Origin header, when present, must be one of CORS_ORIGINS or PUBLIC_BASE_URL.
+ * @summary Sign out: revoke the session of the refresh cookie and clear it
+ */
 export const useAuthControllerLogout = <TError = ErrorType<ProblemDetails>, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -1113,6 +1121,7 @@ export const usePasswordsControllerForgot = <
   return useMutation(getPasswordsControllerForgotMutationOptions(options), queryClient);
 };
 /**
+ * An invitation token also writes the membership of the invitation (and activates a new account). Failed attempts are throttled per client IP.
  * @summary Set a new password with a reset or invitation token (revokes every session)
  */
 export const passwordsControllerReset = (
@@ -1135,7 +1144,7 @@ export const passwordsControllerReset = (
 export const getPasswordsControllerResetMutationKey = () => ['passwordsControllerReset'] as const;
 
 export const getPasswordsControllerResetMutationOptions = <
-  TError = ErrorType<ProblemDetails>,
+  TError = ErrorType<void | ProblemDetails>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -1174,11 +1183,17 @@ export type PasswordsControllerResetMutationResult = NonNullable<
   Awaited<ReturnType<typeof passwordsControllerReset>>
 >;
 export type PasswordsControllerResetMutationBody = BodyType<ResetPasswordDto>;
-export type PasswordsControllerResetMutationError = ErrorType<ProblemDetails>;
+export type PasswordsControllerResetMutationError = ErrorType<void | ProblemDetails>;
 export type PasswordsControllerResetMutationVariables = { data: BodyType<ResetPasswordDto> };
 
-/** @summary Set a new password with a reset or invitation token (revokes every session) */
-export const usePasswordsControllerReset = <TError = ErrorType<ProblemDetails>, TContext = unknown>(
+/**
+ * An invitation token also writes the membership of the invitation (and activates a new account). Failed attempts are throttled per client IP.
+ * @summary Set a new password with a reset or invitation token (revokes every session)
+ */
+export const usePasswordsControllerReset = <
+  TError = ErrorType<void | ProblemDetails>,
+  TContext = unknown,
+>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof passwordsControllerReset>>,

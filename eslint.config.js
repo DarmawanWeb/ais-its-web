@@ -8,6 +8,8 @@ import { defineConfig, globalIgnores } from 'eslint/config';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
+import ais from './scripts/eslint-boundaries.mjs';
+
 export default defineConfig([
   globalIgnores([
     'dist',
@@ -58,38 +60,12 @@ export default defineConfig([
     },
   },
   {
-    // Feature isolation (docs/FEATURE_GUIDE.md): a feature never imports another feature.
-    files: ['src/features/**/*.{ts,tsx}'],
-    rules: {
-      'no-restricted-imports': [
-        'error',
-        {
-          patterns: [
-            {
-              group: ['@/features/*', '@/app/*'],
-              message:
-                'Features are isolated: import from "@/shared/*" (or move the code there) instead of another feature or the app shell.',
-            },
-          ],
-        },
-      ],
-    },
-  },
-  {
-    files: ['src/shared/**/*.{ts,tsx}'],
-    rules: {
-      'no-restricted-imports': [
-        'error',
-        {
-          patterns: [
-            {
-              group: ['@/features/*', '@/app/*'],
-              message: 'Shared code must not depend on features or on the app shell.',
-            },
-          ],
-        },
-      ],
-    },
+    // Feature isolation (docs/FEATURE_GUIDE.md): a feature imports only its own folder and
+    // src/shared; shared code never imports features or the app shell. The local rule resolves
+    // aliases and relative paths (../../other-feature/…), see scripts/eslint-boundaries.mjs.
+    files: ['src/features/**/*.{ts,tsx}', 'src/shared/**/*.{ts,tsx}'],
+    plugins: { ais },
+    rules: { 'ais/boundaries': 'error' },
   },
   {
     // shadcn/ui-style primitives and route modules export helpers next to components.

@@ -68,8 +68,28 @@ export interface CommandItem {
   perform: (context: CommandContext) => void;
 }
 
-/** Places in the shell where a feature can plug a component. */
+/**
+ * Places in the shell where a feature can plug a component.
+ *   - 'topbar.alerts': the alert bell (single owner: the alerts feature; a second claim fails
+ *     at startup).
+ *   - 'topbar.actions', 'sidebar.footer': shared by any number of features, rendered in
+ *     `order` (then feature id).
+ */
 export type ShellSlotName = 'topbar.alerts' | 'topbar.actions' | 'sidebar.footer';
+export type SingleShellSlotName = 'topbar.alerts';
+export type MultiShellSlotName = Exclude<ShellSlotName, SingleShellSlotName>;
+
+/** A component contributed to a shared slot; lower `order` renders first (default 100). */
+export interface SlotContribution {
+  component: ComponentType;
+  order?: number;
+}
+
+export interface FeatureSlots {
+  'topbar.alerts'?: ComponentType;
+  'topbar.actions'?: ComponentType | SlotContribution | readonly SlotContribution[];
+  'sidebar.footer'?: ComponentType | SlotContribution | readonly SlotContribution[];
+}
 
 export interface FeatureModule {
   /** Folder name; also the i18n namespace. */
@@ -81,7 +101,7 @@ export interface FeatureModule {
   publicRoutes?: RouteObject[];
   nav?: NavItem[];
   commands?: CommandItem[];
-  slots?: Partial<Record<ShellSlotName, ComponentType>>;
+  slots?: FeatureSlots;
 }
 
 /** Identity helper that type-checks a feature module. */

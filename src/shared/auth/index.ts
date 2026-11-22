@@ -31,11 +31,13 @@ export {
   login,
   logout,
   refreshAccessToken,
+  retryPendingLogout,
   sessionStore,
   switchOrganization,
   useSessionStore,
   verifyMfa,
   type LoginOutcome,
+  type LogoutResult,
   type SessionState,
   type SessionStatus,
 } from './session';

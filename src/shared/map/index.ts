@@ -27,6 +27,7 @@ export { MapPageLayout, MapPanel, type MapPageLayoutProps } from './map-page-lay
 export { MapView, type MapViewProps } from './map-view';
 export {
   buildVesselIconAtlas,
+  DASHED_RING_ICON,
   useVesselIconAtlas,
   VESSEL_ICON_NAMES,
   vesselIconName,
@@ -36,6 +37,7 @@ export {
 export {
   createVesselLayers,
   safetyRingColor,
+  safetyRingKind,
   VesselLayer,
   vesselHeading,
   type VesselLayerOptions,

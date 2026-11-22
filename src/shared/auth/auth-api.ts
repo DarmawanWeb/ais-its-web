@@ -1,13 +1,26 @@
 import * as z from 'zod';
 
 import { http } from '@/shared/api/http';
+import { ApiProblem } from '@/shared/api/problem';
+import { appConfig } from '@/shared/config/env';
+import { createRequestId } from '@/shared/lib/utils';
 
 /**
- * Hand-written client of the auth endpoints (spec §13.1, stable). The rest of the auth
- * service (users, organizations, API keys, audit logs) comes from the generated client in
- * src/shared/api/generated/auth once its openapi.json is published.
+ * Hand-written client of the session endpoints (spec §13.1, stable) used by the session layer:
+ * it needs per-request control (no token, no refresh-on-401, keepalive) and validates every
+ * response with zod. The shapes match the auth service's openapi.json (auth-api.test.ts parses
+ * fixtures typed with the generated DTOs, so a contract change fails the typecheck). Everything
+ * else of the auth service (users, organizations, members, API keys, audit logs, sessions UI)
+ * uses the generated client in src/shared/api/generated/auth.
  */
 const BASE = '/api/v2/auth';
+const LOGOUT_TIMEOUT_MS = 10_000;
+
+/** Absolute URL of an API path, as axios builds it from the base URL. */
+function apiUrl(path: string): string {
+  const base = appConfig.apiBaseUrl.replace(/\/+$/, '');
+  return new URL(`${base}${path}`, window.location.origin).toString();
+}
 
 export const AuthUserSchema = z.looseObject({
   id: z.string(),
@@ -126,8 +139,44 @@ export const authApi = {
     return TokenResponseSchema.parse(data);
   },
 
+  /**
+   * Revokes the refresh token family (POST /auth/logout, cookie only). Uses fetch with
+   * `keepalive` so the request survives closing the tab right after "sign out". Resolves when
+   * the server revoked the family or had nothing to revoke (401); rejects with an ApiProblem
+   * on network errors, throttling and server errors.
+   */
   async logout(): Promise<void> {
-    await http.post(`${BASE}/logout`, undefined, { skipAuthRefresh: true });
+    const requestId = createRequestId();
+    let response: Response;
+    try {
+      response = await fetch(apiUrl(`${BASE}/logout`), {
+        method: 'POST',
+        credentials: 'include',
+        keepalive: true,
+        headers: { Accept: 'application/json', 'X-Request-Id': requestId },
+        // fetch has no timeout of its own; the session layer holds the cross-tab lock meanwhile.
+        ...(typeof AbortSignal.timeout === 'function'
+          ? { signal: AbortSignal.timeout(LOGOUT_TIMEOUT_MS) }
+          : {}),
+      });
+    } catch (error) {
+      throw new ApiProblem({
+        kind: 'network',
+        status: 0,
+        code: 'NETWORK_ERROR',
+        title: 'Network error',
+        requestId,
+        cause: error,
+      });
+    }
+    if (response.ok || response.status === 401) return;
+    throw new ApiProblem({
+      kind: 'http',
+      status: response.status,
+      code: response.status === 429 ? 'RATE_LIMITED' : 'LOGOUT_FAILED',
+      title: response.statusText || 'Sign-out failed',
+      requestId,
+    });
   },
 
   async switchOrg(orgId: string): Promise<TokenResponse> {

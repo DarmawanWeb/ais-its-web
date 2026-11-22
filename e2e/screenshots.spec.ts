@@ -38,6 +38,18 @@ test.describe('documentation screenshots', () => {
     await page.screenshot({ path: `${DIR}/map.png` });
   });
 
+  test('methodology catalog (desktop and mobile)', async ({ page }) => {
+    await login(page);
+    await page.goto('/methodology');
+    await expect(page.getByText(/\d+ metode/)).toBeVisible();
+    await page.waitForLoadState('networkidle');
+    await settle(page);
+    await page.screenshot({ path: `${DIR}/methodology.png` });
+    await page.setViewportSize({ width: 390, height: 844 });
+    await settle(page);
+    await page.screenshot({ path: `${DIR}/methodology-mobile.png` });
+  });
+
   test('mobile shell', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await login(page);

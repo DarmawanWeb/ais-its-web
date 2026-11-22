@@ -15,6 +15,7 @@ export function LiveMapPage() {
 
   return (
     <MapPageLayout
+      title={t('title')}
       map={
         <MapView ariaLabel={t('title')}>
           <LiveVessels selectedMmsi={selectedMmsi} onSelect={select} />

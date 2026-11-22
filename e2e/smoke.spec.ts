@@ -19,6 +19,10 @@ test.describe('smoke', () => {
 
     await login(page);
 
+    // Dashboard KPIs from GET /ais/stats and GET /alerts/summary (mock: 14 vessels, 3 alerts).
+    await expect(page.getByText('Posisi AIS dalam 30 menit terakhir')).toBeVisible();
+    await expect(page.getByText('1 kritis')).toBeVisible();
+
     // Shell: sections of the sidebar and the top bar controls.
     const nav = page.getByRole('navigation', { name: 'Navigasi utama' });
     for (const section of [

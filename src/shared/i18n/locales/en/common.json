@@ -64,7 +64,13 @@
       "idle": "Realtime idle",
       "error": "Realtime connection failed"
     },
-    "version": "Version {{version}}"
+    "version": "Version {{version}}",
+    "logoutPending": {
+      "title": "Sign-out not finished",
+      "description": "The server has not revoked your session yet. It will not be restored in this browser; we keep retrying.",
+      "retry": "Retry",
+      "done": "The previous session was revoked on the server."
+    }
   },
   "command": {
     "placeholder": "Type a command, page, vessel name or MMSI…",
@@ -200,7 +206,8 @@
     "pendingDescription": "The methodology catalog entry for \"{{methodId}}\" is not loaded yet. Sources will appear once the catalog is available.",
     "needsCitation": "Needs citation",
     "needsCitationDescription": "The value comes from the thesis and has no verified external source yet.",
-    "status": "Status"
+    "status": "Status",
+    "formulaScrollable": "Formula (scroll sideways to see all of it)"
   },
   "map": {
     "basemap": "Basemap",

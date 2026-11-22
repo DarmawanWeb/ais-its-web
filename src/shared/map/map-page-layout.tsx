@@ -8,6 +8,11 @@ import { Button } from '@/shared/ui/button';
 import { Drawer, DrawerContent, DrawerDescription, DrawerTitle } from '@/shared/ui/drawer';
 
 export interface MapPageLayoutProps {
+  /**
+   * Page title: rendered as the page's (visually hidden) <h1> — map pages have no PageHeader
+   * but still need exactly one h1.
+   */
+  title: string;
   /** The <MapView> (fills the page). */
   map: ReactNode;
   /** Floating panel at the top left (search, filters, layer toggles). */
@@ -29,6 +34,7 @@ export interface MapPageLayoutProps {
  * route `handle: { layout: 'full-bleed' }` so the shell removes its padding.
  */
 export function MapPageLayout({
+  title,
   map,
   topLeft,
   topCenter,
@@ -45,6 +51,7 @@ export function MapPageLayout({
 
   return (
     <div className={cn('relative flex h-full w-full overflow-hidden', className)}>
+      <h1 className="sr-only">{title}</h1>
       <div className="relative min-w-0 flex-1">
         {map}
         {topLeft && (

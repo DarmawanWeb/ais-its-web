@@ -30,14 +30,15 @@ function MethodCard({
     <article
       id={method.id}
       className={cn(
-        'scroll-mt-24 rounded-xl border bg-surface p-5 shadow-xs transition-shadow',
+        // min-w-0: a grid item must not grow to its nowrap KaTeX content (page-wide scroll).
+        'min-w-0 scroll-mt-24 rounded-xl border bg-surface p-5 shadow-xs transition-shadow',
         highlighted && 'ring-2 ring-primary/60',
       )}
     >
       <div className="flex flex-wrap items-start justify-between gap-2">
-        <div className="space-y-1">
-          <h3 className="font-semibold">{method.name[locale]}</h3>
-          <p className="font-mono text-xs text-muted-foreground">{method.id}</p>
+        <div className="min-w-0 space-y-1">
+          <h2 className="font-semibold">{method.name[locale]}</h2>
+          <p className="font-mono text-xs break-all text-muted-foreground">{method.id}</p>
         </div>
         <div className="flex flex-wrap gap-1.5">
           <Badge variant="muted">{catalog.labels.status(method.status, locale)}</Badge>
@@ -50,8 +51,8 @@ function MethodCard({
       </div>
       <p className="mt-2 text-sm text-muted-foreground">{method.summary[locale]}</p>
       {method.formulaLatex && (
-        <div className="mt-3 rounded-lg border bg-muted/30 px-4 py-2">
-          <Formula latex={method.formulaLatex} />
+        <div className="mt-3 max-w-full rounded-lg border bg-muted/30 px-4 py-2">
+          <Formula latex={method.formulaLatex} className="max-w-full" />
         </div>
       )}
       {references.length > 0 && (
@@ -61,7 +62,7 @@ function MethodCard({
           </p>
           <ul className="mt-1.5 space-y-1 text-sm">
             {references.map((reference) => (
-              <li key={reference.id}>
+              <li key={reference.id} className="break-words">
                 {reference.url ? (
                   <a
                     href={reference.url}
@@ -175,14 +176,14 @@ export function MethodologyPage() {
                 </ToggleGroupItem>
               ))}
             </ToggleGroup>
-            <span className="text-sm text-muted-foreground lg:ml-auto">
+            <span className="text-sm whitespace-nowrap text-muted-foreground lg:ml-auto">
               {t('methods', { count: methods.length })}
             </span>
           </div>
           {methods.length === 0 ? (
             <EmptyState icon={Search} title={t('noResults')} size="sm" />
           ) : (
-            <div className="grid gap-4 2xl:grid-cols-2">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-4 2xl:grid-cols-[repeat(2,minmax(0,1fr))]">
               {methods.map((method) => (
                 <MethodCard
                   key={method.id}

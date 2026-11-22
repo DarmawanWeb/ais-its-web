@@ -1,48 +1,48 @@
 #!/usr/bin/env node
-// Minimal mock of the gateway for e2e tests and screenshots (no dependencies): the auth
-// endpoints of spec §13.1 with a rotating HttpOnly refresh cookie, GET /me, organizations,
-// a few live vessels around Batam (AIS + safety states) and vessel search. Every other
-// /api/v2 route answers 404 problem details, like a service that is not deployed yet.
+// Minimal mock of the gateway for e2e tests and screenshots (no dependencies). The core below
+// serves the auth endpoints of spec §13.1 with a rotating HttpOnly refresh cookie, GET /me and
+// organizations; every feature adds its endpoints in routes/<feature>.mjs (loaded
+// automatically, see routes/README.md). Every other /api/v2 route answers 404 problem details,
+// like a service that is not deployed yet.
 import { randomBytes, randomUUID } from 'node:crypto';
+import { readdirSync } from 'node:fs';
 import { createServer } from 'node:http';
+
+import { claimsOf, matchPath, ORGS, problem, readBody, send, USERS } from './lib.mjs';
 
 const PORT = Number(process.env.MOCK_PORT ?? 8787);
 
-const ORGS = [
-  {
-    id: '0192f0c8-7d3a-7c2e-9a1b-000000000001',
-    name: 'PT Pelayaran Nusantara',
-    kind: 'shipping_company',
-  },
-  { id: '0192f0c8-7d3a-7c2e-9a1b-000000000002', name: 'KSOP Batam', kind: 'authority' },
-  {
-    id: '0192f0c8-7d3a-7c2e-9a1b-000000000003',
-    name: 'AIS Maritime Intelligence',
-    kind: 'platform',
-  },
-];
+// --- feature routes -------------------------------------------------------------------------
 
-const USERS = [
-  {
-    id: '0192f0c8-7d3a-7c2e-9a1b-1f2e3d4c5b6a',
-    email: 'admin@ais-its.local',
-    password: 'ChangeMe123!',
-    name: 'Dewi Admin',
-    memberships: [
-      { orgId: ORGS[2].id, role: 'org_admin' },
-      { orgId: ORGS[0].id, role: 'org_admin' },
-    ],
-    platformAdmin: true,
-  },
-  {
-    id: '0192f0c8-7d3a-7c2e-9a1b-1f2e3d4c5b6b',
-    email: 'manager@pelni.test',
-    password: 'Kapal12345',
-    name: 'Rina Nakhoda',
-    memberships: [{ orgId: ORGS[0].id, role: 'fleet_manager' }],
-    platformAdmin: false,
-  },
-];
+const ROUTES_DIR = new URL('./routes/', import.meta.url);
+
+async function loadRoutes() {
+  const files = readdirSync(ROUTES_DIR)
+    .filter((file) => file.endsWith('.mjs'))
+    .sort();
+  const routes = [];
+  const seen = new Map();
+  for (const file of files) {
+    const module = await import(new URL(file, ROUTES_DIR).href);
+    if (!Array.isArray(module.routes))
+      throw new Error(`routes/${file} must export "routes" (an array)`);
+    for (const route of module.routes) {
+      if (!route?.method || !route.path || typeof route.handler !== 'function') {
+        throw new Error(`routes/${file}: every route needs method, path and handler`);
+      }
+      const key = `${route.method} ${String(route.path)}`;
+      if (seen.has(key))
+        throw new Error(`${key} is declared by routes/${seen.get(key)} and routes/${file}`);
+      seen.set(key, file);
+      routes.push({ ...route, file });
+    }
+  }
+  return routes;
+}
+
+const featureRoutes = await loadRoutes();
+
+// --- auth core (spec §13.1) -----------------------------------------------------------------
 
 const sessions = new Map(); // refresh token -> { userId, orgId, sid }
 
@@ -71,42 +71,6 @@ function accessToken(user, orgId, sid) {
   return `${b64({ alg: 'EdDSA', typ: 'JWT', kid: 'mock' })}.${b64(claims)}.bW9jaw`;
 }
 
-function claimsOf(req) {
-  const header = req.headers.authorization ?? '';
-  const token = header.replace(/^Bearer\s+/i, '');
-  try {
-    return JSON.parse(Buffer.from(token.split('.')[1] ?? '', 'base64url').toString('utf8'));
-  } catch {
-    return null;
-  }
-}
-
-function send(res, status, body, headers = {}) {
-  const payload = body === undefined ? '' : JSON.stringify(body);
-  res.writeHead(status, {
-    'Content-Type': status >= 400 ? 'application/problem+json' : 'application/json',
-    'X-Request-Id': randomUUID(),
-    ...headers,
-  });
-  res.end(payload);
-}
-
-function problem(res, status, code, title, extra = {}, headers = {}) {
-  send(
-    res,
-    status,
-    {
-      type: `urn:ais-its:problem:${code.toLowerCase().replaceAll('_', '-')}`,
-      title,
-      status,
-      code,
-      traceId: randomUUID(),
-      ...extra,
-    },
-    headers,
-  );
-}
-
 function cookie(token) {
   return token
     ? `aisits_rt=${token}; HttpOnly; Path=/api/v2/auth; SameSite=Strict; Max-Age=2592000`
@@ -124,119 +88,27 @@ function startSession(user, orgId, sid = randomUUID()) {
 }
 
 const memberships = (user) =>
-  user.memberships.map((m) => ({
-    ...m,
-    orgName: ORGS.find((o) => o.id === m.orgId)?.name ?? m.orgId,
-  }));
+  user.memberships.map((m) => {
+    const org = ORGS.find((o) => o.id === m.orgId);
+    return { ...m, orgName: org?.name ?? m.orgId, orgKind: org?.kind };
+  });
 
-async function body(req) {
-  let data = '';
-  for await (const chunk of req) data += chunk;
-  try {
-    return data ? JSON.parse(data) : {};
-  } catch {
-    return {};
-  }
-}
-
-// Live vessels around Batam / Singapore Strait.
-const NOW = () => new Date().toISOString();
-const VESSELS = [
-  [525005223, 'KM Bahari Nusantara', 'tanker', 1.152, 103.902, 248, 9.8],
-  [525019001, 'MV Batam Express', 'ro_ro_passenger_ship', 1.205, 103.83, 72, 18.2],
-  [525019002, 'MT Selat Jaya', 'tanker', 1.118, 103.79, 300, 11.4],
-  [525019003, 'KM Kepri Indah', 'general_cargo_ship', 1.095, 103.96, 120, 7.6],
-  [563012345, 'Lion City Spirit', 'container_ship', 1.182, 103.74, 95, 14.1],
-  [563045678, 'Pacific Reefer', 'refrigerated_cargo_carrier', 1.236, 103.99, 210, 12.3],
-  [525019004, 'TB Pelita 5', 'unknown', 1.131, 103.87, 35, 4.2],
-  [538007788, 'Ocean Bulk Star', 'bulk_carrier', 1.07, 103.71, 280, 10.9],
-  [525019005, 'LNG Natuna', 'lng_carrier', 1.25, 103.86, 160, 13.5],
-  [636019900, 'Car Carrier Aurora', 'ro_ro_cargo_ship_vc', 1.164, 104.05, 265, 15.7],
-  [525019006, 'KM Rempang', 'ro_ro_passenger_ship', 1.02, 103.93, 15, 16.4],
-  [525019007, 'MT Gas Riau', 'gas_carrier', 1.214, 103.93, 330, 8.8],
-  [525019008, 'Cruise Harmony', 'cruise_passenger_ship', 1.27, 103.79, 85, 17.3],
-  [525019009, 'MV Combi Tanjung', 'combination_carrier', 1.06, 103.82, 200, 9.1],
-];
-
-function latest() {
-  return VESSELS.map(([mmsi, name, typeCode, lat, lon, hdg, sog], index) => ({
-    mmsi,
-    time: NOW(),
-    lat,
-    lon,
-    sog,
-    cog: hdg,
-    hdg,
-    navstatus: sog < 1 ? 1 : 0,
-    predictedNavstatus: 0,
-    source: index % 3 === 0 ? 'batam' : 'primary',
-    vessel: { id: randomUUID(), name, typeCode },
-  }));
-}
-
-function safetyStates() {
-  return [
-    {
-      mmsi: 525005223,
-      time: NOW(),
-      lat: 1.152,
-      lon: 103.902,
-      ewsStatus: 0,
-      collisionRisk: 'none',
-      closestEncounter: null,
-    },
-    {
-      mmsi: 525019004,
-      time: NOW(),
-      lat: 1.131,
-      lon: 103.87,
-      ewsStatus: 1,
-      collisionRisk: 'none',
-      closestEncounter: null,
-    },
-    {
-      mmsi: 525019002,
-      time: NOW(),
-      lat: 1.118,
-      lon: 103.79,
-      ewsStatus: 3,
-      collisionRisk: 'high',
-      closestEncounter: { otherMmsi: 563012345, cpaNm: 0.35, tcpaMin: 6.5 },
-    },
-    {
-      mmsi: 563012345,
-      time: NOW(),
-      lat: 1.182,
-      lon: 103.74,
-      ewsStatus: 3,
-      collisionRisk: 'medium',
-      closestEncounter: { otherMmsi: 525019002, cpaNm: 0.35, tcpaMin: 6.5 },
-    },
-  ];
-}
-
-const server = createServer(async (req, res) => {
-  const url = new URL(req.url ?? '/', `http://${req.headers.host ?? 'localhost'}`);
-  const path = url.pathname;
-  const method = req.method ?? 'GET';
-
-  if (path === '/health') return send(res, 200, { ok: true });
-
+async function core(req, res, { method, path, claims, user }) {
   if (method === 'POST' && path === '/api/v2/auth/login') {
-    const { email, password } = await body(req);
-    const user = USERS.find((u) => u.email === String(email ?? '').toLowerCase());
-    if (!user || user.password !== password)
+    const { email, password } = await readBody(req);
+    const found = USERS.find((u) => u.email === String(email ?? '').toLowerCase());
+    if (!found || found.password !== password)
       return problem(res, 401, 'INVALID_CREDENTIALS', 'Invalid credentials');
-    const orgId = user.memberships[0]?.orgId ?? null;
-    const session = startSession(user, orgId);
+    const orgId = found.memberships[0]?.orgId ?? null;
+    const session = startSession(found, orgId);
     return send(
       res,
       200,
       {
         accessToken: session.token,
         expiresIn: 900,
-        user: { id: user.id, email: user.email, name: user.name },
-        memberships: memberships(user),
+        user: { id: found.id, email: found.email, name: found.name },
+        memberships: memberships(found),
         activeOrgId: orgId,
       },
       { 'Set-Cookie': cookie(session.refresh) },
@@ -249,8 +121,8 @@ const server = createServer(async (req, res) => {
     if (!session)
       return problem(res, 401, 'UNAUTHORIZED', 'Unauthorized', {}, { 'Set-Cookie': cookie(null) });
     sessions.delete(presented);
-    const user = USERS.find((u) => u.id === session.userId);
-    const next = startSession(user, session.orgId, session.sid);
+    const owner = USERS.find((u) => u.id === session.userId);
+    const next = startSession(owner, session.orgId, session.sid);
     return send(
       res,
       200,
@@ -261,28 +133,29 @@ const server = createServer(async (req, res) => {
 
   if (method === 'POST' && path === '/api/v2/auth/logout') {
     const presented = readCookie(req);
-    if (presented) sessions.delete(presented);
-    res.writeHead(204, { 'Set-Cookie': cookie(null) });
-    return res.end();
+    const session = presented ? sessions.get(presented) : undefined;
+    // Logout revokes the whole family (spec §8.3).
+    if (session)
+      for (const [token, s] of sessions) if (s.sid === session.sid) sessions.delete(token);
+    return send(res, 204, undefined, { 'Set-Cookie': cookie(null) });
   }
 
-  if (method === 'POST' && path === '/api/v2/auth/password/forgot') {
-    res.writeHead(202);
-    return res.end();
-  }
+  if (method === 'POST' && path === '/api/v2/auth/password/forgot') return send(res, 202);
 
-  const claims = claimsOf(req);
-  if (path.startsWith('/api/v2/') && !claims)
-    return problem(res, 401, 'UNAUTHORIZED', 'Unauthorized');
-  const user = USERS.find((u) => u.id === claims?.sub);
+  if (!path.startsWith('/api/v2/')) return false;
+  if (!claims) return problem(res, 401, 'UNAUTHORIZED', 'Unauthorized');
 
   if (method === 'POST' && path === '/api/v2/auth/switch-org') {
-    const { orgId } = await body(req);
+    const { orgId } = await readBody(req);
     if (!user || !(user.platformAdmin || user.memberships.some((m) => m.orgId === orgId))) {
       return problem(res, 403, 'FORBIDDEN', 'Forbidden');
     }
     for (const session of sessions.values()) if (session.sid === claims.sid) session.orgId = orgId;
-    return send(res, 200, { accessToken: accessToken(user, orgId, claims.sid), expiresIn: 900 });
+    return send(res, 200, {
+      accessToken: accessToken(user, orgId, claims.sid),
+      expiresIn: 900,
+      activeOrgId: orgId,
+    });
   }
 
   if (method === 'GET' && path === '/api/v2/me' && user) {
@@ -290,8 +163,12 @@ const server = createServer(async (req, res) => {
       id: user.id,
       email: user.email,
       name: user.name,
+      status: 'active',
       mfaEnabled: false,
+      isPlatformAdmin: user.platformAdmin,
       memberships: memberships(user),
+      activeOrgId: claims.org ?? null,
+      roles: claims.roles ?? [],
     });
   }
 
@@ -299,25 +176,43 @@ const server = createServer(async (req, res) => {
     if (!claims.roles?.includes('super_admin')) return problem(res, 403, 'FORBIDDEN', 'Forbidden');
     return send(res, 200, { data: ORGS, meta: { page: 1, pageSize: 100, total: ORGS.length } });
   }
+  return false;
+}
 
-  if (method === 'GET' && path === '/api/v2/ais/latest') return send(res, 200, latest());
-  if (method === 'GET' && path === '/api/v2/safety/vessels') return send(res, 200, safetyStates());
+const server = createServer(async (req, res) => {
+  try {
+    const url = new URL(req.url ?? '/', `http://${req.headers.host ?? 'localhost'}`);
+    const path = url.pathname;
+    const method = req.method ?? 'GET';
+    if (path === '/health') return send(res, 200, { ok: true, routes: featureRoutes.length });
 
-  if (method === 'GET' && path === '/api/v2/vessels') {
-    const term = (url.searchParams.get('search') ?? '').toLowerCase();
-    const data = latest()
-      .filter(
-        (v) => !term || v.vessel.name.toLowerCase().includes(term) || String(v.mmsi).includes(term),
-      )
-      .slice(0, Number(url.searchParams.get('pageSize') ?? 20))
-      .map((v) => ({ id: v.vessel.id, mmsi: v.mmsi, imo: null, name: v.vessel.name, flag: 'ID' }));
-    return send(res, 200, { data, meta: { page: 1, pageSize: 20, total: data.length } });
-  }
+    const claims = claimsOf(req);
+    const user = USERS.find((u) => u.id === claims?.sub);
+    if ((await core(req, res, { method, path, claims, user })) !== false) return;
 
-  if (path.startsWith('/api/') || path.startsWith('/ws') || path.startsWith('/tiles')) {
+    for (const route of featureRoutes) {
+      if (route.method !== method) continue;
+      const params = matchPath(route.path, path);
+      if (!params) continue;
+      if (!route.public && !claims) return problem(res, 401, 'UNAUTHORIZED', 'Unauthorized');
+      return await route.handler({
+        req,
+        url,
+        params,
+        claims,
+        body: () => readBody(req),
+        send: (status, payload, headers) => send(res, status, payload, headers),
+        problem: (status, code, title, extra) => problem(res, status, code, title, extra),
+      });
+    }
+
     return problem(res, 404, 'NOT_FOUND', 'Not found', { instance: path });
+  } catch (error) {
+    console.error('[mock] handler failed', error);
+    if (!res.headersSent) problem(res, 500, 'INTERNAL_ERROR', 'Internal error');
   }
-  return problem(res, 404, 'NOT_FOUND', 'Not found');
 });
 
-server.listen(PORT, () => console.info(`mock gateway on http://localhost:${PORT}`));
+server.listen(PORT, () =>
+  console.info(`mock gateway on http://localhost:${PORT} (${featureRoutes.length} feature routes)`),
+);

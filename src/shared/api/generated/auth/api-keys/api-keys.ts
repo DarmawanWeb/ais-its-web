@@ -180,6 +180,7 @@ export function useApiKeysControllerList<
 }
 
 /**
+ * org_admins create keys in their active organization with the scopes telemetry:ingest and ais:read; ais:ingest (the AIS feed shared by every tenant) is granted by super admins only.
  * @summary Create an API key (the key is returned once)
  */
 export const apiKeysControllerCreate = (
@@ -202,7 +203,7 @@ export const apiKeysControllerCreate = (
 export const getApiKeysControllerCreateMutationKey = () => ['apiKeysControllerCreate'] as const;
 
 export const getApiKeysControllerCreateMutationOptions = <
-  TError = ErrorType<ProblemDetails>,
+  TError = ErrorType<void | ProblemDetails>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -241,11 +242,17 @@ export type ApiKeysControllerCreateMutationResult = NonNullable<
   Awaited<ReturnType<typeof apiKeysControllerCreate>>
 >;
 export type ApiKeysControllerCreateMutationBody = BodyType<CreateApiKeyDto>;
-export type ApiKeysControllerCreateMutationError = ErrorType<ProblemDetails>;
+export type ApiKeysControllerCreateMutationError = ErrorType<void | ProblemDetails>;
 export type ApiKeysControllerCreateMutationVariables = { data: BodyType<CreateApiKeyDto> };
 
-/** @summary Create an API key (the key is returned once) */
-export const useApiKeysControllerCreate = <TError = ErrorType<ProblemDetails>, TContext = unknown>(
+/**
+ * org_admins create keys in their active organization with the scopes telemetry:ingest and ais:read; ais:ingest (the AIS feed shared by every tenant) is granted by super admins only.
+ * @summary Create an API key (the key is returned once)
+ */
+export const useApiKeysControllerCreate = <
+  TError = ErrorType<void | ProblemDetails>,
+  TContext = unknown,
+>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof apiKeysControllerCreate>>,

@@ -13,7 +13,10 @@ export interface CreateApiKeyDto {
    * @maxLength 100
    */
   name: string;
-  /** @minItems 1 */
+  /**
+   * ais:ingest (writes the AIS feed shared by every tenant) is granted by super admins only (403 SCOPE_NOT_GRANTABLE otherwise); org_admins grant telemetry:ingest and ais:read
+   * @minItems 1
+   */
   scopes: CreateApiKeyDtoScopesItem[];
   /** Owning organization (super admins); others create keys in their active organization */
   orgId?: string;

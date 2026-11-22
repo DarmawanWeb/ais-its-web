@@ -35,13 +35,26 @@ type Listener<T> = (payload: T) => void;
 const ACK_TIMEOUT_MS = 5_000;
 const PRUNE_INTERVAL_MS = 60_000;
 const VIEWPORT_RELEASE_DELAY_MS = 10_000;
+/** Consecutive handshake rejections answered with a token refresh before backing off. */
 const MAX_AUTH_RETRIES = 3;
+/** Backoff of reconnections socket.io does not retry itself (rejected handshakes, server kicks). */
+const RETRY_DELAYS_MS = [2_000, 5_000, 15_000, 30_000, 60_000] as const;
+
+/** What the server derives rooms from at handshake (user:<id>, org:<id>, authority). */
+function handshakeIdentity(state: SessionState): string {
+  const claims = state.claims;
+  return `${claims?.sub ?? ''}|${claims?.org ?? ''}|${[...(claims?.roles ?? [])].sort().join(',')}`;
+}
 
 /**
  * socket.io client manager of the notification service (spec §9): one connection per tab,
  * opened while signed in, handshake `auth: { token }` read on every (re)connection so a
  * reconnect always uses a fresh token; on `connect_error` UNAUTHORIZED the token is refreshed
- * and the socket reconnects. Viewport and vessel subscriptions are replayed after reconnects.
+ * and the socket reconnects. socket.io does not retry rejected handshakes or server-side
+ * disconnects, so the client does (backoff), and it reconnects whenever the session adopts a
+ * new token while the socket is down. A change of user, organization or roles re-handshakes
+ * (rooms are joined at handshake). Viewport and vessel subscriptions are replayed after
+ * reconnects.
  */
 export class RealtimeClient {
   readonly vessels = new VesselLiveStore();
@@ -57,7 +70,12 @@ export class RealtimeClient {
   private unsubscribeSession: (() => void) | undefined;
   private authRetries = 0;
   private handshakeToken: string | null = null;
-  private orgId: string | null | undefined;
+  /** Identity (user, org, roles) of the current handshake. */
+  private identity: string | null = null;
+  /** Last access token seen from the session store. */
+  private sessionToken: string | null = null;
+  private retryTimer: ReturnType<typeof setTimeout> | undefined;
+  private retryAttempt = 0;
 
   /** Follows the session: connects when signed in, disconnects on sign-out. Idempotent. */
   start(): () => void {
@@ -74,6 +92,8 @@ export class RealtimeClient {
     this.unsubscribeSession = undefined;
     if (this.pruneTimer !== undefined) clearInterval(this.pruneTimer);
     if (this.releaseTimer !== undefined) clearTimeout(this.releaseTimer);
+    this.pruneTimer = undefined;
+    this.releaseTimer = undefined;
     this.disconnect();
   }
 
@@ -88,20 +108,59 @@ export class RealtimeClient {
 
   private sync(state: SessionState): void {
     if (state.status === 'authenticated' && state.accessToken) {
-      const org = state.claims?.org ?? null;
+      const identity = handshakeIdentity(state);
+      const tokenChanged = state.accessToken !== this.sessionToken;
+      this.sessionToken = state.accessToken;
       if (!this.socket) {
-        this.orgId = org;
+        this.identity = identity;
         this.connect();
-      } else if (org !== this.orgId) {
-        // Organization rooms are joined at handshake: reconnect with the new token.
-        this.orgId = org;
+        return;
+      }
+      if (identity !== this.identity) {
+        // Rooms (user:<id>, org:<id>, authority) are joined at handshake: re-handshake with
+        // the new token (another user, organization or role set).
+        this.identity = identity;
+        this.resetRetries();
         this.vessels.clear();
         this.socket.disconnect().connect();
+        return;
       }
-    } else if (state.status === 'unauthenticated' && this.socket) {
-      this.disconnect();
-      this.vessels.clear();
+      if (tokenChanged) {
+        this.resetRetries();
+        // socket.io never retries a rejected handshake: a new token is the moment to try again.
+        if (!this.socket.connected && !this.socket.active) this.socket.connect();
+      }
+    } else if (state.status === 'unauthenticated') {
+      this.sessionToken = null;
+      if (this.socket) {
+        this.disconnect();
+        this.vessels.clear();
+      }
     }
+  }
+
+  private resetRetries(): void {
+    this.authRetries = 0;
+    this.retryAttempt = 0;
+    if (this.retryTimer !== undefined) clearTimeout(this.retryTimer);
+    this.retryTimer = undefined;
+  }
+
+  /** Reconnects later (backoff) when socket.io will not do it by itself. */
+  private scheduleRetry(): void {
+    if (this.retryTimer !== undefined || !this.socket) return;
+    const delay =
+      RETRY_DELAYS_MS[Math.min(this.retryAttempt, RETRY_DELAYS_MS.length - 1)] ?? 60_000;
+    this.retryAttempt += 1;
+    this.retryTimer = setTimeout(() => {
+      this.retryTimer = undefined;
+      const socket = this.socket;
+      if (!socket || socket.connected || socket.active) return;
+      if (sessionStore.getState().status !== 'authenticated') return;
+      if (this.authRetries >= MAX_AUTH_RETRIES) this.authRetries = MAX_AUTH_RETRIES - 1;
+      setConnectionState({ status: 'reconnecting' });
+      socket.connect();
+    }, delay);
   }
 
   private connect(): void {
@@ -123,7 +182,7 @@ export class RealtimeClient {
     setConnectionState({ status: 'connecting', error: null });
 
     socket.on('connect', () => {
-      this.authRetries = 0;
+      this.resetRetries();
       setConnectionState({
         status: 'connected',
         error: null,
@@ -133,10 +192,14 @@ export class RealtimeClient {
       this.replaySubscriptions();
     });
     socket.on('disconnect', (reason) => {
+      // "io server disconnect": the server closed the connection and socket.io will not
+      // reconnect by itself.
+      const retry = !socket.active && reason === 'io server disconnect';
       setConnectionState({
-        status: socket.active ? 'reconnecting' : 'disconnected',
+        status: socket.active || retry ? 'reconnecting' : 'disconnected',
         error: reason,
       });
+      if (retry) this.scheduleRetry();
     });
     socket.on('connect_error', (error) => {
       const data = (error as Error & { data?: { code?: string } }).data;
@@ -150,6 +213,8 @@ export class RealtimeClient {
         error: code,
         attempts: useRealtimeConnectionStore.getState().attempts + 1,
       });
+      // Rejected by the server's middleware (another reason than the token): retry later.
+      if (!socket.active) this.scheduleRetry();
     });
 
     socket.on('positions', (batch) => {
@@ -174,22 +239,37 @@ export class RealtimeClient {
   }
 
   private disconnect(): void {
+    this.resetRetries();
     this.socket?.removeAllListeners();
     this.socket?.disconnect();
     this.socket = null;
+    this.identity = null;
     setConnectionState({ status: 'idle', error: null, connectedAt: null, attempts: 0 });
   }
 
   private async handleUnauthorized(): Promise<void> {
     if (this.authRetries >= MAX_AUTH_RETRIES) {
+      // Fresh tokens keep being rejected: back off (a new session token also reconnects).
       setConnectionState({ status: 'error', error: 'UNAUTHORIZED' });
+      this.scheduleRetry();
       return;
     }
     this.authRetries += 1;
     setConnectionState({ status: 'reconnecting', error: 'UNAUTHORIZED' });
-    const token = await refreshAccessToken(this.handshakeToken);
-    // Middleware rejections are not retried by socket.io: reconnect with the fresh token.
-    if (token && this.socket && !this.socket.connected) this.socket.connect();
+    const rejected = this.handshakeToken;
+    const current = getAccessToken();
+    // The session already holds a newer token (refreshed meanwhile): use it right away.
+    const token = current && current !== rejected ? current : await refreshAccessToken(rejected);
+    const socket = this.socket;
+    if (!socket || sessionStore.getState().status !== 'authenticated') return;
+    if (token) {
+      // Middleware rejections are not retried by socket.io: reconnect with the fresh token.
+      if (!socket.connected && !socket.active) socket.connect();
+      return;
+    }
+    // The refresh failed transiently (the session layer keeps the session and retries):
+    // retry the socket with backoff instead of staying down until a reload.
+    this.scheduleRetry();
   }
 
   private emitAlert(alert: unknown, kind: AlertEventKind): void {

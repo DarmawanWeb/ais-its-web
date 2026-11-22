@@ -21,7 +21,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "test:e2e": "playwright test --project=smoke",
+    "test:e2e": "playwright test --project=e2e",
     "e2e:mock": "node e2e/mock-server/server.mjs",
     "screenshots": "playwright test --project=screenshots",
     "lint": "eslint . --max-warnings=0",
@@ -85,6 +85,7 @@
     "zustand": "^5.1.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
     "@commitlint/cli": "^21.2.4",
     "@commitlint/config-conventional": "^21.2.4",
     "@eslint/js": "^9.39.5",
@@ -124,7 +125,7 @@
   },
   "lint-staged": {
     "*.{ts,tsx,js,mjs,cjs}": [
-      "eslint --max-warnings=0 --fix",
+      "eslint --max-warnings=0 --no-warn-ignored --fix",
       "prettier --write"
     ],
     "*.{json,md,css,yml,yaml,html}": "prettier --write"

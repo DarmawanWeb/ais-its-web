@@ -22,9 +22,10 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  AddMemberDto,
-  AddedMemberDto,
   CreateOrganizationDto,
+  InvitationsControllerList200,
+  InvitationsControllerListParams,
+  InviteMemberDto,
   MemberDto,
   MembersControllerList200,
   MembersControllerListParams,
@@ -32,6 +33,7 @@ import type {
   OrganizationsControllerList200,
   OrganizationsControllerListParams,
   ProblemDetails,
+  SentInvitationDto,
   UpdateMemberDto,
   UpdateOrganizationDto,
 } from '../model';
@@ -730,46 +732,47 @@ export function useMembersControllerList<
 }
 
 /**
- * @summary Add a member; unknown e-mails become invited accounts and receive an invitation
+ * Creates an invited account for unknown addresses and e-mails an invitation link (accepted with POST /auth/password/reset). Existing accounts are never attached directly, and the answer is the same for new and existing addresses. Inviting a pending address again renews its link.
+ * @summary Invite an address to the organization (it joins on acceptance)
  */
-export const membersControllerAdd = (
+export const membersControllerInvite = (
   id: string,
-  addMemberDto: BodyType<AddMemberDto>,
+  inviteMemberDto: BodyType<InviteMemberDto>,
   options?: SecondParameter<typeof apiClient>,
   signal?: AbortSignal,
 ) => {
-  return apiClient<AddedMemberDto>(
+  return apiClient<SentInvitationDto>(
     {
       url: `/api/v2/organizations/${id}/members`,
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      data: addMemberDto,
+      data: inviteMemberDto,
       signal,
     },
     options,
   );
 };
 
-export const getMembersControllerAddMutationKey = () => ['membersControllerAdd'] as const;
+export const getMembersControllerInviteMutationKey = () => ['membersControllerInvite'] as const;
 
-export const getMembersControllerAddMutationOptions = <
-  TError = ErrorType<ProblemDetails>,
+export const getMembersControllerInviteMutationOptions = <
+  TError = ErrorType<void | ProblemDetails>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof membersControllerAdd>>,
+    Awaited<ReturnType<typeof membersControllerInvite>>,
     TError,
-    MembersControllerAddMutationVariables,
+    MembersControllerInviteMutationVariables,
     TContext
   >;
   request?: SecondParameter<typeof apiClient>;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof membersControllerAdd>>,
+  Awaited<ReturnType<typeof membersControllerInvite>>,
   TError,
-  MembersControllerAddMutationVariables,
+  MembersControllerInviteMutationVariables,
   TContext
 > => {
-  const mutationKey = getMembersControllerAddMutationKey();
+  const mutationKey = getMembersControllerInviteMutationKey();
   const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
       ? options
@@ -777,43 +780,52 @@ export const getMembersControllerAddMutationOptions = <
     : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof membersControllerAdd>>,
-    MembersControllerAddMutationVariables
+    Awaited<ReturnType<typeof membersControllerInvite>>,
+    MembersControllerInviteMutationVariables
   > = (props) => {
     const { id, data } = props ?? {};
 
-    return membersControllerAdd(id, data, requestOptions);
+    return membersControllerInvite(id, data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type MembersControllerAddMutationResult = NonNullable<
-  Awaited<ReturnType<typeof membersControllerAdd>>
+export type MembersControllerInviteMutationResult = NonNullable<
+  Awaited<ReturnType<typeof membersControllerInvite>>
 >;
-export type MembersControllerAddMutationBody = BodyType<AddMemberDto>;
-export type MembersControllerAddMutationError = ErrorType<ProblemDetails>;
-export type MembersControllerAddMutationVariables = { id: string; data: BodyType<AddMemberDto> };
+export type MembersControllerInviteMutationBody = BodyType<InviteMemberDto>;
+export type MembersControllerInviteMutationError = ErrorType<void | ProblemDetails>;
+export type MembersControllerInviteMutationVariables = {
+  id: string;
+  data: BodyType<InviteMemberDto>;
+};
 
-/** @summary Add a member; unknown e-mails become invited accounts and receive an invitation */
-export const useMembersControllerAdd = <TError = ErrorType<ProblemDetails>, TContext = unknown>(
+/**
+ * Creates an invited account for unknown addresses and e-mails an invitation link (accepted with POST /auth/password/reset). Existing accounts are never attached directly, and the answer is the same for new and existing addresses. Inviting a pending address again renews its link.
+ * @summary Invite an address to the organization (it joins on acceptance)
+ */
+export const useMembersControllerInvite = <
+  TError = ErrorType<void | ProblemDetails>,
+  TContext = unknown,
+>(
   options?: {
     mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof membersControllerAdd>>,
+      Awaited<ReturnType<typeof membersControllerInvite>>,
       TError,
-      MembersControllerAddMutationVariables,
+      MembersControllerInviteMutationVariables,
       TContext
     >;
     request?: SecondParameter<typeof apiClient>;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<
-  Awaited<ReturnType<typeof membersControllerAdd>>,
+  Awaited<ReturnType<typeof membersControllerInvite>>,
   TError,
-  MembersControllerAddMutationVariables,
+  MembersControllerInviteMutationVariables,
   TContext
 > => {
-  return useMutation(getMembersControllerAddMutationOptions(options), queryClient);
+  return useMutation(getMembersControllerInviteMutationOptions(options), queryClient);
 };
 /**
  * @summary Change a member's role (the last org_admin cannot be demoted)
@@ -985,4 +997,231 @@ export const useMembersControllerRemove = <TError = ErrorType<ProblemDetails>, T
   TContext
 > => {
   return useMutation(getMembersControllerRemoveMutationOptions(options), queryClient);
+};
+/**
+ * @summary List the pending invitations of an organization, newest first
+ */
+export const invitationsControllerList = (
+  id: string,
+  params?: InvitationsControllerListParams,
+  options?: SecondParameter<typeof apiClient>,
+  signal?: AbortSignal,
+) => {
+  return apiClient<InvitationsControllerList200>(
+    { url: `/api/v2/organizations/${id}/invitations`, method: 'GET', params, signal },
+    options,
+  );
+};
+
+export const getInvitationsControllerListQueryKey = (
+  id: string,
+  params?: InvitationsControllerListParams,
+) => {
+  return [`/api/v2/organizations/${id}/invitations`, ...(params ? [params] : [])] as const;
+};
+
+export const getInvitationsControllerListQueryOptions = <
+  TData = Awaited<ReturnType<typeof invitationsControllerList>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  id: string,
+  params?: InvitationsControllerListParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof invitationsControllerList>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getInvitationsControllerListQueryKey(id, params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof invitationsControllerList>>> = ({
+    signal,
+  }) => invitationsControllerList(id, params, requestOptions, signal);
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: id !== null && id !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<Awaited<ReturnType<typeof invitationsControllerList>>, TError, TData> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+};
+
+export type InvitationsControllerListQueryResult = NonNullable<
+  Awaited<ReturnType<typeof invitationsControllerList>>
+>;
+export type InvitationsControllerListQueryError = ErrorType<ProblemDetails>;
+
+/** @summary List the pending invitations of an organization, newest first */
+export function useInvitationsControllerList<
+  TData = Awaited<ReturnType<typeof invitationsControllerList>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  id: string,
+  params: undefined | InvitationsControllerListParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof invitationsControllerList>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof invitationsControllerList>>,
+          TError,
+          Awaited<ReturnType<typeof invitationsControllerList>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/** @summary List the pending invitations of an organization, newest first */
+export function useInvitationsControllerList<
+  TData = Awaited<ReturnType<typeof invitationsControllerList>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  id: string,
+  params?: InvitationsControllerListParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof invitationsControllerList>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof invitationsControllerList>>,
+          TError,
+          Awaited<ReturnType<typeof invitationsControllerList>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/** @summary List the pending invitations of an organization, newest first */
+export function useInvitationsControllerList<
+  TData = Awaited<ReturnType<typeof invitationsControllerList>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  id: string,
+  params?: InvitationsControllerListParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof invitationsControllerList>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/** @summary List the pending invitations of an organization, newest first */
+export function useInvitationsControllerList<
+  TData = Awaited<ReturnType<typeof invitationsControllerList>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  id: string,
+  params?: InvitationsControllerListParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof invitationsControllerList>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getInvitationsControllerListQueryOptions(id, params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+/**
+ * @summary Withdraw an invitation (its link stops working)
+ */
+export const invitationsControllerCancel = (
+  id: string,
+  invitationId: string,
+  options?: SecondParameter<typeof apiClient>,
+  signal?: AbortSignal,
+) => {
+  return apiClient<void>(
+    { url: `/api/v2/organizations/${id}/invitations/${invitationId}`, method: 'DELETE', signal },
+    options,
+  );
+};
+
+export const getInvitationsControllerCancelMutationKey = () =>
+  ['invitationsControllerCancel'] as const;
+
+export const getInvitationsControllerCancelMutationOptions = <
+  TError = ErrorType<ProblemDetails>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof invitationsControllerCancel>>,
+    TError,
+    InvitationsControllerCancelMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof apiClient>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof invitationsControllerCancel>>,
+  TError,
+  InvitationsControllerCancelMutationVariables,
+  TContext
+> => {
+  const mutationKey = getInvitationsControllerCancelMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof invitationsControllerCancel>>,
+    InvitationsControllerCancelMutationVariables
+  > = (props) => {
+    const { id, invitationId } = props ?? {};
+
+    return invitationsControllerCancel(id, invitationId, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type InvitationsControllerCancelMutationResult = NonNullable<
+  Awaited<ReturnType<typeof invitationsControllerCancel>>
+>;
+
+export type InvitationsControllerCancelMutationError = ErrorType<ProblemDetails>;
+export type InvitationsControllerCancelMutationVariables = { id: string; invitationId: string };
+
+/** @summary Withdraw an invitation (its link stops working) */
+export const useInvitationsControllerCancel = <
+  TError = ErrorType<ProblemDetails>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof invitationsControllerCancel>>,
+      TError,
+      InvitationsControllerCancelMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof invitationsControllerCancel>>,
+  TError,
+  InvitationsControllerCancelMutationVariables,
+  TContext
+> => {
+  return useMutation(getInvitationsControllerCancelMutationOptions(options), queryClient);
 };

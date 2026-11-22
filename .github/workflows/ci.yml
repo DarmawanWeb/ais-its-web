@@ -62,7 +62,7 @@ jobs:
         run: pnpm build
 
   e2e:
-    name: E2E smoke (Playwright, headless)
+    name: E2E (Playwright, headless)
     needs: verify
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -91,7 +91,7 @@ jobs:
       - name: Install Chromium
         run: pnpm exec playwright install --with-deps chromium
 
-      - name: Smoke tests
+      - name: E2E tests (every e2e/**/*.spec.ts except screenshots)
         run: pnpm test:e2e
 
       - name: Upload report
@@ -144,6 +144,27 @@ jobs:
           tags: |
             type=ref,event=branch
             type=sha,format=short
+
+      # Local image first: the smoke test checks nginx (worker MIME type, cache headers) before
+      # anything is pushed; the push build below reuses the cached layers.
+      - name: Build for the smoke test
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          push: false
+          tags: ais-its-web:smoke
+          build-args: |
+            APP_VERSION=${{ github.sha }}
+          secret-files: |
+            npmrc=${{ runner.temp }}/npmrc
+          cache-from: type=gha
+
+      - name: Smoke test the image
+        run: |
+          docker run -d --name web -p 8080:8080 ais-its-web:smoke
+          docker/smoke-test.sh web http://localhost:8080
+          docker rm -f web
 
       - name: Build (and push on main)
         uses: docker/build-push-action@v6

@@ -3,21 +3,25 @@ import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { cn } from '@/shared/lib/utils';
-import { rgbaToCss, SAFETY_COLORS } from '@/shared/theme/tokens';
+import { rgbaToCss, SAFETY_COLORS, SAFETY_RING_STYLES } from '@/shared/theme/tokens';
 
 export interface LegendItem {
   label: ReactNode;
   color: string;
-  shape?: 'dot' | 'ring' | 'line' | 'square' | 'arrow';
+  shape?: 'dot' | 'ring' | 'ring-dashed' | 'line' | 'square' | 'arrow';
 }
 
 function Swatch({ color, shape = 'dot' }: Pick<LegendItem, 'color' | 'shape'>) {
   switch (shape) {
     case 'ring':
+    case 'ring-dashed':
       return (
         <span
-          className="size-3 rounded-full border-2"
-          style={{ borderColor: color, backgroundColor: `${color}33` }}
+          className={cn(
+            'size-3.5 rounded-full border-2',
+            shape === 'ring-dashed' && 'border-dashed',
+          )}
+          style={{ borderColor: color }}
         />
       );
     case 'line':
@@ -84,22 +88,21 @@ export function VesselSafetyLegend({ className }: { className?: string }) {
       className={className}
       items={[
         { label: t('map.safety.normal'), color: '#f5b301', shape: 'arrow' },
-        { label: t('map.safety.danger'), color: rgbaToCss(SAFETY_COLORS.ewsDanger), shape: 'ring' },
-        {
-          label: t('map.safety.warning'),
-          color: rgbaToCss(SAFETY_COLORS.ewsWarning),
-          shape: 'ring',
-        },
-        {
-          label: t('map.safety.collisionHigh'),
-          color: rgbaToCss(SAFETY_COLORS.collisionHigh),
-          shape: 'ring',
-        },
-        {
-          label: t('map.safety.collisionMedium'),
-          color: rgbaToCss(SAFETY_COLORS.collisionMedium),
-          shape: 'ring',
-        },
+        ...(
+          [
+            ['ewsDanger', 'map.safety.danger'],
+            ['ewsWarning', 'map.safety.warning'],
+            ['collisionHigh', 'map.safety.collisionHigh'],
+            ['collisionMedium', 'map.safety.collisionMedium'],
+          ] as const
+        ).map(([kind, labelKey]) => ({
+          label: t(labelKey),
+          color: rgbaToCss(SAFETY_COLORS[kind]),
+          shape:
+            SAFETY_RING_STYLES[kind].line === 'dashed'
+              ? ('ring-dashed' as const)
+              : ('ring' as const),
+        })),
       ]}
     />
   );

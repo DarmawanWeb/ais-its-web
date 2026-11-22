@@ -10,9 +10,15 @@ import {
   Radar,
   Ship,
 } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 
+import { useStatsControllerDescribe } from '@/shared/api/generated/ais-processor/ais/ais';
+import {
+  getAlertsControllerSummaryQueryKey,
+  useAlertsControllerSummary,
+} from '@/shared/api/generated/notification/alerts/alerts';
 import { CiiGradeBadge } from '@/shared/domain-ui/badges';
 import { EmptyState } from '@/shared/domain-ui/feedback';
 import { MethodInfo } from '@/shared/domain-ui/method-info';
@@ -20,14 +26,25 @@ import { PageHeader } from '@/shared/domain-ui/page-header';
 import { Section } from '@/shared/domain-ui/section';
 import { StatCard } from '@/shared/domain-ui/stat-card';
 import { formatNumber } from '@/shared/lib/format';
-import { useRealtimeConnection, useVesselSnapshot } from '@/shared/realtime/hooks';
+import { useAlertStream, useRealtimeConnection } from '@/shared/realtime/hooks';
 import { Button } from '@/shared/ui/button';
 
-/** Fleet dashboard (scaffold): live counters from the realtime store, other KPIs pending. */
+/**
+ * Fleet dashboard (scaffold): vessels tracked by the AIS pipeline (GET /ais/stats) and open
+ * alerts (GET /alerts/summary, refreshed by the alert stream); CII and fuel KPIs pending.
+ */
 export function DashboardPage() {
   const { t, i18n } = useTranslation('dashboard');
-  const vessels = useVesselSnapshot({ throttleMs: 1000 });
+  const queryClient = useQueryClient();
   const { connected } = useRealtimeConnection();
+  // Platform-wide count of vessels with a recent position (not the vessels of a map view).
+  const aisStats = useStatsControllerDescribe({
+    query: { refetchInterval: 30_000, staleTime: 15_000 },
+  });
+  const alertSummary = useAlertsControllerSummary({ query: { staleTime: 30_000 } });
+  useAlertStream(() => {
+    void queryClient.invalidateQueries({ queryKey: getAlertsControllerSummaryQueryKey() });
+  });
 
   const links = [
     { to: '/map', label: t('quickLinks.map'), icon: MapIcon },
@@ -55,10 +72,15 @@ export function DashboardPage() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label={t('stats.trackedVessels')}
-          value={formatNumber(vessels.length, i18n.language)}
+          value={aisStats.data ? formatNumber(aisStats.data.activeVessels, i18n.language) : '—'}
+          loading={aisStats.isPending}
           icon={Ship}
           tone="primary"
-          description={t('stats.trackedHint')}
+          description={
+            aisStats.data
+              ? t('stats.trackedHint', { minutes: aisStats.data.activeWindowMinutes })
+              : t('stats.unavailable')
+          }
           footer={
             <span className="text-[11px] text-muted-foreground">
               <span className={connected ? 'text-success' : 'text-muted-foreground'}>●</span>{' '}
@@ -70,10 +92,15 @@ export function DashboardPage() {
         />
         <StatCard
           label={t('stats.openAlerts')}
-          value="—"
+          value={alertSummary.data ? formatNumber(alertSummary.data.total, i18n.language) : '—'}
+          loading={alertSummary.isPending}
           icon={BellRing}
           tone="warning"
-          description={t('stats.pending', { service: 'notification' })}
+          description={
+            alertSummary.data
+              ? t('stats.openAlertsHint', { count: alertSummary.data.bySeverity.critical })
+              : t('stats.unavailable')
+          }
         />
         <StatCard
           label={t('stats.fleetCii')}
@@ -81,14 +108,14 @@ export function DashboardPage() {
           icon={Leaf}
           tone="success"
           methodId="cii.rating_grade"
-          description={t('stats.pending', { service: 'emission' })}
+          description={t('stats.pending')}
         />
         <StatCard
           label={t('stats.fuel30d')}
           value="—"
           unit="t"
           icon={Fuel}
-          description={t('stats.pending', { service: 'telemetry' })}
+          description={t('stats.pending')}
         />
       </div>
 

@@ -7,13 +7,18 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
-/** @type {readonly { name: string; candidates: readonly string[] }[]} */
+/**
+ * `supersededBy`: the target is not needed (and not reported as skipped) when all of these
+ * targets have a document — the pipeline publishes one document per process.
+ * @type {readonly { name: string; candidates: readonly string[]; supersededBy?: readonly string[] }[]}
+ */
 export const API_TARGETS = [
   { name: 'auth', candidates: ['auth/openapi.json'] },
   { name: 'fleet', candidates: ['fleet/openapi.json'] },
   {
     name: 'ais-pipeline',
     candidates: ['ais-pipeline/openapi.json'],
+    supersededBy: ['ais-processor', 'ais-ingestor'],
   },
   {
     name: 'ais-processor',
@@ -57,5 +62,14 @@ export function resolveApiTargets() {
         candidates: target.candidates.map((candidate) => resolve(dir, candidate)),
       });
   }
-  return { found, skipped, dir };
+  const foundNames = new Set(found.map((target) => target.name));
+  const superseded = new Set(
+    API_TARGETS.filter(
+      (target) =>
+        !foundNames.has(target.name) &&
+        target.supersededBy?.length &&
+        target.supersededBy.every((name) => foundNames.has(name)),
+    ).map((target) => target.name),
+  );
+  return { found, skipped: skipped.filter((target) => !superseded.has(target.name)), dir };
 }

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { LogOut, Moon, Languages, Ship } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import * as z from 'zod';
@@ -37,10 +37,23 @@ interface CommandPaletteState {
   setOpen: (open: boolean) => void;
 }
 
-export const useCommandPalette = create<CommandPaletteState>((set) => ({
+/** Element focused when the palette opened (focus goes back there, or to the page). */
+let opener: HTMLElement | null = null;
+
+export const useCommandPalette = create<CommandPaletteState>((set, get) => ({
   open: false,
-  setOpen: (open) => set({ open }),
+  setOpen: (open) => {
+    if (open && !get().open && typeof document !== 'undefined') {
+      opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    }
+    set({ open });
+  },
 }));
+
+/** Moves focus to the content area (the new page) instead of leaving it on <body>. */
+function focusMainContent(): void {
+  document.getElementById('main-content')?.focus({ preventScroll: true });
+}
 
 const VesselSearchSchema = z.looseObject({
   data: z.array(
@@ -76,6 +89,8 @@ export function CommandPalette() {
   const commands = useMemo(() => buildCommands(features, permissions), [permissions]);
   const [query, setQuery] = useState('');
   const term = useDebouncedValue(query.trim(), 250);
+  /** The palette closed because an entry was selected (a page or an action). */
+  const selected = useRef(false);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -101,6 +116,7 @@ export function CommandPalette() {
     (vessels.error.status === 404 || vessels.error.kind !== 'http');
 
   const run = (action: () => void) => {
+    selected.current = true;
     setOpen(false);
     setQuery('');
     action();
@@ -115,6 +131,15 @@ export function CommandPalette() {
       }}
       title={t('command.title')}
       description={t('command.description')}
+      onCloseAutoFocus={(event) => {
+        // After a selection (navigation) or when the palette was opened with Ctrl/Cmd+K from
+        // nowhere, focus the content area; otherwise Radix returns focus to the opener.
+        const toPage = selected.current || !opener?.isConnected || opener === document.body;
+        selected.current = false;
+        if (!toPage) return;
+        event.preventDefault();
+        focusMainContent();
+      }}
     >
       <CommandInput placeholder={t('command.placeholder')} value={query} onValueChange={setQuery} />
       <CommandList>
@@ -189,7 +214,8 @@ export function CommandPalette() {
             value="logout keluar sign out"
             onSelect={() =>
               run(() => {
-                void logout().then(() => navigate(AUTH_PATHS.login, { replace: true }));
+                void logout();
+                void navigate(AUTH_PATHS.login, { replace: true });
               })
             }
           >

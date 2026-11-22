@@ -13,7 +13,7 @@ import { ScrollArea } from '@/shared/ui/scroll-area';
 import { SimpleTooltip } from '@/shared/ui/tooltip';
 
 import { features } from '../features';
-import { buildNavigation, slotComponent } from '../navigation';
+import { buildNavigation, slotContributions } from '../navigation';
 
 export function useNavigationSections() {
   const permissions = usePermissions();
@@ -86,7 +86,7 @@ export function SidebarNav({
   );
 }
 
-const SidebarFooterSlot = slotComponent(features, 'sidebar.footer');
+const sidebarFooter = slotContributions(features, 'sidebar.footer');
 
 /** Desktop sidebar (collapsible to icons). */
 export function Sidebar() {
@@ -112,7 +112,9 @@ export function Sidebar() {
       <ScrollArea className="min-h-0 flex-1">
         <SidebarNav collapsed={collapsed} />
       </ScrollArea>
-      {SidebarFooterSlot && <SidebarFooterSlot />}
+      {sidebarFooter.map(({ key, component: Footer }) => (
+        <Footer key={key} />
+      ))}
       <div
         className={cn(
           'flex items-center border-t border-sidebar-border p-2',

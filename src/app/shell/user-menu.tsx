@@ -25,10 +25,14 @@ export function UserMenu() {
   const session = useSession();
   const [busy, setBusy] = useState(false);
   const locale = i18n.language === 'en' ? 'en' : 'id';
+  const displayName = session.name || session.email;
+  const userInitials = initials(displayName);
 
-  const signOut = async () => {
+  // The local session ends at once; an unfinished server revocation is reported by the
+  // LogoutPendingNotice (app providers) on the login page.
+  const signOut = () => {
     setBusy(true);
-    await logout();
+    void logout();
     void navigate(AUTH_PATHS.login, { replace: true });
   };
 
@@ -39,11 +43,12 @@ export function UserMenu() {
           variant="ghost"
           size="icon"
           className="rounded-full"
-          aria-label={t('shell.userMenu')}
+          // The name starts with the visible initials (WCAG 2.5.3: speech input users say "DA").
+          aria-label={`${userInitials} · ${t('shell.userMenu')} (${displayName})`}
           data-testid="user-menu"
         >
           <Avatar className="size-8 ring-1 ring-border">
-            <AvatarFallback>{initials(session.name || session.email)}</AvatarFallback>
+            <AvatarFallback>{userInitials}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
@@ -73,7 +78,7 @@ export function UserMenu() {
           disabled={busy}
           onSelect={(event) => {
             event.preventDefault();
-            void signOut();
+            signOut();
           }}
           data-testid="logout"
         >

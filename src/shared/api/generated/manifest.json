@@ -1,11 +1,8 @@
 {
   "$comment": "Written by `pnpm api:generate`. Do not edit the generated clients by hand.",
   "generated": [
-    "auth"
-  ],
-  "skipped": [
+    "auth",
     "fleet",
-    "ais-pipeline",
     "ais-processor",
     "ais-ingestor",
     "telemetry",
@@ -14,5 +11,6 @@
     "safety",
     "surveillance",
     "notification"
-  ]
+  ],
+  "skipped": []
 }

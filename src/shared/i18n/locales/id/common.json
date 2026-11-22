@@ -64,7 +64,13 @@
       "idle": "Realtime tidak aktif",
       "error": "Realtime gagal terhubung"
     },
-    "version": "Versi {{version}}"
+    "version": "Versi {{version}}",
+    "logoutPending": {
+      "title": "Keluar belum selesai",
+      "description": "Server belum mencabut sesi Anda. Sesi tidak akan dipulihkan di peramban ini; kami mencoba lagi otomatis.",
+      "retry": "Coba lagi",
+      "done": "Sesi sebelumnya telah dicabut di server."
+    }
   },
   "command": {
     "placeholder": "Ketik perintah, nama halaman, nama kapal atau MMSI…",
@@ -200,7 +206,8 @@
     "pendingDescription": "Katalog metodologi untuk \"{{methodId}}\" belum dimuat. Sumber akan ditampilkan setelah katalog tersedia.",
     "needsCitation": "Perlu sitasi",
     "needsCitationDescription": "Nilai berasal dari tesis dan belum memiliki sumber eksternal terverifikasi.",
-    "status": "Status"
+    "status": "Status",
+    "formulaScrollable": "Rumus (geser ke samping untuk melihat semuanya)"
   },
   "map": {
     "basemap": "Peta dasar",

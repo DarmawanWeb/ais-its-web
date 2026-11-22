@@ -43,11 +43,12 @@ export function LanguageToggle() {
         <Button
           variant="ghost"
           size="sm"
-          aria-label={t('shell.language.toggle')}
           className="gap-1.5 px-2 font-mono text-xs uppercase"
           data-testid="language-toggle"
         >
-          <Languages className="size-4" />
+          <Languages className="size-4" aria-hidden />
+          {/* Name from content ("Ganti bahasa: ID") so it contains the visible text (WCAG 2.5.3). */}
+          <span className="sr-only normal-case">{t('shell.language.toggle')}: </span>
           {i18n.language}
         </Button>
       </DropdownMenuTrigger>

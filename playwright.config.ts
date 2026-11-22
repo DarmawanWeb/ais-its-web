@@ -1,11 +1,14 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
- * E2E smoke tests and documentation screenshots against the production build (vite preview)
- * and a dependency-free mock gateway (e2e/mock-server/server.mjs).
+ * E2E tests and documentation screenshots against the production build (vite preview) and a
+ * dependency-free mock gateway (e2e/mock-server/server.mjs + e2e/mock-server/routes/*.mjs).
  *
- *   pnpm test:e2e      smoke tests (headless)
+ *   pnpm test:e2e      every e2e/**\/*.spec.ts except the screenshots (headless; CI runs it)
  *   pnpm screenshots   refreshes docs/screenshots/*.png
+ *
+ * The build sets VITE_E2E_HOOKS=true: test hooks such as window.__AIS_E2E_MAPS__ (the live
+ * MapLibre maps) exist only in this build.
  */
 const MOCK_PORT = Number(process.env.E2E_MOCK_PORT ?? 8787);
 const WEB_PORT = Number(process.env.E2E_WEB_PORT ?? 4173);
@@ -36,8 +39,9 @@ export default defineConfig({
     },
   },
   projects: [
-    { name: 'smoke', testMatch: /smoke\.spec\.ts/ },
-    { name: 'screenshots', testMatch: /screenshots\.spec\.ts/ },
+    // Feature specs are picked up automatically: add e2e/<feature>.spec.ts (or a folder).
+    { name: 'e2e', testMatch: /.*\.spec\.ts$/, testIgnore: /screenshots\.spec\.ts$/ },
+    { name: 'screenshots', testMatch: /screenshots\.spec\.ts$/ },
   ],
   webServer: [
     {
@@ -50,7 +54,11 @@ export default defineConfig({
     {
       command: `pnpm exec vite build --logLevel warn && pnpm exec vite preview --port ${WEB_PORT} --strictPort`,
       url: `http://localhost:${WEB_PORT}`,
-      env: { VITE_DEV_PROXY_TARGET: `http://localhost:${MOCK_PORT}`, VITE_QUERY_DEVTOOLS: 'false' },
+      env: {
+        VITE_DEV_PROXY_TARGET: `http://localhost:${MOCK_PORT}`,
+        VITE_QUERY_DEVTOOLS: 'false',
+        VITE_E2E_HOOKS: 'true',
+      },
       reuseExistingServer: !CI,
       timeout: 180_000,
       stdout: 'ignore',

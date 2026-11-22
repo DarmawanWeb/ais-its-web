@@ -1,14 +1,19 @@
 {
-  "nav": { "dashboard": "Dashboard" },
+  "nav": {
+    "dashboard": "Dashboard"
+  },
   "title": "Dashboard Armada",
   "description": "Ringkasan operasi armada: kapal terlacak, keselamatan, alert dan performa emisi.",
   "stats": {
-    "trackedVessels": "Kapal terlacak (live)",
-    "trackedHint": "Dari aliran realtime saat ini",
+    "trackedVessels": "Kapal terlacak",
     "openAlerts": "Alert terbuka",
     "fleetCii": "Rata-rata rating CII",
     "fuel30d": "Bahan bakar 30 hari",
-    "pending": "Menunggu layanan {{service}}"
+    "pending": "Segera hadir di modul ini",
+    "trackedHint": "Posisi AIS dalam {{minutes}} menit terakhir",
+    "openAlertsHint_one": "{{count}} kritis",
+    "openAlertsHint_other": "{{count}} kritis",
+    "unavailable": "Data belum tersedia"
   },
   "ciiDistribution": {
     "title": "Distribusi peringkat CII",

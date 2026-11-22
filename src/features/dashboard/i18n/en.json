@@ -1,14 +1,19 @@
 {
-  "nav": { "dashboard": "Dashboard" },
+  "nav": {
+    "dashboard": "Dashboard"
+  },
   "title": "Fleet Dashboard",
   "description": "Fleet operations at a glance: tracked vessels, safety, alerts and emission performance.",
   "stats": {
-    "trackedVessels": "Tracked vessels (live)",
-    "trackedHint": "From the current realtime stream",
+    "trackedVessels": "Tracked vessels",
     "openAlerts": "Open alerts",
     "fleetCii": "Average CII rating",
     "fuel30d": "Fuel, last 30 days",
-    "pending": "Waiting for the {{service}} service"
+    "pending": "Coming soon to this module",
+    "trackedHint": "AIS position within the last {{minutes}} minutes",
+    "openAlertsHint_one": "{{count}} critical",
+    "openAlertsHint_other": "{{count}} critical",
+    "unavailable": "Data not available yet"
   },
   "ciiDistribution": {
     "title": "CII grade distribution",

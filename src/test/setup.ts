@@ -34,6 +34,25 @@ window.scrollTo = () => undefined;
 Element.prototype.hasPointerCapture ??= () => false;
 Element.prototype.releasePointerCapture ??= () => undefined;
 
+// jsdom has no Web Locks API: a FIFO exclusive lock per name, like browsers in secure
+// contexts. The localStorage fallback (src/shared/auth/cross-tab-lock.ts) has its own tests.
+if (!('locks' in navigator) || !navigator.locks) {
+  const queues = new Map<string, Promise<unknown>>();
+  const locks = {
+    request(name: string, ...args: unknown[]): Promise<unknown> {
+      const callback = args[args.length - 1] as () => Promise<unknown>;
+      const run = (queues.get(name) ?? Promise.resolve()).then(() => callback());
+      queues.set(
+        name,
+        run.catch(() => undefined),
+      );
+      return run;
+    },
+    query: () => Promise.resolve({ held: [], pending: [] }),
+  };
+  Object.defineProperty(navigator, 'locks', { value: locks, configurable: true });
+}
+
 beforeAll(() => {
   server.listen({ onUnhandledRequest: 'error' });
   void i18n.changeLanguage('id');

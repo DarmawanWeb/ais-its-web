@@ -8,6 +8,8 @@ import { ThemeSync } from '@/shared/theme/theme';
 import { Toaster } from '@/shared/ui/sonner';
 import { TooltipProvider } from '@/shared/ui/tooltip';
 
+import { LogoutPendingNotice } from './logout-pending-notice';
+
 const QueryDevtools = import.meta.env.DEV
   ? lazy(() =>
       import('@tanstack/react-query-devtools').then((module) => ({
@@ -16,9 +18,13 @@ const QueryDevtools = import.meta.env.DEV
     )
   : null;
 
+/** Roles of a session, order-insensitive. */
+const rolesKey = (roles: readonly string[] | undefined) => [...(roles ?? [])].sort().join(',');
+
 /**
  * Tenant data must never leak between sessions or organizations: the cache is cleared on
- * sign-out and reset (refetching active queries) when the active organization changes.
+ * sign-out and reset (refetching active queries) when the user, the active organization or the
+ * roles change (responses depend on all three).
  */
 function SessionCacheGuard({ client }: { client: QueryClient }) {
   useEffect(
@@ -29,7 +35,9 @@ function SessionCacheGuard({ client }: { client: QueryClient }) {
         } else if (
           state.status === 'authenticated' &&
           previous.status === 'authenticated' &&
-          (state.claims?.org !== previous.claims?.org || state.claims?.sub !== previous.claims?.sub)
+          (state.claims?.org !== previous.claims?.org ||
+            state.claims?.sub !== previous.claims?.sub ||
+            rolesKey(state.claims?.roles) !== rolesKey(previous.claims?.roles))
         ) {
           void client.resetQueries();
         }
@@ -53,6 +61,7 @@ export function AppProviders({
         <SessionCacheGuard client={queryClient} />
         {children}
         <Toaster />
+        <LogoutPendingNotice />
         {QueryDevtools && appConfig.enableQueryDevtools && (
           <Suspense fallback={null}>
             <QueryDevtools />

@@ -15,9 +15,30 @@ export function loginPath(from?: string): string {
   return `${AUTH_PATHS.login}?redirect=${encodeURIComponent(from)}`;
 }
 
-/** Validates a post-login redirect target (same-origin absolute paths only). */
-export function safeRedirect(target: string | null | undefined): string {
+// Browsers read "/\host" and "/<TAB>/host" as protocol-relative URLs (they treat a backslash
+// as a slash and strip TAB, CR and LF), so backslashes and control characters are refused.
+// eslint-disable-next-line no-control-regex
+const UNSAFE_REDIRECT = /[\\\u0000-\u001f\u007f]/;
+
+/**
+ * Validates a post-login redirect target: a same-origin path, returned as pathname + search +
+ * hash of the URL the browser would resolve. Anything else (other origins, protocol-relative
+ * forms, backslashes, control characters, the auth pages) falls back to the home page.
+ */
+export function safeRedirect(
+  target: string | null | undefined,
+  origin: string = window.location.origin,
+): string {
   if (!target || !target.startsWith('/') || target.startsWith('//')) return HOME_PATH;
-  if (Object.values(AUTH_PATHS).some((path) => target.startsWith(path))) return HOME_PATH;
-  return target;
+  if (UNSAFE_REDIRECT.test(target)) return HOME_PATH;
+  let url: URL;
+  try {
+    url = new URL(target, origin);
+  } catch {
+    return HOME_PATH;
+  }
+  if (url.origin !== origin) return HOME_PATH;
+  const path = `${url.pathname}${url.search}${url.hash}`;
+  if (Object.values(AUTH_PATHS).some((auth) => url.pathname.startsWith(auth))) return HOME_PATH;
+  return path;
 }

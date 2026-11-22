@@ -7,3 +7,6 @@ ignoredBuiltDependencies:
   - core-js
   - esbuild
   - protobufjs
+# Test-only dependency pinned to a release that has been public for several weeks.
+overrides:
+  axe-core: 4.14.0

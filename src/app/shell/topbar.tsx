@@ -4,18 +4,18 @@ import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router';
 
 import { BrandMark } from '@/shared/domain-ui/brand';
+import { LanguageToggle, ThemeToggle } from '@/shared/domain-ui/preference-toggles';
 import { Button } from '@/shared/ui/button';
 import { Kbd } from '@/shared/ui/kbd';
 
 import { features } from '../features';
-import { slotComponent } from '../navigation';
+import { singleSlotComponent, slotContributions } from '../navigation';
 import { AlertsBellPlaceholder } from './alerts-bell';
 import { useCommandPalette } from './command-palette';
 import { OrgSwitcher } from './org-switcher';
 import { RealtimeIndicator } from './realtime-indicator';
 import { useRouteHandle } from './route-handle';
 import { useNavigationSections } from './sidebar';
-import { LanguageToggle, ThemeToggle } from '@/shared/domain-ui/preference-toggles';
 import { UserMenu } from './user-menu';
 
 function useBreadcrumb(): { section: string | null; title: string | null } {
@@ -45,8 +45,8 @@ function useBreadcrumb(): { section: string | null; title: string | null } {
 }
 
 /** Components plugged by features into the top bar (resolved once: features are static). */
-const AlertsSlot = slotComponent(features, 'topbar.alerts') ?? AlertsBellPlaceholder;
-const ActionsSlot = slotComponent(features, 'topbar.actions');
+const AlertsSlot = singleSlotComponent(features, 'topbar.alerts') ?? AlertsBellPlaceholder;
+const topbarActions = slotContributions(features, 'topbar.actions');
 
 export function Topbar({ onOpenMobileNav }: { onOpenMobileNav: () => void }) {
   const { t } = useTranslation();
@@ -81,18 +81,24 @@ export function Topbar({ onOpenMobileNav }: { onOpenMobileNav: () => void }) {
           size="sm"
           onClick={() => setPaletteOpen(true)}
           className="h-8 w-9 justify-start gap-2 bg-surface/60 px-2 text-muted-foreground sm:w-56 lg:w-72"
-          aria-label={t('shell.search')}
+          aria-keyshortcuts={isMac ? 'Meta+K' : 'Control+K'}
+          title={t('shell.search')}
           data-testid="command-palette-trigger"
         >
-          <Search />
-          <span className="hidden truncate font-normal sm:inline">{t('shell.searchShort')}</span>
+          <Search aria-hidden />
+          {/* The accessible name is the visible text (WCAG 2.5.3); screen-reader only on phones. */}
+          <span className="sr-only truncate font-normal sm:not-sr-only">
+            {t('shell.searchShort')}
+          </span>
           <span className="ml-auto hidden items-center gap-0.5 sm:flex">
             <Kbd>{isMac ? '⌘' : 'Ctrl'}</Kbd>
             <Kbd>K</Kbd>
           </span>
         </Button>
         <RealtimeIndicator />
-        {ActionsSlot && <ActionsSlot />}
+        {topbarActions.map(({ key, component: Action }) => (
+          <Action key={key} />
+        ))}
         <AlertsSlot />
         <ThemeToggle />
         <LanguageToggle />

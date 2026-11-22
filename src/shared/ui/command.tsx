@@ -25,18 +25,22 @@ export function CommandDialog({
   children,
   className,
   shouldFilter,
+  onCloseAutoFocus,
   ...props
 }: React.ComponentProps<typeof Dialog> & {
   title: string;
   description: string;
   className?: string;
   shouldFilter?: boolean;
+  /** Where focus goes when the dialog closes (default: back to the element that opened it). */
+  onCloseAutoFocus?: React.ComponentProps<typeof DialogContent>['onCloseAutoFocus'];
 }) {
   return (
     <Dialog {...props}>
       <DialogContent
         className={cn('top-[18%] translate-y-0 overflow-hidden p-0 sm:max-w-xl', className)}
         showCloseButton={false}
+        onCloseAutoFocus={onCloseAutoFocus}
       >
         <DialogHeader className="sr-only">
           <DialogTitle>{title}</DialogTitle>
