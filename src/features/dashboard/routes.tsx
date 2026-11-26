@@ -5,7 +5,10 @@ import { defineFeature, lazyPage } from '@/shared/feature';
 import en from './i18n/en.json';
 import id from './i18n/id.json';
 
-/** Fleet dashboard (landing page after sign-in, HOME_PATH). */
+/**
+ * Operations overview, the landing page after sign-in (HOME_PATH `/dashboard`; `/` redirects
+ * there). Every role holds `vessel:read`; each card checks its own permission.
+ */
 export const feature = defineFeature({
   id: 'dashboard',
   i18n: { id, en },
@@ -25,7 +28,7 @@ export const feature = defineFeature({
       labelKey: 'dashboard:nav.dashboard',
       icon: LayoutDashboard,
       permission: 'vessel:read',
-      keywords: ['dashboard', 'beranda', 'home', 'ringkasan'],
+      keywords: ['dashboard', 'beranda', 'home', 'ringkasan', 'overview', 'kpi'],
     },
   ],
 });

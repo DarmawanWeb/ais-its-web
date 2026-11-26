@@ -1,44 +1,404 @@
 {
-  "transhipment": {
-    "title": "Illegal Transhipment",
-    "description": "Detects vessel pairs staying alongside at sea for a long time — an indication of illegal transhipment.",
-    "capabilities": [
-      "Transhipment events with score and accuracy",
-      "Tracks of both vessels (GET /api/v2/ais/pairs/track)",
-      "Event review by authorities (surveillance:review)"
-    ]
-  },
   "nav": {
+    "section": "Surveillance navigation",
+    "overview": "Overview",
     "transhipment": "Transhipment",
     "fishing": "Illegal Fishing",
     "dark": "Dark Vessels",
-    "anomaly": "Navstatus Anomaly"
+    "anomaly": "Navstatus Anomalies"
+  },
+  "live": {
+    "connected": "Live updates on",
+    "disconnected": "Live updates offline"
+  },
+  "common": {
+    "unknownVessel": "Unnamed vessel",
+    "unknownZone": "Unnamed zone"
+  },
+  "duration": {
+    "days": "{{count}} d",
+    "hours": "{{count}} h",
+    "minutes": "{{count}} min"
+  },
+  "filters": {
+    "label": "Event filters",
+    "range": "Time range",
+    "ranges": {
+      "24h": "24 hours",
+      "7d": "7 days",
+      "30d": "30 days",
+      "90d": "90 days"
+    },
+    "severity": "Severity",
+    "status": "Review status",
+    "all": "All",
+    "allYears": "All years",
+    "mmsi": "Vessel (MMSI)",
+    "mmsiPlaceholder": "9-digit MMSI",
+    "mmsiInvalid": "An MMSI has 9 digits.",
+    "reset": "Reset ({{count}})",
+    "resetAll": "Reset filters"
+  },
+  "fields": {
+    "time": "Time",
+    "vessel": "Vessel",
+    "relatedVessel": "Paired vessel",
+    "pair": "Vessel pair",
+    "severity": "Severity",
+    "status": "Status",
+    "review": "Review",
+    "state": "State",
+    "position": "Position",
+    "method": "Method",
+    "zone": "Zone",
+    "zoneKind": "Zone kind",
+    "accuracy": "Score (accuracy)",
+    "averagePriority": "Average priority",
+    "accumulatedPriority": "Accumulated priority",
+    "distribution": "Priority distribution",
+    "observations": "Observations",
+    "lastDistance": "Last distance",
+    "routePoints": "Route points (vessel 1/2)",
+    "window": "Analysed window",
+    "duration": "Duration",
+    "detectedAt": "Detected",
+    "lastSeenAt": "Last seen",
+    "gapDuration": "Gap length",
+    "gapGrowing": "ongoing",
+    "lastSog": "Last SOG",
+    "lastCog": "Last COG",
+    "nearestHarbour": "Nearest harbour",
+    "noHarbour": "No harbour zone",
+    "reappearedAt": "Reappeared",
+    "reportedNavstatus": "Reported status",
+    "predictedNavstatus": "Predicted status",
+    "streak": "Consecutive positions",
+    "streakValue": "{{streak}} of at least {{min}} positions",
+    "sog": "SOG",
+    "sogAtEntry": "SOG at entry",
+    "loiterDuration": "Loitering duration",
+    "positions": "Positions",
+    "meanSog": "Mean SOG",
+    "courseChangeRate": "Course change rate",
+    "degPerMin": "{{value}} °/min",
+    "totalCourseChange": "Total course change",
+    "vesselName": "Vessel name",
+    "flag": "Flag",
+    "year": "Year",
+    "violation": "Violation",
+    "action": "Action taken",
+    "source": "Source"
+  },
+  "rule": {
+    "title": "What the detector looks for",
+    "methods": "Methods",
+    "disabled": "Detector disabled",
+    "transhipment": "Pairs of vessels from AIS source {{sources}} or inside a {{zoneKinds}} that come within {{radius}} m of each other within {{window}} minutes are scored by speed × location × heading priorities. Pairs with accumulated priority are re-analysed with route interpolation and 30-minute sliding windows; a transhipment is reported when the score reaches {{threshold}} % (critical from {{critical}} %).",
+    "fishing": "A loitering pattern typical of fishing: at least {{minDuration}} minutes and {{minPositions}} positions at {{minSog}}–{{maxSog}} kn with a mean course change of at least {{rate}} °/min, inside a {{kinds}}.",
+    "dark": "A vessel stops transmitting AIS for more than {{gap}} minutes while it last sailed above {{sog}} kn more than {{distance}} km away from any global {{kinds}} zone. The event ends when the vessel reappears; gaps longer than {{maxGap}} hours are not reported.",
+    "anomaly": "The reported navigational status contradicts the status predicted from the vessel's motion for {{minPositions}} consecutive positions. The event ends at the first consistent position.",
+    "geofence": "A vessel enters an active {{kinds}} zone that raises an alert on entry (zone buffer included)."
+  },
+  "empty": {
+    "filteredTitle": "No events match the filters",
+    "filteredHint": "Widen the time range or reset the filters to see other events.",
+    "hint": "No events in this range yet. They appear automatically when the detector finds the pattern.",
+    "transhipment": {
+      "title": "No suspected transhipments yet"
+    },
+    "fishing": {
+      "title": "No suspected illegal fishing yet"
+    },
+    "dark": {
+      "title": "No dark vessels yet"
+    },
+    "anomaly": {
+      "title": "No navigational status anomalies yet"
+    },
+    "geofence": {
+      "title": "No zone entries yet"
+    }
+  },
+  "map": {
+    "noPositions": "No positions to show on this page",
+    "legend": {
+      "title": "Legend",
+      "critical": "Critical (large marker)",
+      "warning": "Warning",
+      "info": "Information (small marker)",
+      "ended": "Ended by the detector (ring)",
+      "reappeared": "Reappearance position",
+      "harbourBand": "{{value}} km harbour radius (approximate)",
+      "heatLow": "Low density",
+      "heatHigh": "high",
+      "violation": "Apprehension site",
+      "density": "Density"
+    }
+  },
+  "export": {
+    "done": "CSV downloaded: {{count}} rows",
+    "empty": "No data to export with these filters.",
+    "truncated": "Limited to the first {{count}} rows; narrow the filters for a complete export.",
+    "failed": "CSV export failed"
+  },
+  "csv": {
+    "eventId": "event_id",
+    "resultId": "result_id",
+    "time": "time",
+    "vesselName": "vessel_name",
+    "relatedMmsi": "related_mmsi",
+    "relatedVesselName": "related_vessel_name",
+    "ship1Name": "ship1_name",
+    "ship2Name": "ship2_name",
+    "accuracy": "accuracy_percent",
+    "averagePriority": "average_priority",
+    "low": "distribution_low_percent",
+    "medium": "distribution_medium_percent",
+    "high": "distribution_high_percent",
+    "severity": "severity",
+    "status": "review_status",
+    "note": "note",
+    "detectedAt": "detected_at",
+    "lat": "lat",
+    "lon": "lon",
+    "methodId": "method_id",
+    "zone": "zone",
+    "zoneKind": "zone_kind",
+    "durationMin": "duration_min",
+    "meanSogKn": "mean_sog_kn",
+    "courseChangeRate": "course_change_rate_deg_per_min",
+    "lastSeenAt": "last_seen_at",
+    "gapMin": "gap_min",
+    "lastSogKn": "last_sog_kn",
+    "nearestHarbourM": "nearest_harbour_m",
+    "reappearedAt": "reappeared_at",
+    "navstatus": "reported_navstatus",
+    "predictedNavstatus": "predicted_navstatus",
+    "streak": "consecutive_positions",
+    "sogKn": "sog_kn",
+    "endedAt": "ended_at",
+    "flag": "flag",
+    "year": "year",
+    "violation": "violation",
+    "action": "action",
+    "source": "source",
+    "sourceNote": "source_note",
+    "from": "period_start",
+    "to": "period_end",
+    "total": "total"
+  },
+  "review": {
+    "title": "Review",
+    "verdict": "Review verdict",
+    "options": {
+      "open": "Undecided",
+      "openHint": "Back to the review queue (withdraws an earlier verdict).",
+      "confirmed": "Confirm",
+      "confirmedHint": "The suspicion is verified as a violation.",
+      "dismissed": "Dismiss",
+      "dismissedHint": "Not a violation (e.g. authorised bunkering or faulty AIS data)."
+    },
+    "note": "Reviewer note",
+    "notePlaceholder": "Grounds for the decision, report number, follow-up…",
+    "noteHint": "The note is optional and recorded in the audit log.",
+    "noteKept": "An unchanged note is kept; clear it to remove it.",
+    "submit": "Save review",
+    "saved": "Review saved",
+    "failed": "The review could not be saved",
+    "notFound": "The event is no longer available.",
+    "forbidden": "You are not allowed to review events (surveillance:review).",
+    "readOnly": "Only authorities can review events.",
+    "notReviewed": "Not reviewed yet",
+    "reviewedBy": "Reviewed by {{who}} · {{at}}",
+    "you": "you",
+    "reviewer": "a reviewer"
+  },
+  "timeline": {
+    "title": "Timeline",
+    "occurred": "Occurrence started",
+    "opened": "Detected by the detector",
+    "analysis": "Positive analysis",
+    "analysisScore": "Positive analysis · score {{accuracy}} %",
+    "lastSeen": "Last observed",
+    "resolved": "Ended by the detector",
+    "reviewed": "Reviewed",
+    "reviewedAs": "Reviewed: {{status}}",
+    "reason": "Reason: {{reason}}"
+  },
+  "overview": {
+    "title": "Surveillance Overview",
+    "description": "Detected illegal activity at a glance: transhipment, illegal fishing, dark vessels, navigational status anomalies and zone violations.",
+    "stats": {
+      "total": "Events",
+      "totalHint": "All detectors, last {{range}}",
+      "active": "Ongoing",
+      "activeHint": "Not ended by the detector",
+      "toReview": "Awaiting review",
+      "toReviewHint": "Review status open",
+      "critical": "Critical",
+      "criticalHint": "Critical severity in this range"
+    },
+    "trendTitle": "Events by type over time",
+    "trendDescription": "Events per period ({{count}} periods), stacked by detector.",
+    "chartCaption": "Events per detector type and period",
+    "legend": "Event types",
+    "view": "View",
+    "chartView": "Chart",
+    "tableView": "Table",
+    "period": "Period",
+    "total": "Total",
+    "breakdownTitle": "Severity & review",
+    "breakdownDescription": "Distribution of the events in the selected range.",
+    "typesTitle": "By detector",
+    "typesDescription": "Events and trend of each detector; open a detector's page for details.",
+    "recentTitle": "Latest events",
+    "recentDescription": "Click for the details and the review.",
+    "recentEmpty": "No events yet",
+    "recentEmptyHint": "The detectors run continuously; new events appear here live.",
+    "detectorsTitle": "Detectors",
+    "detectorsDescription": "Enabled detectors, active thresholds and their methods.",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "queueTitle": "Transhipment candidate queue",
+    "queueDescription": "Vessel pairs waiting for the route analysis (authorities only).",
+    "queue": {
+      "pending": "Pending",
+      "inProgress": "In progress",
+      "completed": "Completed",
+      "failed": "Failed"
+    },
+    "violationsNote": "{{count}} historical illegal fishing records are available.",
+    "violationsLink": "Open the dataset",
+    "config": {
+      "ACCURACY_THRESHOLD": "Score threshold",
+      "NEIGHBOUR_RADIUS_M": "Pair radius",
+      "GAP_MIN": "AIS gap",
+      "HARBOUR_DISTANCE_KM": "Harbour distance",
+      "MIN_POSITIONS": "Consecutive positions",
+      "MIN_DURATION_MIN": "Minimum duration",
+      "MAX_SOG_KN": "Maximum SOG",
+      "KINDS": "Watched zones"
+    }
+  },
+  "transhipment": {
+    "title": "Illegal Transhipment",
+    "detailTitle": "Transhipment Detail",
+    "description": "Vessel pairs side by side at low speed at sea — indicating an illegal ship-to-ship transfer of cargo.",
+    "tabs": "Transhipment views",
+    "tabEvents": "Events",
+    "tabResults": "Analysis results",
+    "tableLabel": "Transhipment events",
+    "resultsLabel": "Transhipment analysis results",
+    "mapLabel": "Map of transhipment locations",
+    "openReplay": "Open the pair route replay",
+    "back": "Back to the transhipment list",
+    "pairTitle": "{{a}} ↔ {{b}}",
+    "notFound": "Transhipment event not found",
+    "notFoundHint": "The event may have expired or does not concern a vessel of your organization.",
+    "scoreTitle": "Transhipment score",
+    "scoreHint": "Detection threshold {{threshold}} % (white line), critical from {{critical}} % (red line).",
+    "threshold": "Detection threshold {{value}} %",
+    "critical": "Critical from {{value}} %",
+    "levels": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "vesselsTitle": "Vessels",
+    "midpoint": "Midpoint:",
+    "inZone": "Inside zone {{zone}}",
+    "analysesTitle": "Positive analyses of this event",
+    "analysesDescription": "Every route analysis that found a transhipment for this pair. Select a row to move the replay to its analysis window."
+  },
+  "replay": {
+    "title": "Pair route replay",
+    "window": "{{from}} – {{to}}",
+    "mapLabel": "Replay map of both vessels' routes",
+    "distance": "Distance between the vessels",
+    "legend": "Routes",
+    "gapLine": "Distance line",
+    "play": "Play the replay",
+    "pause": "Pause the replay",
+    "restart": "Restart",
+    "closest": "Closest approach",
+    "scrubber": "Replay time",
+    "speed": "Replay speed",
+    "speedValue": "×{{value}}",
+    "analysedWindow": "Analysed window",
+    "emptyTitle": "Routes unavailable",
+    "emptyDescription": "No AIS positions of both vessels in this window (raw data may be past its retention).",
+    "noPair": "This event has no paired vessel to replay."
   },
   "fishing": {
     "title": "Illegal Fishing",
-    "description": "Heatmap of suspicious fishing activity and historical violations.",
-    "capabilities": [
-      "Grid heatmap (GET /api/v2/surveillance/heatmap)",
-      "Historical violations layer per year",
-      "Loitering detection in fishing grounds"
-    ]
+    "description": "Loitering patterns inside fishing grounds and restricted areas, and the historical record of illegal fishing vessels apprehended.",
+    "tabs": "Illegal fishing views",
+    "tabEvents": "Loitering detections",
+    "tabHistory": "Historical violations",
+    "tableLabel": "Suspected illegal fishing events",
+    "mapLabel": "Heatmap of suspected illegal fishing",
+    "heatmapNote": "Heatmap of {{total}} events, {{cell}} km cells.",
+    "heatmapLoading": "Loading the heatmap…",
+    "historyTitle": "Illegal fishing apprehension dataset",
+    "historyDescription": "Historical apprehensions of illegal fishing vessels (flag, violation, action, location). The origin still needs a citation — see the source of each row.",
+    "historyLabel": "Historical fishing violations",
+    "historyMapLabel": "Map of historical apprehension sites",
+    "historyMapNote": "{{count}} apprehension sites on the heatmap.",
+    "historyEmpty": "No records for this year",
+    "historyEmptyHint": "Choose another year or show every year."
   },
   "dark": {
     "title": "Dark Vessels (AIS Gaps)",
-    "description": "Vessels that stopped transmitting AIS inside monitored areas.",
-    "capabilities": [
-      "AIS gaps with duration and last position",
-      "Map of disappearance and reappearance positions",
-      "Alerts of type dark"
-    ]
+    "description": "Vessels that stopped transmitting AIS while under way far from ports and anchorages.",
+    "tableLabel": "Dark vessel events",
+    "mapLabel": "Map of the dark vessels' last known positions",
+    "stillDark": "Still dark",
+    "reappeared": "Back {{at}}",
+    "ruleGap": "Silent for more than {{value}} minutes",
+    "ruleSog": "Last SOG above {{value}} kn",
+    "ruleHarbour": "More than {{value}} km from ports/anchorages",
+    "ruleTenancy": "The harbour rule only uses curated global zones; an organization's own zones never silence a detection."
   },
   "anomaly": {
-    "title": "Navigational Status Anomaly",
-    "description": "Vessels whose AIS navigational status contradicts the status predicted from their movement.",
-    "capabilities": [
-      "Anomalies: reported vs predicted status",
-      "Position history for verification",
-      "Review by authorities"
-    ]
+    "title": "Navigational Status Anomalies",
+    "description": "Vessels whose AIS navigational status contradicts the status predicted from their motion.",
+    "tableLabel": "Navigational status anomaly events",
+    "mapLabel": "Map of navigational status anomalies",
+    "mismatch": "Mismatch",
+    "formula": "anomaly ⇔ (predicted = 0 ∧ navstatus = 1) ∨ (predicted = 1 ∧ navstatus ≠ 1)"
+  },
+  "resolution": {
+    "escalated": "escalated, continued as a new occurrence",
+    "aisResumed": "AIS reports resumed",
+    "navstatusConsistent": "navigational status consistent with the motion again",
+    "leftZone": "the vessel left the zone",
+    "loiteringEnded": "the loitering pattern ended",
+    "analysisNegative": "a later analysis was no longer positive",
+    "pairSeparated": "the pair was no longer observed side by side",
+    "zoneDeleted": "the zone was deleted",
+    "zoneNoLongerAlerts": "the zone no longer alerts on entry",
+    "openSuccessor": "Open the continued occurrence"
+  },
+  "text": {
+    "transhipment": {
+      "title": "Transhipment {{a}} ↔ {{b}}",
+      "description": "{{a}} and {{b}} stayed side by side at low speed at sea (score {{score}} %)."
+    },
+    "fishing": {
+      "title": "Suspected fishing by {{vessel}} in {{zone}}",
+      "description": "Loitering at {{sog}} kn with a mean course change of {{rate}} °/min for {{duration}} in {{zone}}."
+    },
+    "dark": {
+      "title": "AIS of {{vessel}} went dark",
+      "description": "Stopped reporting AIS positions at {{at}} while under way at {{sog}} kn, away from any harbour."
+    },
+    "anomaly": {
+      "title": "Navigational status anomaly of {{vessel}}",
+      "description": "Reports \"{{reported}}\" while its motion indicates {{predicted}} for {{streak}} positions in a row."
+    },
+    "geofence": {
+      "title": "{{vessel}} entered {{zone}}",
+      "description": "The vessel is inside {{zone}} ({{kind}}), a zone that alerts on entry."
+    }
   }
 }

@@ -3,21 +3,47 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Emission Service
  * Fuel and CO2 per voyage segment, IMO CII (daily/annual, rating A-E), reduction factors, SEEMP recommendations and what-if simulation, IMO DCS summary
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import type { FleetVesselCiiDtoGrade } from './fleetVesselCiiDtoGrade';
 import type { FleetVesselCiiDtoSource } from './fleetVesselCiiDtoSource';
+import type { PreviousYearCiiDto } from './previousYearCiiDto';
 
 export interface FleetVesselCiiDto {
   mmsi: number;
   vesselId: string;
   name: string;
   /** @nullable */
+  imo: string | null;
+  /** Ship type code */
+  typeCode: string;
+  /** @nullable */
   grade: FleetVesselCiiDtoGrade;
-  /** @nullable */
+  /**
+   * attained / required
+   * @nullable
+   */
   rating: number | null;
-  /** @nullable */
+  /**
+   * Attained CII, g CO2 / (capacity · nm)
+   * @nullable
+   */
   attained: number | null;
+  /**
+   * Required CII of the year, g CO2 / (capacity · nm)
+   * @nullable
+   */
+  required: number | null;
+  /**
+   * Reduction factor Z of the year, %
+   * @nullable
+   */
+  zPercent: number | null;
   /** @nullable */
   source: FleetVesselCiiDtoSource;
+  /**
+   * Rating and grade of year − 1 (null without CII data then), for the trend
+   * @nullable
+   */
+  previousYear: PreviousYearCiiDto | null;
 }

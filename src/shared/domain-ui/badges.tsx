@@ -16,20 +16,13 @@ import { useTranslation } from 'react-i18next';
 
 import { currentLanguage } from '@/shared/i18n';
 import { cn } from '@/shared/lib/utils';
+import { gradeClassName } from '@/shared/theme/grade';
 import { Badge } from '@/shared/ui/badge';
 
 function useLocale(): 'id' | 'en' {
   const { i18n } = useTranslation();
   return i18n.language === 'en' ? 'en' : currentLanguage();
 }
-
-const GRADE_CLASSES: Record<CiiGrade, string> = {
-  A: 'bg-grade-a',
-  B: 'bg-grade-b',
-  C: 'bg-grade-c',
-  D: 'bg-grade-d',
-  E: 'bg-grade-e',
-};
 
 /** CII rating grade A–E with the IMO colour scale. */
 export function CiiGradeBadge({
@@ -55,8 +48,8 @@ export function CiiGradeBadge({
       <span
         aria-label={t('domain.ciiGrade', { grade })}
         className={cn(
-          'inline-flex items-center justify-center rounded-md font-bold text-white shadow-xs ring-1 ring-black/10 ring-inset',
-          GRADE_CLASSES[grade],
+          'inline-flex items-center justify-center rounded-md font-bold shadow-xs ring-1 ring-black/10 ring-inset',
+          gradeClassName(grade),
           size === 'sm' && 'size-5 text-[11px]',
           size === 'md' && 'size-7 text-sm',
           size === 'lg' && 'size-11 text-xl',

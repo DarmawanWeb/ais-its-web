@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Emission Service
  * Fuel and CO2 per voyage segment, IMO CII (daily/annual, rating A-E), reduction factors, SEEMP recommendations and what-if simulation, IMO DCS summary
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 
 /**
@@ -20,4 +20,6 @@ export const MethodSummaryDtoDomain = {
   geo: 'geo',
   safety: 'safety',
   surveillance: 'surveillance',
+  notification: 'notification',
+  security: 'security',
 } as const;

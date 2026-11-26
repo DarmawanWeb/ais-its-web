@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Emission Service
  * Fuel and CO2 per voyage segment, IMO CII (daily/annual, rating A-E), reduction factors, SEEMP recommendations and what-if simulation, IMO DCS summary
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import { useMutation, useQuery } from '@tanstack/react-query';
 import type {
@@ -24,6 +24,7 @@ import type {
 import type {
   CreateScenarioDto,
   ProblemDetails,
+  RenameScenarioDto,
   SeempControllerListScenarios200,
   SeempControllerListScenariosParams,
   SeempControllerRecommendationsParams,
@@ -178,10 +179,10 @@ export function useSeempControllerMeasures<
 }
 
 /**
- * @summary SEEMP recommendations: measures with grade A–C after, cheapest first (legacy calculateSEEMPbyMMSI)
+ * @summary SEEMP recommendations: measures with grade A–C after, cheapest first (legacy calculateSEEMPbyMMSI); includeAll=true lists every measure
  */
 export const seempControllerRecommendations = (
-  mmsi: number,
+  mmsi: string,
   params?: SeempControllerRecommendationsParams,
   options?: SecondParameter<typeof apiClient>,
   signal?: AbortSignal,
@@ -193,7 +194,7 @@ export const seempControllerRecommendations = (
 };
 
 export const getSeempControllerRecommendationsQueryKey = (
-  mmsi: number,
+  mmsi: string,
   params?: SeempControllerRecommendationsParams,
 ) => {
   return [`/api/v2/seemp/vessels/${mmsi}/recommendations`, ...(params ? [params] : [])] as const;
@@ -203,7 +204,7 @@ export const getSeempControllerRecommendationsQueryOptions = <
   TData = Awaited<ReturnType<typeof seempControllerRecommendations>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   params?: SeempControllerRecommendationsParams,
   options?: {
     query?: Partial<
@@ -238,12 +239,12 @@ export type SeempControllerRecommendationsQueryResult = NonNullable<
 >;
 export type SeempControllerRecommendationsQueryError = ErrorType<ProblemDetails>;
 
-/** @summary SEEMP recommendations: measures with grade A–C after, cheapest first (legacy calculateSEEMPbyMMSI) */
+/** @summary SEEMP recommendations: measures with grade A–C after, cheapest first (legacy calculateSEEMPbyMMSI); includeAll=true lists every measure */
 export function useSeempControllerRecommendations<
   TData = Awaited<ReturnType<typeof seempControllerRecommendations>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   params: undefined | SeempControllerRecommendationsParams,
   options: {
     query: Partial<
@@ -261,12 +262,12 @@ export function useSeempControllerRecommendations<
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-/** @summary SEEMP recommendations: measures with grade A–C after, cheapest first (legacy calculateSEEMPbyMMSI) */
+/** @summary SEEMP recommendations: measures with grade A–C after, cheapest first (legacy calculateSEEMPbyMMSI); includeAll=true lists every measure */
 export function useSeempControllerRecommendations<
   TData = Awaited<ReturnType<typeof seempControllerRecommendations>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   params?: SeempControllerRecommendationsParams,
   options?: {
     query?: Partial<
@@ -284,12 +285,12 @@ export function useSeempControllerRecommendations<
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-/** @summary SEEMP recommendations: measures with grade A–C after, cheapest first (legacy calculateSEEMPbyMMSI) */
+/** @summary SEEMP recommendations: measures with grade A–C after, cheapest first (legacy calculateSEEMPbyMMSI); includeAll=true lists every measure */
 export function useSeempControllerRecommendations<
   TData = Awaited<ReturnType<typeof seempControllerRecommendations>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   params?: SeempControllerRecommendationsParams,
   options?: {
     query?: Partial<
@@ -299,12 +300,12 @@ export function useSeempControllerRecommendations<
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-/** @summary SEEMP recommendations: measures with grade A–C after, cheapest first (legacy calculateSEEMPbyMMSI) */
+/** @summary SEEMP recommendations: measures with grade A–C after, cheapest first (legacy calculateSEEMPbyMMSI); includeAll=true lists every measure */
 export function useSeempControllerRecommendations<
   TData = Awaited<ReturnType<typeof seempControllerRecommendations>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   params?: SeempControllerRecommendationsParams,
   options?: {
     query?: Partial<
@@ -327,7 +328,7 @@ export function useSeempControllerRecommendations<
  * @summary What-if simulation of a combination of measures
  */
 export const seempControllerSimulate = (
-  mmsi: number,
+  mmsi: string,
   simulateDto: BodyType<SimulateDto>,
   options?: SecondParameter<typeof apiClient>,
   signal?: AbortSignal,
@@ -388,7 +389,7 @@ export type SeempControllerSimulateMutationResult = NonNullable<
 export type SeempControllerSimulateMutationBody = BodyType<SimulateDto>;
 export type SeempControllerSimulateMutationError = ErrorType<ProblemDetails>;
 export type SeempControllerSimulateMutationVariables = {
-  mmsi: number;
+  mmsi: string;
   data: BodyType<SimulateDto>;
 };
 
@@ -413,7 +414,7 @@ export const useSeempControllerSimulate = <TError = ErrorType<ProblemDetails>, T
   return useMutation(getSeempControllerSimulateMutationOptions(options), queryClient);
 };
 /**
- * @summary Saved simulations of the organization, newest first
+ * @summary Saved simulations of the organization (super_admin: all), newest first by default
  */
 export const seempControllerListScenarios = (
   params?: SeempControllerListScenariosParams,
@@ -464,7 +465,7 @@ export type SeempControllerListScenariosQueryResult = NonNullable<
 >;
 export type SeempControllerListScenariosQueryError = ErrorType<ProblemDetails>;
 
-/** @summary Saved simulations of the organization, newest first */
+/** @summary Saved simulations of the organization (super_admin: all), newest first by default */
 export function useSeempControllerListScenarios<
   TData = Awaited<ReturnType<typeof seempControllerListScenarios>>,
   TError = ErrorType<ProblemDetails>,
@@ -486,7 +487,7 @@ export function useSeempControllerListScenarios<
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-/** @summary Saved simulations of the organization, newest first */
+/** @summary Saved simulations of the organization (super_admin: all), newest first by default */
 export function useSeempControllerListScenarios<
   TData = Awaited<ReturnType<typeof seempControllerListScenarios>>,
   TError = ErrorType<ProblemDetails>,
@@ -508,7 +509,7 @@ export function useSeempControllerListScenarios<
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-/** @summary Saved simulations of the organization, newest first */
+/** @summary Saved simulations of the organization (super_admin: all), newest first by default */
 export function useSeempControllerListScenarios<
   TData = Awaited<ReturnType<typeof seempControllerListScenarios>>,
   TError = ErrorType<ProblemDetails>,
@@ -522,7 +523,7 @@ export function useSeempControllerListScenarios<
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-/** @summary Saved simulations of the organization, newest first */
+/** @summary Saved simulations of the organization (super_admin: all), newest first by default */
 export function useSeempControllerListScenarios<
   TData = Awaited<ReturnType<typeof seempControllerListScenarios>>,
   TError = ErrorType<ProblemDetails>,
@@ -768,6 +769,99 @@ export function useSeempControllerGetScenario<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * @summary Rename a saved scenario (audited as seemp_scenario.update)
+ */
+export const seempControllerRenameScenario = (
+  id: string,
+  renameScenarioDto: BodyType<RenameScenarioDto>,
+  options?: SecondParameter<typeof apiClient>,
+  signal?: AbortSignal,
+) => {
+  return apiClient<SeempScenarioDto>(
+    {
+      url: `/api/v2/seemp/scenarios/${id}`,
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      data: renameScenarioDto,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getSeempControllerRenameScenarioMutationKey = () =>
+  ['seempControllerRenameScenario'] as const;
+
+export const getSeempControllerRenameScenarioMutationOptions = <
+  TError = ErrorType<ProblemDetails>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof seempControllerRenameScenario>>,
+    TError,
+    SeempControllerRenameScenarioMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof apiClient>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof seempControllerRenameScenario>>,
+  TError,
+  SeempControllerRenameScenarioMutationVariables,
+  TContext
+> => {
+  const mutationKey = getSeempControllerRenameScenarioMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof seempControllerRenameScenario>>,
+    SeempControllerRenameScenarioMutationVariables
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return seempControllerRenameScenario(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type SeempControllerRenameScenarioMutationResult = NonNullable<
+  Awaited<ReturnType<typeof seempControllerRenameScenario>>
+>;
+export type SeempControllerRenameScenarioMutationBody = BodyType<RenameScenarioDto>;
+export type SeempControllerRenameScenarioMutationError = ErrorType<ProblemDetails>;
+export type SeempControllerRenameScenarioMutationVariables = {
+  id: string;
+  data: BodyType<RenameScenarioDto>;
+};
+
+/** @summary Rename a saved scenario (audited as seemp_scenario.update) */
+export const useSeempControllerRenameScenario = <
+  TError = ErrorType<ProblemDetails>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof seempControllerRenameScenario>>,
+      TError,
+      SeempControllerRenameScenarioMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof seempControllerRenameScenario>>,
+  TError,
+  SeempControllerRenameScenarioMutationVariables,
+  TContext
+> => {
+  return useMutation(getSeempControllerRenameScenarioMutationOptions(options), queryClient);
+};
 /**
  * @summary Delete a saved scenario
  */

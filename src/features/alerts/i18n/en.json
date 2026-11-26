@@ -1,15 +1,181 @@
 {
-  "alerts": {
-    "title": "Alerts",
-    "description": "Realtime inbox of safety and surveillance alerts: acknowledge, resolve and trace incidents.",
-    "capabilities": [
-      "Alert list filtered by status, type, domain, severity and vessel (cursor pagination)",
-      "Acknowledge and resolve alerts with the alert:ack permission",
-      "Realtime alert:raised / alert:updated notifications in the top bar bell (slot topbar.alerts)",
-      "Open alert summary by severity, type and domain"
-    ]
-  },
   "nav": {
     "alerts": "Alerts"
+  },
+  "alerts": {
+    "title": "Alerts",
+    "description": "Realtime inbox of safety and surveillance alerts. Acknowledge, resolve and trace every occurrence with the source of its method."
+  },
+  "page": {
+    "inbox": "Alert inbox",
+    "live": "Live",
+    "offline": "Not live",
+    "missed_one": "{{count}} new alert arrived on the first page.",
+    "missed_other": "{{count}} new alerts arrived on the first page.",
+    "backToFirst": "Go to the first page"
+  },
+  "summary": {
+    "open": "Open alerts",
+    "byDomain": "Safety {{safety}} · Surveillance {{surveillance}}",
+    "unavailable": "Summary not available yet",
+    "critical": "Critical",
+    "criticalHint": "Needs immediate action",
+    "warning": "Warning",
+    "warningHint": "Open info: {{count}}"
+  },
+  "filters": {
+    "label": "Alert filters",
+    "status": "Status",
+    "statuses": {
+      "open": "Open",
+      "acknowledged": "Acknowledged",
+      "resolved": "Resolved",
+      "all": "All"
+    },
+    "reset": "Reset filters",
+    "severity": "Severity",
+    "allSeverities": "All severities",
+    "domain": "Domain",
+    "allDomains": "All domains",
+    "type": "Alert type",
+    "allTypes": "All types",
+    "mmsi": "Vessel MMSI",
+    "mmsiPlaceholder": "Vessel MMSI…",
+    "range": "Occurrence time range"
+  },
+  "table": {
+    "severity": "Severity",
+    "new": "New",
+    "alert": "Alert",
+    "vessel": "Vessel (MMSI)",
+    "status": "Status",
+    "occurrences": "Occurrences",
+    "occurrencesHint": "Merged occurrences (same dedup key while unresolved)",
+    "lastOccurred": "Latest",
+    "actions": "Actions"
+  },
+  "status": {
+    "open": "Open",
+    "acknowledged": "Acknowledged",
+    "resolved": "Resolved"
+  },
+  "empty": {
+    "title": "No open alerts",
+    "description": "Everything monitored looks safe. New alerts appear here in real time.",
+    "filteredTitle": "No alerts match",
+    "filteredDescription": "Change or reset the filters to see other alerts."
+  },
+  "actions": {
+    "acknowledge": "Acknowledge",
+    "resolve": "Resolve",
+    "acknowledged": "Alert acknowledged",
+    "resolved": "Alert resolved",
+    "failed": "Alert action failed",
+    "resolveConfirmTitle": "Resolve this alert?",
+    "resolveConfirmDescription": "\"{{title}}\" will be marked as resolved for every user of your organization. A new occurrence of the same condition opens a new alert."
+  },
+  "errors": {
+    "alreadyResolved": "This alert is already resolved and can no longer be acknowledged.",
+    "notFound": "The alert was not found or is outside your organization's scope.",
+    "forbidden": "You are not allowed to change the status of alerts.",
+    "rateLimited": "Too many requests. Try again in a moment.",
+    "network": "The server cannot be reached. Check the connection and try again.",
+    "generic": "Something went wrong. Try again."
+  },
+  "export": {
+    "empty": "There are no alerts to export with these filters.",
+    "done_one": "{{count}} alert exported to CSV",
+    "done_other": "{{count}} alerts exported to CSV",
+    "truncated": "Only the first {{count}} alerts were exported. Narrow the filters to export the rest.",
+    "failed": "The CSV export failed. Try again."
+  },
+  "detail": {
+    "title": "Alert details",
+    "loading": "Loading alert details…",
+    "facts": "Summary",
+    "vessel": "Vessel",
+    "openVessel": "Open vessel",
+    "relatedVessel": "Related vessel",
+    "type": "Type",
+    "method": "Method",
+    "position": "Location",
+    "occurrences": "Occurrences",
+    "source": "Source service",
+    "location": "Location",
+    "locationMap": "Location map of alert {{title}}",
+    "openMap": "Open on the live map",
+    "data": "Detector data",
+    "you": "you",
+    "by": "by {{who}}",
+    "yes": "Yes",
+    "no": "No",
+    "dataKeys": {
+      "ewsStatus": "EWS status",
+      "pipelineDistanceM": "Distance to pipeline",
+      "distanceM": "Distance",
+      "risk": "Risk band",
+      "cpaNm": "CPA",
+      "tcpaMin": "TCPA",
+      "rangeNm": "Range between vessels",
+      "sog": "Speed (SOG)",
+      "sogKn": "Speed (SOG)",
+      "relatedMmsi": "Related MMSI",
+      "otherMmsi": "Other vessel",
+      "gapMinutes": "Time without signal",
+      "accuracy": "Accuracy",
+      "thresholds": "Active thresholds"
+    },
+    "timeline": {
+      "title": "Occurrence timeline",
+      "raised": "Alert raised",
+      "recurred": "Latest occurrence ({{count}}×)",
+      "acknowledged": "Acknowledged",
+      "resolved": "Resolved"
+    },
+    "deliveries": {
+      "title": "Notification deliveries",
+      "rules": "Alert rules",
+      "empty": "No deliveries yet",
+      "emptyHint": "None of your organization's alert rules matches this alert.",
+      "attempts_one": "{{count}} attempt",
+      "attempts_other": "{{count}} attempts",
+      "channels": {
+        "email": "E-mail",
+        "telegram": "Telegram",
+        "webhook": "Webhook"
+      },
+      "status": {
+        "pending": "Pending",
+        "sending": "Sending",
+        "queued": "Queued",
+        "sent": "Sent",
+        "failed": "Failed"
+      }
+    }
+  },
+  "bell": {
+    "label": "Alerts",
+    "labelCount_one": "Alerts, {{count}} open",
+    "labelCount_other": "Alerts, {{count}} open",
+    "title": "Latest alerts",
+    "openSummary_one": "{{count}} open alert",
+    "openSummary_other": "{{count}} open alerts",
+    "summaryUnavailable": "Alert count not available yet",
+    "critical": "critical",
+    "warning": "warning",
+    "latest": "Latest alerts",
+    "listUnavailable": "The alert list could not be loaded.",
+    "empty": "No alerts yet",
+    "emptyHint": "Realtime alerts of the safety and surveillance detectors appear here.",
+    "view": "View"
+  },
+  "commands": {
+    "openCritical": "Open critical alerts"
+  },
+  "problems": {
+    "validation": "The filters could not be applied",
+    "validationDetail": "Check the time range and the MMSI of the filters, then try again.",
+    "notFound": "Alert not found",
+    "notFoundDetail": "This alert does not exist or is outside your organization's scope."
   }
 }

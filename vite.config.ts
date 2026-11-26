@@ -47,11 +47,23 @@ export default defineConfig(({ mode }) => {
         output: {
           // Long-lived vendor chunks of the (lazy) map stack, cached across app releases.
           codeSplitting: {
+            // A group captures its modules' dependencies too (Rolldown's default), so each vendor
+            // chunk is self-contained: without that, deck.gl's dependency mjolnir.js landed in the
+            // app's shared map chunk and the two chunks imported each other ("t is not a
+            // constructor" at start-up). Vite's preload helper (used by every lazy import, also by
+            // deck.gl) gets its own chunk first, or vendor-deckgl would capture it and load with
+            // the entry. `pnpm bundle:report` checks both (initial load, import cycles).
             groups: [
-              { name: 'vendor-maplibre', test: /[\\/]node_modules[\\/].*maplibre-gl/ },
+              { name: 'preload-helper', test: /vite[\\/]preload-helper/, priority: 30 },
+              {
+                name: 'vendor-maplibre',
+                test: /[\\/]node_modules[\\/]maplibre-gl[\\/]/,
+                priority: 20,
+              },
               {
                 name: 'vendor-deckgl',
-                test: /[\\/]node_modules[\\/].*@(deck\.gl|luma\.gl|loaders\.gl|math\.gl|probe\.gl)[\\/]/,
+                test: /[\\/]node_modules[\\/]@(deck\.gl|luma\.gl|loaders\.gl|math\.gl|probe\.gl)[\\/]/,
+                priority: 10,
               },
             ],
           },
@@ -62,7 +74,12 @@ export default defineConfig(({ mode }) => {
       environment: 'jsdom',
       globals: false,
       setupFiles: ['./src/test/setup.ts'],
-      include: ['src/**/*.{test,spec}.{ts,tsx}', 'scripts/**/*.test.mjs'],
+      include: [
+        'src/**/*.{test,spec}.{ts,tsx}',
+        'scripts/**/*.test.mjs',
+        // Pure helpers of the e2e mock gateway (its protocol is covered by e2e/realtime.spec.ts).
+        'e2e/mock-server/**/*.test.mjs',
+      ],
       css: false,
       restoreMocks: true,
       reporters: ['dot'],

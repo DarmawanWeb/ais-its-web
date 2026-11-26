@@ -3,8 +3,9 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Emission Service
  * Fuel and CO2 per voyage segment, IMO CII (daily/annual, rating A-E), reduction factors, SEEMP recommendations and what-if simulation, IMO DCS summary
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
+import type { CiiControllerSegmentsFlag } from './ciiControllerSegmentsFlag';
 
 export type CiiControllerSegmentsParams = {
   /**
@@ -21,4 +22,8 @@ export type CiiControllerSegmentsParams = {
   from?: string;
   /** End (ISO-8601); default: now */
   to?: string;
+  /** Only segments of these fuel methods (comma-separated: telemetry, first_formula, holtrop, none) */
+  method?: string;
+  /** Only segments carrying this flag */
+  flag?: CiiControllerSegmentsFlag;
 };

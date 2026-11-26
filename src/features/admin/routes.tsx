@@ -23,12 +23,12 @@ export const feature = defineFeature({
     {
       path: 'admin/api-keys',
       handle: { titleKey: 'admin:apiKeys.title', permission: 'api_key:manage' },
-      lazy: lazyPage(() => import('./pages/api-keys-page'), 'ApikeysPage'),
+      lazy: lazyPage(() => import('./pages/api-keys-page'), 'ApiKeysPage'),
     },
     {
       path: 'admin/reference-data',
       handle: { titleKey: 'admin:referenceData.title', permission: 'vessel:read' },
-      lazy: lazyPage(() => import('./pages/reference-data-page'), 'ReferencedataPage'),
+      lazy: lazyPage(() => import('./pages/reference-data-page'), 'ReferenceDataPage'),
     },
     {
       path: 'admin/devices',
@@ -38,7 +38,7 @@ export const feature = defineFeature({
     {
       path: 'admin/audit-log',
       handle: { titleKey: 'admin:auditLog.title', permission: 'audit:read' },
-      lazy: lazyPage(() => import('./pages/audit-log-page'), 'AuditlogPage'),
+      lazy: lazyPage(() => import('./pages/audit-log-page'), 'AuditLogPage'),
     },
   ],
   nav: [
@@ -80,7 +80,19 @@ export const feature = defineFeature({
       labelKey: 'admin:nav.referenceData',
       icon: Database,
       permission: 'vessel:read',
-      keywords: ['referensi', 'reference', 'fuel', 'engine', 'port'],
+      keywords: [
+        'referensi',
+        'reference',
+        'tipe kapal',
+        'bahan bakar',
+        'fuel',
+        'mesin',
+        'engine',
+        'formula',
+        'pelabuhan',
+        'port',
+        'registri',
+      ],
     },
     {
       id: 'admin.devices',
@@ -90,7 +102,7 @@ export const feature = defineFeature({
       labelKey: 'admin:nav.devices',
       icon: Cpu,
       permission: 'device:manage',
-      keywords: ['perangkat', 'device', 'mqtt'],
+      keywords: ['perangkat', 'device', 'mqtt', 'telemetri', 'flow meter'],
     },
     {
       id: 'admin.auditLog',

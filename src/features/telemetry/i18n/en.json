@@ -1,15 +1,186 @@
 {
+  "nav": { "telemetry": "Telemetry" },
   "telemetry": {
     "title": "Fuel Telemetry",
-    "description": "Main and auxiliary engine fuel consumption readings from devices, APIs and manual entry.",
-    "capabilities": [
-      "Hourly / daily readings charts",
-      "Device activity per vessel",
-      "Manual readings (telemetry:write)",
-      "CSV export"
-    ]
+    "description": "Fuel consumption readings of the main and auxiliary engines from MQTT/HTTP devices, APIs and manual entry."
   },
-  "nav": {
-    "telemetry": "Telemetry"
+  "vessels": {
+    "title": "Fleet vessels",
+    "activeCount": "{{active}} of {{total}} active",
+    "search": "Search vessel or MMSI",
+    "noMatch": "No matching vessels",
+    "empty": "No vessels in the fleet yet",
+    "emptyHint": "Telemetry is available for your organization's vessels. Add a vessel first.",
+    "noReading": "no readings yet",
+    "devices_one": "{{count}} registered device",
+    "devices_other": "{{count}} registered devices",
+    "devicesShort_one": "{{count}} device",
+    "devicesShort_other": "{{count}} devices",
+    "choose": "Choose a vessel",
+    "loading": "Loading vessels…",
+    "openFleet": "Open the vessel list",
+    "detail": "Vessel details"
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "lastReading": "Last reading {{time}}",
+    "noReading": "No readings yet"
+  },
+  "series": {
+    "title": "Fuel consumption",
+    "description": "Main engine (ME) and auxiliary engines (AE) per reading, per hour or per day (UTC).",
+    "me": "Main engine (ME)",
+    "ae": "Auxiliary engines (AE)",
+    "total": "Total",
+    "readingsInBucket_one": "{{count}} reading",
+    "readingsInBucket_other": "{{count}} readings",
+    "caption": "Fuel consumption chart, {{bucket}}",
+    "legend": "Chart legend",
+    "empty": "No readings in this range",
+    "emptyHint": "Choose another range, check the vessel's devices or enter a manual reading.",
+    "truncated": "The chart and table show the first {{count}} points; narrow the range or choose a coarser resolution. The CSV export holds every point."
+  },
+  "buckets": {
+    "label": "Resolution",
+    "raw": "Raw",
+    "1h": "Hourly",
+    "1d": "Daily",
+    "tooLong": "The range is too long for this resolution"
+  },
+  "range": {
+    "label": "Time range",
+    "last24h": "24 hours",
+    "last7d": "7 days",
+    "last30d": "30 days",
+    "thisYear": "This year"
+  },
+  "summary": {
+    "total": "Total fuel",
+    "readings_one": "{{count}} reading",
+    "readings_other": "{{count}} readings",
+    "me": "Main engine",
+    "ae": "Auxiliary engines",
+    "last": "Last reading",
+    "first": "First {{time}}"
+  },
+  "table": {
+    "title": "Readings",
+    "description": "Newest first. Metric tonnes.",
+    "time": "Time",
+    "bucket": "Period start",
+    "me": "ME (t)",
+    "ae": "AE (t)",
+    "total": "Total (t)",
+    "period": "Period",
+    "source": "Source",
+    "device": "Device",
+    "readings": "Readings"
+  },
+  "sources": {
+    "device": "HTTP device",
+    "mqtt": "MQTT",
+    "api": "API",
+    "manual": "Manual",
+    "import": "Import"
+  },
+  "manual": {
+    "open": "Manual entry",
+    "title": "Manual reading",
+    "description": "Record fuel consumption from the engine log. One reading per vessel and time; a different reading at the same time is refused.",
+    "vessel": "Vessel",
+    "chooseVessel": "Choose a vessel",
+    "time": "Reading time",
+    "timeHint": "End of the measured period (local time).",
+    "periodStart": "Period start (optional)",
+    "periodHint": "Before the reading time, at most {{hours}} hours.",
+    "fuelMe": "Main engine fuel",
+    "fuelAe": "Auxiliary engine fuel",
+    "maxHint": "0 – {{max}} t (service default limit)",
+    "save": "Save reading",
+    "saved": "Reading saved",
+    "savedHint": "Chart and summary updated; the emission service receives this reading.",
+    "duplicate": "The same reading is already stored (nothing changed)",
+    "errors": {
+      "required": "Required",
+      "number": "Enter a number",
+      "negative": "Must not be negative",
+      "max": "At most {{max}} t",
+      "vessel": "Choose a vessel",
+      "date": "Invalid date",
+      "future": "The time must not be more than 5 minutes ahead",
+      "tooOld": "The reading is older than 5 years",
+      "periodOrder": "The period start must be before the reading time",
+      "periodLength": "The period is at most {{hours}} hours",
+      "conflict": "A different reading exists at this time. Change the time or check the stored data."
+    }
+  },
+  "devices": {
+    "title": "Devices",
+    "description_one": "{{count}} device registered on this vessel.",
+    "description_other": "{{count}} devices registered on this vessel.",
+    "manage": "Manage devices",
+    "noPermission": "Organization admins register and configure devices on the Devices page.",
+    "empty": "No devices yet",
+    "emptyHint": "Register an MQTT or HTTP fuel meter so telemetry flows automatically.",
+    "register": "Register a device",
+    "lastSeen": "Last sent {{time}}",
+    "neverSeen": "Has not sent data yet",
+    "serial": "Serial {{serial}}",
+    "topic": "Device MQTT topic"
+  },
+  "copy": {
+    "copied": "Copied",
+    "copy": "Copy {{label}}"
+  },
+  "mqtt": {
+    "title": "How devices report",
+    "description": "Fuel meters publish JSON on their own MQTT topic, or post over HTTP with the device's API key.",
+    "channels": "Reporting channels",
+    "topic": "MQTT topic",
+    "topicHint": "Replace <deviceId> with the device id from the Devices page. The NATS MQTT gateway forwards it to the telemetry service.",
+    "example": "Example message",
+    "schema": "Payload schema (contracts)",
+    "rules": [
+      "One object or an array of up to 1000 readings; the MMSI is the device's.",
+      "Values ≥ 0 in metric tonnes; ISO-8601 UTC times, at most 5 minutes ahead.",
+      "Identical readings are ignored (idempotent); a different reading at the same time is refused as a conflict.",
+      "Only active devices of kind mqtt are accepted."
+    ],
+    "httpHint": "HTTP devices post with an API key of scope telemetry:ingest linked to the device.",
+    "httpExample": "Example HTTP request"
+  },
+  "export": {
+    "running": "Exporting…",
+    "done_one": "{{count}} row exported",
+    "done_other": "{{count}} rows exported",
+    "truncated": "The export is limited to {{count}} rows; narrow the range for the rest.",
+    "failed": "Export failed"
+  },
+  "problems": {
+    "VALIDATION_FAILED": {
+      "title": "The reading is not valid",
+      "detail": "Check the highlighted fields."
+    },
+    "FORBIDDEN": {
+      "title": "The vessel is not your organization's",
+      "detail": "Telemetry can only be recorded for vessels of the active organization."
+    },
+    "ORGANIZATION_REQUIRED": {
+      "title": "Choose an active organization",
+      "detail": "Telemetry is private to each organization."
+    },
+    "VESSEL_NOT_FOUND": {
+      "title": "The telemetry service does not know the vessel",
+      "detail": "It may be new or deleted; try again in a moment."
+    },
+    "DEVICE_NOT_FOUND": {
+      "title": "Device not found",
+      "detail": "The device may have been deleted."
+    },
+    "READING_CONFLICT": {
+      "title": "Reading conflict",
+      "detail": "A different reading exists at that time; nothing was stored."
+    }
   }
 }

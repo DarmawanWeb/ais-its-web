@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Safety Service
  * Navigational safety analytics (pipeline Early Warning System, collision risk CPA/TCPA) built on the Detector SDK
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import { useQuery } from '@tanstack/react-query';
 import type {
@@ -45,7 +45,7 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
 };
 
 /**
- * Initial state of the live map (spec §9): latest EWS status, collision risk and closest encounter per vessel, ordered by MMSI, at most `limit` vessels with a position since `since`. Shared across tenants (spec §8.5), except the nearest pipeline when it is a zone private to another organization: `nearestPipelineZoneId` and `pipelineDistanceM` are then `null` (authority and super_admin see every zone).
+ * Initial state of the live map (spec §9): latest EWS status, collision risk and closest encounter per vessel, ordered by MMSI, at most `limit` vessels with a position since `since`, with the vessel’s fleet identity and the nearest pipeline’s code and name. Shared across tenants (spec §8.5), except the nearest pipeline when it is a zone private to another organization: `nearestPipelineZoneId`, `nearestPipeline` and `pipelineDistanceM` are then `null` (authority and super_admin see every zone).
  * @summary Latest safety states of the vessels in a viewport
  */
 export const vesselStatesControllerList = (
@@ -98,7 +98,7 @@ export type VesselStatesControllerListQueryResult = NonNullable<
 export type VesselStatesControllerListQueryError = ErrorType<ProblemDetails>;
 
 /**
- * Initial state of the live map (spec §9): latest EWS status, collision risk and closest encounter per vessel, ordered by MMSI, at most `limit` vessels with a position since `since`. Shared across tenants (spec §8.5), except the nearest pipeline when it is a zone private to another organization: `nearestPipelineZoneId` and `pipelineDistanceM` are then `null` (authority and super_admin see every zone).
+ * Initial state of the live map (spec §9): latest EWS status, collision risk and closest encounter per vessel, ordered by MMSI, at most `limit` vessels with a position since `since`, with the vessel’s fleet identity and the nearest pipeline’s code and name. Shared across tenants (spec §8.5), except the nearest pipeline when it is a zone private to another organization: `nearestPipelineZoneId`, `nearestPipeline` and `pipelineDistanceM` are then `null` (authority and super_admin see every zone).
  * @summary Latest safety states of the vessels in a viewport
  */
 export function useVesselStatesControllerList<
@@ -123,7 +123,7 @@ export function useVesselStatesControllerList<
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
- * Initial state of the live map (spec §9): latest EWS status, collision risk and closest encounter per vessel, ordered by MMSI, at most `limit` vessels with a position since `since`. Shared across tenants (spec §8.5), except the nearest pipeline when it is a zone private to another organization: `nearestPipelineZoneId` and `pipelineDistanceM` are then `null` (authority and super_admin see every zone).
+ * Initial state of the live map (spec §9): latest EWS status, collision risk and closest encounter per vessel, ordered by MMSI, at most `limit` vessels with a position since `since`, with the vessel’s fleet identity and the nearest pipeline’s code and name. Shared across tenants (spec §8.5), except the nearest pipeline when it is a zone private to another organization: `nearestPipelineZoneId`, `nearestPipeline` and `pipelineDistanceM` are then `null` (authority and super_admin see every zone).
  * @summary Latest safety states of the vessels in a viewport
  */
 export function useVesselStatesControllerList<
@@ -148,7 +148,7 @@ export function useVesselStatesControllerList<
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
- * Initial state of the live map (spec §9): latest EWS status, collision risk and closest encounter per vessel, ordered by MMSI, at most `limit` vessels with a position since `since`. Shared across tenants (spec §8.5), except the nearest pipeline when it is a zone private to another organization: `nearestPipelineZoneId` and `pipelineDistanceM` are then `null` (authority and super_admin see every zone).
+ * Initial state of the live map (spec §9): latest EWS status, collision risk and closest encounter per vessel, ordered by MMSI, at most `limit` vessels with a position since `since`, with the vessel’s fleet identity and the nearest pipeline’s code and name. Shared across tenants (spec §8.5), except the nearest pipeline when it is a zone private to another organization: `nearestPipelineZoneId`, `nearestPipeline` and `pipelineDistanceM` are then `null` (authority and super_admin see every zone).
  * @summary Latest safety states of the vessels in a viewport
  */
 export function useVesselStatesControllerList<
@@ -165,7 +165,7 @@ export function useVesselStatesControllerList<
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
- * Initial state of the live map (spec §9): latest EWS status, collision risk and closest encounter per vessel, ordered by MMSI, at most `limit` vessels with a position since `since`. Shared across tenants (spec §8.5), except the nearest pipeline when it is a zone private to another organization: `nearestPipelineZoneId` and `pipelineDistanceM` are then `null` (authority and super_admin see every zone).
+ * Initial state of the live map (spec §9): latest EWS status, collision risk and closest encounter per vessel, ordered by MMSI, at most `limit` vessels with a position since `since`, with the vessel’s fleet identity and the nearest pipeline’s code and name. Shared across tenants (spec §8.5), except the nearest pipeline when it is a zone private to another organization: `nearestPipelineZoneId`, `nearestPipeline` and `pipelineDistanceM` are then `null` (authority and super_admin see every zone).
  * @summary Latest safety states of the vessels in a viewport
  */
 export function useVesselStatesControllerList<
@@ -191,11 +191,11 @@ export function useVesselStatesControllerList<
 }
 
 /**
- * Same visibility as the list: the nearest pipeline is `null` when it is a zone private to another organization.
+ * Same visibility as the list: the nearest pipeline (id, identity, distance) is `null` when it is a zone private to another organization.
  * @summary Latest safety state of one vessel
  */
 export const vesselStatesControllerGet = (
-  mmsi: number,
+  mmsi: string,
   options?: SecondParameter<typeof apiClient>,
   signal?: AbortSignal,
 ) => {
@@ -205,7 +205,7 @@ export const vesselStatesControllerGet = (
   );
 };
 
-export const getVesselStatesControllerGetQueryKey = (mmsi: number) => {
+export const getVesselStatesControllerGetQueryKey = (mmsi: string) => {
   return [`/api/v2/safety/vessels/${mmsi}`] as const;
 };
 
@@ -213,7 +213,7 @@ export const getVesselStatesControllerGetQueryOptions = <
   TData = Awaited<ReturnType<typeof vesselStatesControllerGet>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof vesselStatesControllerGet>>, TError, TData>
@@ -245,14 +245,14 @@ export type VesselStatesControllerGetQueryResult = NonNullable<
 export type VesselStatesControllerGetQueryError = ErrorType<ProblemDetails>;
 
 /**
- * Same visibility as the list: the nearest pipeline is `null` when it is a zone private to another organization.
+ * Same visibility as the list: the nearest pipeline (id, identity, distance) is `null` when it is a zone private to another organization.
  * @summary Latest safety state of one vessel
  */
 export function useVesselStatesControllerGet<
   TData = Awaited<ReturnType<typeof vesselStatesControllerGet>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   options: {
     query: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof vesselStatesControllerGet>>, TError, TData>
@@ -270,14 +270,14 @@ export function useVesselStatesControllerGet<
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
- * Same visibility as the list: the nearest pipeline is `null` when it is a zone private to another organization.
+ * Same visibility as the list: the nearest pipeline (id, identity, distance) is `null` when it is a zone private to another organization.
  * @summary Latest safety state of one vessel
  */
 export function useVesselStatesControllerGet<
   TData = Awaited<ReturnType<typeof vesselStatesControllerGet>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof vesselStatesControllerGet>>, TError, TData>
@@ -295,14 +295,14 @@ export function useVesselStatesControllerGet<
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
- * Same visibility as the list: the nearest pipeline is `null` when it is a zone private to another organization.
+ * Same visibility as the list: the nearest pipeline (id, identity, distance) is `null` when it is a zone private to another organization.
  * @summary Latest safety state of one vessel
  */
 export function useVesselStatesControllerGet<
   TData = Awaited<ReturnType<typeof vesselStatesControllerGet>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof vesselStatesControllerGet>>, TError, TData>
@@ -312,14 +312,14 @@ export function useVesselStatesControllerGet<
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
- * Same visibility as the list: the nearest pipeline is `null` when it is a zone private to another organization.
+ * Same visibility as the list: the nearest pipeline (id, identity, distance) is `null` when it is a zone private to another organization.
  * @summary Latest safety state of one vessel
  */
 export function useVesselStatesControllerGet<
   TData = Awaited<ReturnType<typeof vesselStatesControllerGet>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof vesselStatesControllerGet>>, TError, TData>

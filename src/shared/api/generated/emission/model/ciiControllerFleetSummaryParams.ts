@@ -3,8 +3,9 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Emission Service
  * Fuel and CO2 per voyage segment, IMO CII (daily/annual, rating A-E), reduction factors, SEEMP recommendations and what-if simulation, IMO DCS summary
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
+import type { CiiControllerFleetSummarySort } from './ciiControllerFleetSummarySort';
 
 export type CiiControllerFleetSummaryParams = {
   /**
@@ -13,13 +14,25 @@ export type CiiControllerFleetSummaryParams = {
    * @maximum 2200
    */
   year?: number;
-  /** @minimum 1 */
+  /** Organization (super_admin only; others always see their active organization) */
+  orgId?: string;
+  /**
+   * @minimum 1
+   * @maximum 1000000
+   */
   page?: number;
   /**
    * @minimum 1
    * @maximum 100
    */
   pageSize?: number;
-  /** Organization (super_admin only; others always see their active organization) */
-  orgId?: string;
+  /** Only items with one of these grades of the year (comma-separated A–E); vessels without CII data never match */
+  grade?: string;
+  /**
+   * Name (case-insensitive substring), MMSI or IMO number (prefix of digits)
+   * @maxLength 120
+   */
+  search?: string;
+  /** Order of `items`; a leading `-` sorts descending. grade A→E, rating and attained ascending = best first; vessels without CII data come last in both directions; ties by MMSI */
+  sort?: CiiControllerFleetSummarySort;
 };

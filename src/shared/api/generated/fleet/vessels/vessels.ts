@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Fleet Service
  * Vessel master data and reference data (vessel types, fuels, engines, fuel formulas, ports, registry); publishes VesselSnapshotV1 to the FLEET stream
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import { useMutation, useQuery } from '@tanstack/react-query';
 import type {
@@ -1183,8 +1183,10 @@ export const useVesselsControllerRemovePhoto = <
   return useMutation(getVesselsControllerRemovePhotoMutationOptions(options), queryClient);
 };
 /**
- * Requires super_admin (403 PLATFORM_ADMIN_REQUIRED otherwise).
- * @summary Re-enqueue the snapshot of a vessel (platform administrators)
+ * Enqueues one fleet.vessel.upserted.v1 with the current data; the relay publishes it asynchronously.
+ *
+ * Requires a platform administrator (super_admin); other users and API keys get 403 PLATFORM_ADMIN_REQUIRED.
+ * @summary Re-enqueue the snapshot of a vessel (super_admin)
  */
 export const vesselsControllerRepublish = (
   id: string,
@@ -1244,8 +1246,10 @@ export type VesselsControllerRepublishMutationError = ErrorType<ProblemDetails>;
 export type VesselsControllerRepublishMutationVariables = { id: string };
 
 /**
- * Requires super_admin (403 PLATFORM_ADMIN_REQUIRED otherwise).
- * @summary Re-enqueue the snapshot of a vessel (platform administrators)
+ * Enqueues one fleet.vessel.upserted.v1 with the current data; the relay publishes it asynchronously.
+ *
+ * Requires a platform administrator (super_admin); other users and API keys get 403 PLATFORM_ADMIN_REQUIRED.
+ * @summary Re-enqueue the snapshot of a vessel (super_admin)
  */
 export const useVesselsControllerRepublish = <
   TError = ErrorType<ProblemDetails>,

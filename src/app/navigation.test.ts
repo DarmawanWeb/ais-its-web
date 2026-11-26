@@ -66,6 +66,7 @@ describe('buildNavigation', () => {
       [
         'surveillance',
         [
+          '/surveillance',
           '/surveillance/transhipment',
           '/surveillance/fishing',
           '/surveillance/dark',

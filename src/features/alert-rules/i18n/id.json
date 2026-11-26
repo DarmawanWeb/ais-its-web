@@ -1,14 +1,307 @@
 {
-  "rules": {
-    "title": "Aturan Alert",
-    "description": "Atur siapa yang diberi tahu, untuk alert apa, dan melalui kanal mana (email, Telegram, webhook).",
-    "capabilities": [
-      "Aturan per tipe, domain, tingkat minimum, kapal dan zona",
-      "Kanal email, Telegram dan webhook bertanda tangan",
-      "Kirim notifikasi uji (POST /api/v2/notifications/test)"
-    ]
-  },
   "nav": {
     "rules": "Aturan Alert"
+  },
+  "rules": {
+    "title": "Aturan Alert",
+    "description": "Tentukan alert mana yang diteruskan, kepada siapa dan melalui kanal apa: email, Telegram atau webhook bertanda tangan.",
+    "create": "Buat aturan",
+    "createFirst": "Buat aturan pertama",
+    "listTitle": "Daftar aturan",
+    "search": "Cari aturan",
+    "searchPlaceholder": "Cari nama aturan…",
+    "statusFilter": "Filter status aturan",
+    "status": {
+      "all": "Semua",
+      "enabled": "Aktif",
+      "disabled": "Nonaktif"
+    },
+    "orgFilter": "Filter organisasi",
+    "allOrganizations": "Semua organisasi",
+    "noMatches": "Tidak ada aturan yang cocok",
+    "noMatchesHint": "Ubah kata kunci atau filter status untuk melihat aturan lain.",
+    "empty": "Belum ada aturan alert",
+    "emptyHint": "Buat aturan untuk meneruskan alert EWS, risiko tubrukan, transhipment, kapal gelap dan lainnya ke email, grup Telegram atau sistem Anda melalui webhook."
+  },
+  "stats": {
+    "label": "Ringkasan aturan dan pengiriman",
+    "active": "Aturan aktif",
+    "ofTotal": "dari {{total}}",
+    "channels": "Kanal notifikasi",
+    "channelsBreakdown": "{{email}} email · {{telegram}} Telegram · {{webhook}} webhook",
+    "successRate": "Keberhasilan pengiriman",
+    "successSample": "{{count}} pengiriman terakhir · {{failed}} gagal",
+    "noDeliveries": "Belum ada pengiriman",
+    "lastDelivery": "Pengiriman terakhir",
+    "lastDeliveryHint": "Diperbarui otomatis secara realtime"
+  },
+  "toasts": {
+    "enabled": "Aturan \"{{name}}\" diaktifkan",
+    "disabled": "Aturan \"{{name}}\" dinonaktifkan",
+    "toggleFailed": "Status aturan gagal diubah",
+    "deleted": "Aturan \"{{name}}\" dihapus",
+    "deleteFailed": "Aturan gagal dihapus",
+    "secretRotated": "Secret webhook aturan \"{{name}}\" diganti",
+    "rotateFailed": "Secret tidak dapat diganti"
+  },
+  "delete": {
+    "title": "Hapus aturan \"{{name}}\"?",
+    "description": "Aturan berhenti meneruskan alert dan seluruh riwayat pengirimannya ikut terhapus. Tindakan ini tidak dapat dibatalkan.",
+    "confirm": "Hapus aturan"
+  },
+  "rotate": {
+    "title": "Ganti secret {{target}}?",
+    "description": "Pengiriman berikutnya, termasuk percobaan ulang yang tertunda, langsung ditandatangani dengan secret baru. Simpan secret baru di penerima; penerima dapat memegang secret lama dan baru berdasarkan X-AIS-ITS-Key-Id selama peralihan.",
+    "confirm": "Ganti secret"
+  },
+  "secret": {
+    "title": "Simpan secret penandatanganan webhook",
+    "description": "Secret baru untuk aturan \"{{name}}\". Penerima webhook memverifikasi setiap pengiriman dengan secret ini.",
+    "onceTitle": "Hanya ditampilkan sekali",
+    "onceText": "Salin secret sekarang dan simpan di penerima webhook. Secret tidak dapat ditampilkan lagi; jika hilang, ganti secret kanal ini.",
+    "secret": "Secret penandatanganan",
+    "copy": "Salin secret penandatanganan",
+    "keyId": "ID kunci (X-AIS-ITS-Key-Id):",
+    "copyKeyId": "Salin ID kunci",
+    "usage": "Penerima memilih secret berdasarkan header X-AIS-ITS-Key-Id dan menghitung HMAC-SHA256 atas \"<timestamp>.<raw body>\" (lihat panduan webhook).",
+    "stored_other": "Saya sudah menyimpan secret ini di tempat yang aman",
+    "done": "Selesai"
+  },
+  "scope": {
+    "org": "Armada organisasi",
+    "all": "Semua kapal"
+  },
+  "locales": {
+    "id": "Bahasa Indonesia",
+    "en": "English"
+  },
+  "card": {
+    "minSeverity": "Tingkat minimum",
+    "allAlerts": "Semua alert",
+    "allTypes": "semua tipe",
+    "anyVessel": "Semua kapal dalam cakupan",
+    "anyZone": "Semua lokasi",
+    "disabled": "Nonaktif",
+    "enable": "Aktifkan aturan",
+    "disable": "Nonaktifkan aturan",
+    "lockedHint": "Aturan lintas tenant hanya dapat diubah anggota otoritas organisasi ini",
+    "toggleLabel": "Aktifkan aturan {{name}}",
+    "actions": "Aksi aturan {{name}}",
+    "edit": "Ubah aturan",
+    "deliveries": "Riwayat pengiriman",
+    "test": "Kirim notifikasi uji",
+    "conditions": "Kondisi",
+    "vessels": "Kapal",
+    "zones": "Zona",
+    "channels": "Kanal",
+    "quiet": "Senyap {{minutes}} mnt",
+    "noQuiet": "Tanpa periode senyap",
+    "updated": "Diperbarui {{time}}",
+    "locked": "Hanya otoritas",
+    "rotateSecret": "Ganti secret webhook",
+    "rotateSecretOf": "Ganti secret {{target}}",
+    "keyId": "(kunci {{keyId}})",
+    "deploymentKey": "(ditandatangani dengan secret deployment)",
+    "deploymentKeyHint": "Webhook ini masih ditandatangani dengan secret deployment lama. Ganti secret-nya agar kanal memiliki kunci sendiri."
+  },
+  "channels": {
+    "types": {
+      "email": "Email",
+      "telegram": "Telegram",
+      "webhook": "Webhook"
+    },
+    "type": "Jenis kanal {{index}}",
+    "target": "Tujuan kanal {{index}}",
+    "placeholders": {
+      "email": "ops@perusahaan.co.id",
+      "telegram": "-1001234567890 atau @kanal_anda",
+      "webhook": "https://sistem-anda.example/hooks/ais"
+    },
+    "hints": {
+      "email": "Satu alamat per kanal; tambahkan kanal email lain untuk penerima berikutnya.",
+      "telegram": "ID chat (grup/kanal diawali -100) atau @namakanal. Bot platform harus menjadi anggota.",
+      "webhook": "Menerima POST JSON bertanda tangan. Alamat jaringan privat/lokal ditolak."
+    },
+    "insecureWebhook": "Webhook http:// mengirim alert tanpa enkripsi. Gunakan https:// bila memungkinkan.",
+    "test": {
+      "action": "Uji",
+      "sending": "Mengirim notifikasi uji…",
+      "sent": "Notifikasi uji terkirim",
+      "queued": "Diantrekan — periksa kotak masuk dalam beberapa menit",
+      "failed": "Notifikasi uji gagal"
+    },
+    "remove": "Hapus kanal {{index}}",
+    "add": {
+      "email": "Email",
+      "telegram": "Telegram",
+      "webhook": "Webhook"
+    },
+    "count": "{{count}} dari {{max}} kanal",
+    "errors": {
+      "required": "Tujuan wajib diisi",
+      "tooLong": "Tujuan terlalu panjang",
+      "email": "Alamat email tidak valid",
+      "telegram": "Gunakan ID chat numerik atau @namakanal",
+      "webhookUrl": "Gunakan URL http(s) yang lengkap",
+      "webhookCredentials": "Jangan sertakan nama pengguna atau kata sandi di URL",
+      "duplicate": "Kanal ini sudah ada di aturan",
+      "none": "Tambahkan minimal satu kanal",
+      "tooMany": "Maksimal {{max}} kanal per aturan"
+    }
+  },
+  "editor": {
+    "createTitle": "Aturan alert baru",
+    "editTitle": "Ubah aturan alert",
+    "description": "Aturan cocok bila semua kondisi terpenuhi; daftar yang kosong tidak membatasi.",
+    "identity": "Identitas",
+    "name": "Nama aturan",
+    "namePlaceholder": "mis. EWS kritis Selat Singapura",
+    "locale": "Bahasa notifikasi",
+    "enabled": "Aturan aktif",
+    "enabledHint": "Aturan nonaktif disimpan tetapi tidak meneruskan alert.",
+    "owner": "Organisasi pemilik",
+    "ownerPlaceholder": "Pilih organisasi",
+    "ownerHint": "Hanya super admin yang dapat membuat aturan untuk organisasi lain. Pemilik tidak dapat diubah setelah dibuat.",
+    "scopeTitle": "Cakupan kapal",
+    "scopeDescription": "Sebagai anggota otoritas, Anda dapat memantau seluruh kapal di platform.",
+    "scopeHints": {
+      "all": "Alert dari kapal mana pun (lintas tenant), termasuk kapal di luar organisasi Anda.",
+      "org": "Hanya alert dari kapal milik organisasi ini."
+    },
+    "scopeKeptAll": "Aturan ini memantau seluruh kapal. Cakupan hanya dapat diubah oleh anggota otoritas organisasi pemilik.",
+    "scopeFixedOrg": "Aturan memantau kapal milik organisasi ini (alert dari kapal maupun kapal terkait).",
+    "conditionsTitle": "Kondisi alert",
+    "conditionsDescription": "Pilih domain atau tipe alert, tingkat minimum, serta batasi kapal dan zona bila perlu.",
+    "conditions": {
+      "everything": "Tidak ada yang dipilih: semua domain dan tipe alert cocok.",
+      "wholeDomains": "Seluruh tipe domain terpilih cocok, termasuk tipe baru di masa depan.",
+      "someTypes": "Hanya tipe yang dicentang yang cocok.",
+      "clear": "Kosongkan",
+      "allTypes": "Semua tipe",
+      "otherTypes": "Tipe lain yang tetap dipantau:"
+    },
+    "severity": {
+      "label": "Tingkat minimum",
+      "hints": {
+        "info": "Semua alert, termasuk informasi",
+        "warning": "Peringatan dan kritis",
+        "critical": "Hanya alert kritis"
+      }
+    },
+    "vessels": {
+      "label": "Kapal",
+      "none": "Semua kapal dalam cakupan",
+      "add": "Tambah kapal",
+      "search": "Cari kapal",
+      "searchPlaceholder": "Nama kapal, IMO atau MMSI…",
+      "noResults": "Tidak ada kapal yang cocok",
+      "results": "Hasil pencarian",
+      "addMmsi": "Tambahkan MMSI {{mmsi}}",
+      "unknown": "Kapal",
+      "remove": "Hapus {{name}} dari filter"
+    },
+    "zones": {
+      "label": "Zona",
+      "none": "Semua lokasi",
+      "add": "Tambah zona",
+      "search": "Cari zona",
+      "searchPlaceholder": "Nama atau kode zona…",
+      "noResults": "Tidak ada zona yang cocok",
+      "remove": "Hapus zona {{name}} dari filter"
+    },
+    "channelsTitle": "Kanal notifikasi",
+    "channelsDescription": "Ke mana alert yang cocok dikirim. Gunakan tombol Uji untuk memastikan tujuan menerima pesan.",
+    "quietTitle": "Periode senyap",
+    "quietDescription": "Setelah aturan mengirim sebuah alert, kemunculan berikutnya dari alert yang sama tidak dikirim lagi selama periode ini — kecuali tingkatnya naik.",
+    "quietLabel": "Periode senyap dalam menit",
+    "minutes": "menit",
+    "quietPresets": {
+      "0": "Tanpa",
+      "15": "15 mnt",
+      "60": "1 jam",
+      "240": "4 jam",
+      "1440": "1 hari"
+    },
+    "errors": {
+      "nameRequired": "Nama aturan wajib diisi",
+      "nameTooLong": "Nama maksimal {{max}} karakter",
+      "quietInvalid": "Isi bilangan bulat 0–{{max}} menit"
+    },
+    "create": "Buat aturan",
+    "created": "Aturan \"{{name}}\" dibuat",
+    "saved": "Aturan \"{{name}}\" disimpan",
+    "saveFailed": "Aturan gagal disimpan"
+  },
+  "webhook": {
+    "open": "Panduan webhook",
+    "toggle": "Cara memverifikasi tanda tangan webhook",
+    "dialogTitle": "Verifikasi webhook AIS Maritime Intelligence",
+    "dialogDescription": "Setiap pengiriman webhook ditandatangani agar penerima dapat memastikan pesan asli dan belum diubah.",
+    "title": "Tanda tangan HMAC-SHA256",
+    "intro": "Platform mengirim POST application/json ke URL Anda dengan header berikut. Tolak permintaan yang tanda tangannya tidak cocok atau stempel waktunya kedaluwarsa.",
+    "headers": {
+      "timestamp": "Waktu penandatanganan (detik Unix).",
+      "signature": "sha256=<hex HMAC-SHA256(secret kunci, \"<timestamp>.<raw body>\")>.",
+      "delivery": "ID pengiriman — gunakan untuk mengabaikan percobaan ulang yang sama.",
+      "keyId": "Kunci yang menandatangani: keyId kanal (UUID), deployment (kanal dari sebelum versi 0.2.0) atau test (notifikasi uji ke target lain)."
+    },
+    "steps": {
+      "raw": "Baca body mentah persis seperti diterima, sebelum diurai sebagai JSON.",
+      "hmac": "Pilih secret berdasarkan X-AIS-ITS-Key-Id, lalu hitung HMAC-SHA256 atas \"<timestamp>.<raw body>\".",
+      "compare": "Bandingkan dengan X-AIS-ITS-Signature menggunakan perbandingan waktu-konstan.",
+      "fresh": "Tolak stempel waktu yang berbeda lebih dari 5 menit dari jam server Anda.",
+      "dedupe": "Jawab 2xx secepatnya; 408, 429, 5xx dan time-out akan dicoba ulang, status lain dianggap gagal permanen."
+    },
+    "body": "Isi body:",
+    "sample": "Contoh verifikasi {{language}}",
+    "copyCode": "Salin contoh kode",
+    "secretTitle": "Secret penandatanganan",
+    "secretText": "Setiap kanal webhook memiliki secret sendiri (whsec_…) yang hanya ditampilkan sekali: saat kanal dibuat atau saat secret-nya diganti (menu aksi aturan). Kanal dari sebelum versi 0.2.0 ditandatangani dengan secret deployment (ID kunci deployment) sampai secret-nya diganti."
+  },
+  "deliveries": {
+    "title": "Riwayat pengiriman",
+    "description": "Notifikasi yang direncanakan dan dikirim oleh aturan \"{{name}}\", terbaru di atas.",
+    "filter": "Filter status pengiriman",
+    "filters": {
+      "all": "Semua",
+      "sent": "Terkirim",
+      "queued": "Diantrekan",
+      "pending": "Tertunda",
+      "failed": "Gagal"
+    },
+    "status": {
+      "pending": "Menunggu percobaan",
+      "sending": "Sedang dikirim",
+      "queued": "Diantrekan",
+      "sent": "Terkirim",
+      "failed": "Gagal"
+    },
+    "attempts_other": "{{count}} percobaan",
+    "nextAttempt": "Percobaan berikutnya {{time}}",
+    "openAlert": "Buka alert",
+    "retryHint": "Percobaan ulang dengan jeda bertahap",
+    "listLabel": "Daftar pengiriman",
+    "empty": "Belum ada pengiriman",
+    "emptyFiltered": "Tidak ada pengiriman dengan status ini",
+    "emptyHint": "Pengiriman muncul di sini saat alert yang cocok dengan aturan ini terjadi."
+  },
+  "test": {
+    "title": "Kirim notifikasi uji",
+    "description": "Pesan uji dikirim ke setiap kanal aturan \"{{name}}\" tanpa membuat alert.",
+    "listLabel": "Kanal aturan",
+    "notSent": "Belum dikirim",
+    "hint": "Batas 10 notifikasi uji per pengguna setiap 10 menit. Email masuk antrean pengiriman.",
+    "sendAll": "Kirim ke semua kanal"
+  },
+  "problems": {
+    "ALERT_RULE_NOT_FOUND": "Aturan tidak ditemukan atau sudah dihapus.",
+    "RULE_SCOPE_FORBIDDEN": "Aturan yang memantau semua kapal hanya dapat dibuat atau diubah oleh anggota otoritas organisasi pemiliknya.",
+    "ORGANIZATION_REQUIRED": "Pilih organisasi aktif terlebih dahulu.",
+    "CHANNEL_NOT_CONFIGURED": "Kanal ini belum dikonfigurasi di server (token bot Telegram atau secret webhook). Hubungi administrator platform.",
+    "RATE_LIMITED": "Terlalu banyak notifikasi uji. Coba lagi dalam {{seconds}} detik.",
+    "VALIDATION_FAILED": "Periksa kembali isian aturan.",
+    "CONFLICT": "Aturan diubah pengguna lain. Muat ulang lalu coba lagi.",
+    "RULE_CHANNEL_NOT_FOUND": "Kanal ini sudah tidak ada. Muat ulang aturan lalu coba lagi.",
+    "RULE_CHANNEL_NOT_WEBHOOK": "Hanya kanal webhook yang memiliki secret penandatanganan."
   }
 }

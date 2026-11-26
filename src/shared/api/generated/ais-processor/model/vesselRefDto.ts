@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Pipeline: processor
  * AIS processing and query API (spec §13.2): latest positions, tracks (raw / 1-minute), pair tracks and live statistics. AIS data is shared across tenants (`ais:read`; API keys with `ais:read`).
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 
 export interface VesselRefDto {

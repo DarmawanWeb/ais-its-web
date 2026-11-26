@@ -3,11 +3,11 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Safety Service
  * Navigational safety analytics (pipeline Early Warning System, collision risk CPA/TCPA) built on the Detector SDK
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 
 /**
- * Why and how it ended (`reason`, last measurements)
+ * Why and how it ended: `reason` (English), the last measurements and the localizable text `messageKey` / `messageParams` (absent on events resolved before 0.2.0)
  * @nullable
  */
 export type SafetyEventDtoResolution = { [key: string]: unknown } | null;

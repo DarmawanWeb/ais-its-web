@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Pipeline: processor
  * AIS processing and query API (spec §13.2): latest positions, tracks (raw / 1-minute), pair tracks and live statistics. AIS data is shared across tenants (`ais:read`; API keys with `ais:read`).
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import type { PositionsControllerTrackResolution } from './positionsControllerTrackResolution';
 
@@ -12,10 +12,10 @@ export type PositionsControllerTrackParams = {
   from?: string;
   /** End (ISO-8601); default: now */
   to?: string;
-  /** raw ≤ 7 days, 1m ≤ 90 days */
+  /** raw: every recorded position (range ≤ 7 days); 1m: the last position of each minute with its sample count and mean / maximum SOG (range ≤ 90 days) */
   resolution?: PositionsControllerTrackResolution;
   /**
-   * Douglas–Peucker tolerance in metres (0 = none)
+   * Douglas–Peucker tolerance in metres, 0 = none (method geo.track_simplification; applied after the 100 000-point limit)
    * @minimum 0
    * @maximum 100000
    */

@@ -25,7 +25,7 @@ export const feature = defineFeature({
       labelKey: 'telemetry:nav.telemetry',
       icon: Fuel,
       permission: 'telemetry:read',
-      keywords: ['telemetri', 'bahan bakar', 'fuel'],
+      keywords: ['telemetri', 'bahan bakar', 'fuel', 'mqtt', 'sensor', 'flowmeter'],
     },
   ],
 });

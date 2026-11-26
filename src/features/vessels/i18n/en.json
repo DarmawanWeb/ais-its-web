@@ -1,24 +1,469 @@
 {
-  "list": {
-    "title": "Vessels",
-    "description": "Master data of your fleet: identity, dimensions, engines, fuel and photo.",
-    "capabilities": [
-      "Vessel list with name / MMSI / IMO search (page pagination)",
-      "Detail page at /vessels/:mmsi",
-      "Vessel, dimensions, engines and ports forms (vessel:write)",
-      "Vessel photo upload (≤ 5 MB)"
-    ]
-  },
   "nav": {
     "list": "Vessels"
   },
+  "commands": {
+    "create": "Add a new vessel"
+  },
+  "actions": {
+    "create": "Add vessel",
+    "edit": "Edit",
+    "delete": "Delete"
+  },
+  "list": {
+    "title": "Vessels",
+    "description": "Fleet master data: identity, dimensions, engines, fuel, photo, last position and CII rating.",
+    "searchPlaceholder": "Search name, MMSI or IMO…",
+    "searchLabel": "Search vessels by name, MMSI or IMO",
+    "tableLabel": "Vessel list",
+    "noMatch": "No matching vessels",
+    "noMatchDescription": "Change the search or the type and status filters to see other vessels.",
+    "resetFilters": "Reset filters",
+    "emptyFleet": "Your fleet has no vessels yet",
+    "emptyAll": "No vessels registered yet",
+    "emptyDescription": "Add your first vessel: enter its identity, dimensions and engines, or take its data from the registry.",
+    "emptyNoWrite": "Ask an organization admin or fleet manager to add vessels.",
+    "allScopeNote": "Vessels of other organizations show their identity only; technical data, CII and telemetry are private to the owner.",
+    "technicalHidden": "Technical data is visible to the owning organization only",
+    "ciiNone": "None yet"
+  },
+  "stats": {
+    "fleet": "Fleet vessels",
+    "registered": "Registered vessels",
+    "active": "Active",
+    "laidUp": "Laid up",
+    "ciiAttention": "CII D/E",
+    "ciiAttentionHint": "Rated D/E this year",
+    "ciiUnavailable": "CII data not available yet"
+  },
+  "filters": {
+    "type": "Ship type",
+    "allTypes": "All types",
+    "status": "Status",
+    "allStatuses": "All statuses",
+    "scope": "List scope",
+    "scopeFleet": "My fleet",
+    "scopeAll": "All vessels"
+  },
+  "columns": {
+    "photo": "Photo",
+    "name": "Vessel name",
+    "mmsi": "MMSI",
+    "imo": "IMO",
+    "type": "Type",
+    "flag": "Flag",
+    "tonnage": "GT / DWT",
+    "cii": "CII",
+    "lastSeen": "Last seen"
+  },
+  "lastSeen": {
+    "never": "Never",
+    "live": "Live",
+    "recent": "A few hours ago",
+    "stale": "A while ago",
+    "none": "No position"
+  },
   "detail": {
     "title": "Vessel Details",
-    "description": "Identity, live position, safety, emissions and telemetry of one vessel.",
-    "capabilities": [
-      "Live position and safety state (useVesselLive)",
-      "Particulars, dimensions and engines",
-      "CII and telemetry summary"
-    ]
+    "back": "Back to vessels",
+    "invalidMmsi": "Invalid MMSI",
+    "invalidMmsiHint": "An MMSI has 9 digits. Check the link or find the vessel in the list.",
+    "showOnMap": "Show on map",
+    "photoAlt": "Photo of {{name}}",
+    "identity": "Vessel identity",
+    "built": "Built {{year}}",
+    "ownFleet": "Your fleet",
+    "platformAccess": "Platform admin access",
+    "otherOrg": "Other organization",
+    "restrictedTitle": "Technical data is private",
+    "restrictedDescription": "Dimensions, engines, fuel, CII and telemetry of this vessel are visible to its owning organization only (tenancy rule §8.5)."
+  },
+  "tabs": {
+    "label": "Vessel detail sections",
+    "overview": "Overview",
+    "live": "Live",
+    "cii": "CII",
+    "telemetry": "Telemetry",
+    "alerts": "Alerts"
+  },
+  "fields": {
+    "name": "Vessel name",
+    "mmsi": "MMSI",
+    "imo": "IMO number",
+    "flag": "Flag (ISO alpha-2)",
+    "type": "Ship type",
+    "status": "Status",
+    "builtYear": "Year built",
+    "annualVoyagePercentage": "Share of the year at sea",
+    "updatedAt": "Updated",
+    "capacity": "CII capacity ({{unit}})",
+    "gt": "Gross tonnage (GT)",
+    "dwt": "Deadweight (DWT)",
+    "loa": "Length overall (LOA)",
+    "lpp": "Length between perpendiculars (LPP)",
+    "lwl": "Length on waterline (LWL)",
+    "b": "Breadth (B)",
+    "t": "Draught (T)",
+    "vs": "Service speed (Vs)",
+    "cb": "Block coefficient C_B",
+    "cbnsp": "Block coefficient C_bnsp",
+    "cp": "Prismatic coefficient C_P",
+    "cm": "Midship coefficient C_M",
+    "cwp": "Waterplane coefficient C_WP",
+    "cstern": "Stern coefficient C_stern",
+    "bulbousBow": "Bulbous bow",
+    "c1": "Factor c1 (ship type)",
+    "c2": "Factor c2 (rudder type)",
+    "c3": "Factor c3 (rudder profile)",
+    "c5": "Factor c5 (rudder arrangement)",
+    "conversionFactor": "Conversion factor C_F",
+    "carbonContent": "Carbon content",
+    "density": "Density (t/m³)",
+    "code": "Code",
+    "fuel": "Fuel",
+    "firstFuelFormula": "First fuel formula"
+  },
+  "overview": {
+    "identity": "Identity",
+    "dimensions": "Dimensions & hull coefficients",
+    "dimensionsDescription": "Inputs of the CII capacity and of the Holtrop–Mennen resistance chain of the emission service.",
+    "principal": "Principal dimensions",
+    "hull": "Hull coefficients",
+    "rudder": "Rudder factors",
+    "capacityFixed": "(fixed by regulation)",
+    "yes": "Yes",
+    "no": "No",
+    "engines": "Engines",
+    "installedPower": "Total installed power {{power}} kW",
+    "noEngines": "No engines yet",
+    "noEnginesHint": "Add the main and auxiliary engines with the Edit button.",
+    "fuel": "Fuel & formula",
+    "firstFormula": "First fuel formula",
+    "noFormula": "No formula: the emission service uses telemetry when active, then the Holtrop model.",
+    "ports": "Ports of call",
+    "noPorts": "No ports of call yet."
+  },
+  "engines": {
+    "main": "Main engine",
+    "auxiliary": "Auxiliary engines",
+    "powerKw": "Power",
+    "rpm": "rpm",
+    "sfoc": "SFOC",
+    "noMain": "No main engine",
+    "quantity": "Quantity",
+    "addAux": "Add auxiliary engine",
+    "noAux": "No auxiliary engines yet.",
+    "auxRow": "Auxiliary engine {{index}}",
+    "removeAux": "Remove auxiliary engine {{index}}",
+    "limit": "{{count}} of at most {{max}} engine rows"
+  },
+  "formula": {
+    "main": "Main engine (ME)",
+    "auxiliary": "Auxiliary engines (AE)",
+    "previewUnavailable": "Preview not available",
+    "previewAt": "At the service speed of {{speed}} kn: {{value}} L/min",
+    "needSpeed": "enter the service speed",
+    "unit": "L/min",
+    "created": "Formula {{name}} created",
+    "createFailed": "The formula could not be created",
+    "newTitle": "New fuel formula",
+    "newDescription": "Fuel flow (L/min) as a function of speedKnot. Formulas are checked with the same safe grammar as the fleet and emission services.",
+    "name": "Formula name",
+    "grammarHint": "Numbers, speedKnot, + - * / ** ^ ( ) and exp, log, ln, sqrt, pow, abs, min, max (optionally Math.). ^ means power.",
+    "create": "Create formula",
+    "choose": "Choose a formula",
+    "none": "No formula (Holtrop)",
+    "new": "New formula",
+    "atServiceSpeed": "at Vs:",
+    "noneHint": "Without a first formula, fuel comes from telemetry (when active) or the Holtrop model.",
+    "issues": {
+      "tooLong": "The formula is longer than {{max}} characters",
+      "empty": "A formula is required",
+      "unexpectedCharacter": "Character \"{{text}}\" is not allowed at position {{position}}",
+      "unknownIdentifier": "Unknown name \"{{text}}\" at position {{position}} (only speedKnot and the functions are allowed)",
+      "arity": "{{text}}() takes {{expected}} arguments, not {{actual}} (position {{position}})",
+      "tooDeep": "The formula is nested deeper than {{max}} levels (position {{position}})",
+      "numberOutOfRange": "Number {{text}} is out of range (position {{position}})",
+      "expected": "Expected \"{{text}}\" at position {{position}}",
+      "unexpectedToken": "Unexpected \"{{text}}\" at position {{position}}",
+      "unexpectedEnd": "The formula ends too early (position {{position}})"
+    }
+  },
+  "live": {
+    "position": "Latest position",
+    "coordinates": "Coordinates",
+    "positionTime": "Position time",
+    "sog": "Speed (SOG)",
+    "cog": "Course (COG)",
+    "heading": "Heading",
+    "headingNa": "Not available",
+    "navstatus": "Navigational status",
+    "predicted": "Predicted status",
+    "source": "AIS source",
+    "sources": {
+      "primary": "Primary receiver",
+      "batam": "Batam station",
+      "pusher": "Partner (API)"
+    },
+    "map": "Map",
+    "track": "Track on the map",
+    "mapLabel": "Map of the position of {{name}}",
+    "noPosition": "No AIS position yet",
+    "noPositionHint": "The vessel has not reported a position in the last 24 hours. It appears here as soon as one arrives.",
+    "openMap": "Open the live map",
+    "safety": "Navigational safety",
+    "safetyDescription": "Pipeline EWS status and collision risk from the safety service.",
+    "noSafety": "No safety state yet",
+    "noSafetyHint": "The state is computed when the next position arrives.",
+    "ews": "EWS status",
+    "pipelineDistance": "Distance to pipeline",
+    "collisionRisk": "Collision risk",
+    "closestEncounter": "Closest encounter",
+    "cpa": "CPA",
+    "tcpa": "TCPA"
+  },
+  "cii": {
+    "title": "CII {{year}}",
+    "scaleLabel": "Attained CII {{value}} on the rating scale A to E",
+    "attained": "Attained CII",
+    "required": "Required CII",
+    "rating": "Rating ratio",
+    "z": "Reduction factor Z",
+    "distance": "Distance",
+    "co2": "CO₂ emissions",
+    "fuelMe": "ME fuel",
+    "fuelAe": "AE fuel",
+    "methods": "Fuel methods",
+    "methodShares": "Telemetry {{telemetry}}% · Formula {{formula}}% · Holtrop {{holtrop}}%",
+    "manual": "Manual annual record",
+    "asOf": "Data up to",
+    "dailyCaption": "Cumulative attained CII per day compared with the required CII",
+    "cumulative": "Cumulative CII",
+    "empty": "No CII data this year yet",
+    "emptyHint": "The CII is computed from AIS voyage segments. Data appears once the vessel sails and its fuel is computed.",
+    "report": "CII report",
+    "grade": "Year-to-date rating",
+    "sourceManual": "From a manual annual record",
+    "sourceSegments_one": "From {{count}} voyage segment",
+    "sourceSegments_other": "From {{count}} voyage segments",
+    "projection": "Year-end projection",
+    "capacity": "CII capacity: {{capacity}}",
+    "figures": "CII figures",
+    "figuresDescription": "g CO₂ per capacity·nm, current calendar year."
+  },
+  "telemetry": {
+    "status": "Telemetry status",
+    "active": "Active",
+    "inactive": "Inactive",
+    "lastReading": "Last reading {{time}}",
+    "noReading": "No readings yet",
+    "total30d": "Total 30 days",
+    "readings_one": "{{count}} reading",
+    "readings_other": "{{count}} readings",
+    "me30d": "Main engine 30 days",
+    "ae30d": "Auxiliary engines 30 days",
+    "dailyTitle": "Daily consumption",
+    "dailyDescription": "Daily (UTC) sums of the fuel meter readings. Telemetry is active with a reading in the last {{minutes}} minutes.",
+    "explore": "Open the telemetry explorer",
+    "empty": "No fuel readings yet",
+    "emptyHint": "Install an MQTT/HTTP device or enter readings manually on the Telemetry page.",
+    "me": "Main engine",
+    "ae": "Auxiliary engines",
+    "methodNote": "While telemetry is active the emission service uses these readings for segment fuel.",
+    "latestTitle": "Latest readings",
+    "latestDescription": "The newest raw readings received by the telemetry service (metric tonnes).",
+    "since": "since {{time}}",
+    "columns": {
+      "time": "Time",
+      "me": "ME (t)",
+      "ae": "AE (t)",
+      "total": "Total (t)",
+      "source": "Source"
+    },
+    "sources": {
+      "device": "HTTP device",
+      "mqtt": "MQTT",
+      "api": "API",
+      "manual": "Manual",
+      "import": "Import"
+    }
+  },
+  "alerts": {
+    "title": "Vessel alerts",
+    "description": "The latest 20 alerts involving this vessel (as main or related vessel).",
+    "inbox": "Open the inbox",
+    "empty": "No alerts",
+    "emptyHint": "EWS, collision and surveillance alerts of this vessel appear here."
+  },
+  "delete": {
+    "title": "Delete {{name}}?",
+    "description": "The vessel with MMSI {{mmsi}} and its dimensions, engines, ports and photo are removed from the fleet. AIS and CII history are kept. This cannot be undone.",
+    "confirm": "Delete vessel",
+    "done": "{{name}} deleted",
+    "failed": "The vessel could not be deleted"
+  },
+  "form": {
+    "createTitle": "Add Vessel",
+    "createDescription": "Register a vessel in the active organization's fleet. Prefill it from the registry to save time.",
+    "editTitle": "Edit Vessel",
+    "editDescription": "Changes to identity, dimensions, engines and ports are published to the emission, safety and surveillance services.",
+    "createLabel": "New vessel form",
+    "editLabel": "Edit form of {{name}}",
+    "notOwnTitle": "This vessel belongs to another organization",
+    "notOwnDescription": "Only the owning organization (or a platform admin) can change vessel data.",
+    "sections": {
+      "identity": "Identity",
+      "identityHint": "Identity data is shared with every platform user.",
+      "type": "Type & fuel",
+      "typeHint": "The type sets the CII reference line; the fuel sets the CO₂ factor.",
+      "dimensions": "Dimensions",
+      "dimensionsHint": "Lengths in metres, speed in knots, coefficients without unit.",
+      "engines": "Engines",
+      "enginesHint": "One main engine row (with a quantity) and auxiliary engines, at most 16 rows.",
+      "ports": "Ports of call",
+      "portsHint": "Order of the ports on the vessel's route."
+    },
+    "sectionsNav": "Form sections",
+    "mmsiHint": "9 digits, unique on the platform",
+    "imoHint": "7 digits (IMO prefix allowed)",
+    "voyageHint": "Used by the SEEMP simulation",
+    "selectType": "Choose a ship type",
+    "selectFuel": "Choose a fuel",
+    "selectEngine": "Choose an engine",
+    "typeParams": "CII parameters of the type",
+    "typeParamsValue": "Capacity {{unit}} · a = {{a}} · c = {{c}}",
+    "fuelParams": "C_F {{cf}} t CO₂/t · density {{density}} t/m³",
+    "bulbousBowHint": "Used by the Holtrop resistance model (bulb area A_BT).",
+    "unsaved": "There are unsaved changes",
+    "noChanges": "No changes yet",
+    "save": "Save changes",
+    "create": "Save vessel",
+    "created": "{{name}} added to the fleet",
+    "saved": "Changes to {{name}} saved",
+    "unchanged": "Nothing to save",
+    "newVessel": "New vessel",
+    "tenancyNote": "The vessel is created in your active organization. Technical data, CII and telemetry are visible to this organization only.",
+    "leaveTitle": "Leave the form?",
+    "leaveDescription": "Unsaved changes will be lost.",
+    "leave": "Leave",
+    "errors": {
+      "required": "Required",
+      "number": "Enter a number",
+      "integer": "Must be a whole number",
+      "range": "Must be between {{min}} and {{max}}",
+      "positive": "Must be greater than {{min}}",
+      "min": "At least {{min}}",
+      "max": "At most {{max}}",
+      "mmsi": "An MMSI has 9 digits (100000000–999999999)",
+      "imo": "An IMO number has 7 digits",
+      "flag": "Use a 2-letter country code, e.g. ID",
+      "maxLength": "At most {{max}} characters",
+      "select": "Choose one",
+      "maxPorts": "At most {{max}} ports",
+      "duplicateEngine": "This engine is already chosen in another row",
+      "maxEngines": "At most {{max}} engine rows",
+      "duplicatePort": "Ports must not repeat"
+    }
+  },
+  "photo": {
+    "title": "Vessel photo",
+    "tooLarge": "The photo is larger than 5 MB",
+    "invalidType": "Use JPEG, PNG or WebP",
+    "invalid": "This file cannot be used",
+    "input": "Choose a vessel photo",
+    "uploading": "Uploading…",
+    "drop": "Drop to upload",
+    "hint": "Drag a photo here",
+    "limits": "JPEG, PNG or WebP · up to 5 MB",
+    "replace": "Replace photo",
+    "choose": "Choose photo",
+    "remove": "Remove photo",
+    "uploadFailedAfterCreate": "The vessel was saved but the photo upload failed",
+    "uploaded": "Vessel photo updated",
+    "uploadFailed": "The photo upload failed",
+    "afterCreate": "The photo is uploaded once the vessel is saved.",
+    "removeTitle": "Remove the vessel photo?",
+    "removeDescription": "The photo is deleted from storage and cannot be restored.",
+    "removed": "Vessel photo removed",
+    "removeFailed": "The photo could not be removed"
+  },
+  "ports": {
+    "add": "Add a port",
+    "choose": "Choose a port",
+    "noneLeft": "All ports are chosen",
+    "addButton": "Add",
+    "empty": "No ports of call yet.",
+    "order": "Order of the ports of call",
+    "up": "Move {{name}} up",
+    "down": "Move {{name}} down",
+    "remove": "Remove {{name}}"
+  },
+  "registry": {
+    "open": "Fill from registry",
+    "title": "Search the ship registry",
+    "description": "Public ship particulars (secondary registry). Pick an entry to fill the identity and principal dimensions.",
+    "placeholder": "Name, IMO number or MMSI…",
+    "label": "Registry search",
+    "start": "Type at least 2 characters",
+    "startHint": "Names match from the start; digits match IMO numbers or MMSIs.",
+    "none": "No registry entries",
+    "noneHint": "Try another spelling or enter the vessel data manually.",
+    "built": "Built {{year}}",
+    "applied_one": "{{count}} field filled from the registry ({{name}})",
+    "applied_other": "{{count}} fields filled from the registry ({{name}})"
+  },
+  "problems": {
+    "VALIDATION_FAILED": {
+      "title": "Some data is not valid",
+      "detail": "Check the highlighted fields and save again."
+    },
+    "FORBIDDEN": {
+      "title": "Access denied",
+      "detail": "This vessel belongs to another organization or your role does not allow this action."
+    },
+    "ORGANIZATION_REQUIRED": {
+      "title": "Choose an active organization",
+      "detail": "Vessels are created in the active organization; choose one with the organization switcher."
+    },
+    "PLATFORM_ADMIN_REQUIRED": {
+      "title": "Platform admins only",
+      "detail": "Only platform admins can change this field."
+    },
+    "VESSEL_NOT_FOUND": {
+      "title": "Vessel not found",
+      "detail": "The vessel may have been deleted or its MMSI changed."
+    },
+    "REGISTRY_ENTRY_NOT_FOUND": {
+      "title": "Registry entry not found",
+      "detail": "No particulars with that IMO number or MMSI."
+    },
+    "PHOTO_NOT_FOUND": {
+      "title": "Photo not found",
+      "detail": "This vessel has no photo yet."
+    },
+    "MMSI_ALREADY_EXISTS": {
+      "title": "MMSI already registered",
+      "detail": "Each MMSI belongs to one vessel on the platform."
+    },
+    "IMO_ALREADY_EXISTS": {
+      "title": "IMO number already registered",
+      "detail": "Another vessel already uses this IMO number."
+    },
+    "REFERENCE_IN_USE": {
+      "title": "Reference data still in use",
+      "detail": "Move the vessels to other reference data first."
+    },
+    "PAYLOAD_TOO_LARGE": {
+      "title": "Photo too large",
+      "detail": "Photos can be up to 5 MB."
+    },
+    "UNSUPPORTED_MEDIA_TYPE": {
+      "title": "Photo format not supported",
+      "detail": "Use JPEG, PNG or WebP."
+    },
+    "SERVICE_UNAVAILABLE": {
+      "title": "Photo storage unavailable",
+      "detail": "Try the upload again in a moment."
+    }
   }
 }

@@ -3,12 +3,15 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Geo Service
  * Zones and geofences registry: validated GeoJSON zones, map layers and the GEO zone snapshot stream
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import type { ZonesControllerListKindItem } from './zonesControllerListKindItem';
 
 export type ZonesControllerListParams = {
-  /** @minimum 1 */
+  /**
+   * @minimum 1
+   * @maximum 1000000
+   */
   page?: number;
   /**
    * @minimum 1
@@ -21,6 +24,8 @@ export type ZonesControllerListParams = {
   kind?: ZonesControllerListKindItem[];
   /** Zones owned by this organization (authority and super_admin: any; others: their own) */
   orgId?: string;
+  /** true = global zones only (shared by every organization); false = organization zones only (within what you may read: your own organization, or every organization for authority and super_admin); both when absent. global=true cannot be combined with orgId */
+  global?: boolean;
   /** Only active (true) or inactive (false) zones; both when absent */
   active?: boolean;
   /**

@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Notification Service
  * Alert inbox, alert rules and deliveries (e-mail, Telegram, webhook), transactional e-mail and the realtime WebSocket gateway. Realtime: socket.io at path /ws on the same origin (handshake auth { token }, events of @darmawanweb/ais-its-contracts/realtime).
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import { useMutation, useQuery } from '@tanstack/react-query';
 import type {
@@ -23,14 +23,21 @@ import type {
 
 import type {
   AlertDto,
+  AlertOccurrencePageDto,
   AlertPageDto,
+  AlertSeriesDto,
   AlertSummaryDto,
+  AlertsControllerExportCsvParams,
   AlertsControllerListParams,
+  AlertsControllerOccurrencesParams,
+  AlertsControllerSeriesParams,
+  MarkAlertsReadDto,
   ProblemDetails,
+  UnreadCountDto,
 } from '../model';
 
 import { apiClient } from '../../../mutator';
-import type { ErrorType } from '../../../mutator';
+import type { ErrorType, BodyType } from '../../../mutator';
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
@@ -291,6 +298,674 @@ export function useAlertsControllerSummary<
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
   const queryOptions = getAlertsControllerSummaryQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+/**
+ * Open alerts visible to the user stored or changed (`updatedAt`) after the read mark of POST /alerts/read; every open alert before the first mark. The mark is per user and active organization.
+ * @summary Unread open alerts of the user in the active organization
+ */
+export const alertsControllerUnreadCount = (
+  options?: SecondParameter<typeof apiClient>,
+  signal?: AbortSignal,
+) => {
+  return apiClient<UnreadCountDto>(
+    { url: `/api/v2/alerts/unread-count`, method: 'GET', signal },
+    options,
+  );
+};
+
+export const getAlertsControllerUnreadCountQueryKey = () => {
+  return [`/api/v2/alerts/unread-count`] as const;
+};
+
+export const getAlertsControllerUnreadCountQueryOptions = <
+  TData = Awaited<ReturnType<typeof alertsControllerUnreadCount>>,
+  TError = ErrorType<ProblemDetails>,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<Awaited<ReturnType<typeof alertsControllerUnreadCount>>, TError, TData>
+  >;
+  request?: SecondParameter<typeof apiClient>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getAlertsControllerUnreadCountQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof alertsControllerUnreadCount>>> = ({
+    signal,
+  }) => alertsControllerUnreadCount(requestOptions, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof alertsControllerUnreadCount>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type AlertsControllerUnreadCountQueryResult = NonNullable<
+  Awaited<ReturnType<typeof alertsControllerUnreadCount>>
+>;
+export type AlertsControllerUnreadCountQueryError = ErrorType<ProblemDetails>;
+
+/**
+ * Open alerts visible to the user stored or changed (`updatedAt`) after the read mark of POST /alerts/read; every open alert before the first mark. The mark is per user and active organization.
+ * @summary Unread open alerts of the user in the active organization
+ */
+export function useAlertsControllerUnreadCount<
+  TData = Awaited<ReturnType<typeof alertsControllerUnreadCount>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof alertsControllerUnreadCount>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof alertsControllerUnreadCount>>,
+          TError,
+          Awaited<ReturnType<typeof alertsControllerUnreadCount>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Open alerts visible to the user stored or changed (`updatedAt`) after the read mark of POST /alerts/read; every open alert before the first mark. The mark is per user and active organization.
+ * @summary Unread open alerts of the user in the active organization
+ */
+export function useAlertsControllerUnreadCount<
+  TData = Awaited<ReturnType<typeof alertsControllerUnreadCount>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof alertsControllerUnreadCount>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof alertsControllerUnreadCount>>,
+          TError,
+          Awaited<ReturnType<typeof alertsControllerUnreadCount>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Open alerts visible to the user stored or changed (`updatedAt`) after the read mark of POST /alerts/read; every open alert before the first mark. The mark is per user and active organization.
+ * @summary Unread open alerts of the user in the active organization
+ */
+export function useAlertsControllerUnreadCount<
+  TData = Awaited<ReturnType<typeof alertsControllerUnreadCount>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof alertsControllerUnreadCount>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Open alerts visible to the user stored or changed (`updatedAt`) after the read mark of POST /alerts/read; every open alert before the first mark. The mark is per user and active organization.
+ * @summary Unread open alerts of the user in the active organization
+ */
+export function useAlertsControllerUnreadCount<
+  TData = Awaited<ReturnType<typeof alertsControllerUnreadCount>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof alertsControllerUnreadCount>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getAlertsControllerUnreadCountQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+/**
+ * Moves the read mark of the user in the active organization forward to `upTo` (default and maximum: now; it never moves backwards) and answers the new unread count. Bodiless requests mark everything read.
+ * @summary Mark the alerts read up to a time
+ */
+export const alertsControllerMarkRead = (
+  markAlertsReadDto?: BodyType<MarkAlertsReadDto>,
+  options?: SecondParameter<typeof apiClient>,
+  signal?: AbortSignal,
+) => {
+  return apiClient<UnreadCountDto>(
+    {
+      url: `/api/v2/alerts/read`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      data: markAlertsReadDto,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getAlertsControllerMarkReadMutationKey = () => ['alertsControllerMarkRead'] as const;
+
+export const getAlertsControllerMarkReadMutationOptions = <
+  TError = ErrorType<ProblemDetails>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof alertsControllerMarkRead>>,
+    TError,
+    AlertsControllerMarkReadMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof apiClient>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof alertsControllerMarkRead>>,
+  TError,
+  AlertsControllerMarkReadMutationVariables,
+  TContext
+> => {
+  const mutationKey = getAlertsControllerMarkReadMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof alertsControllerMarkRead>>,
+    AlertsControllerMarkReadMutationVariables
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return alertsControllerMarkRead(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type AlertsControllerMarkReadMutationResult = NonNullable<
+  Awaited<ReturnType<typeof alertsControllerMarkRead>>
+>;
+export type AlertsControllerMarkReadMutationBody = BodyType<MarkAlertsReadDto> | undefined;
+export type AlertsControllerMarkReadMutationError = ErrorType<ProblemDetails>;
+export type AlertsControllerMarkReadMutationVariables = { data?: BodyType<MarkAlertsReadDto> };
+
+/**
+ * Moves the read mark of the user in the active organization forward to `upTo` (default and maximum: now; it never moves backwards) and answers the new unread count. Bodiless requests mark everything read.
+ * @summary Mark the alerts read up to a time
+ */
+export const useAlertsControllerMarkRead = <TError = ErrorType<ProblemDetails>, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof alertsControllerMarkRead>>,
+      TError,
+      AlertsControllerMarkReadMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof alertsControllerMarkRead>>,
+  TError,
+  AlertsControllerMarkReadMutationVariables,
+  TContext
+> => {
+  return useMutation(getAlertsControllerMarkReadMutationOptions(options), queryClient);
+};
+/**
+ * Visible alerts (the tenancy of GET /alerts) per local hour or day of `tz` of their first occurrence, counted by `groupBy`, every bucket from the one containing `from` to the one containing `to` (zeros included). Default range: 7 days (`1d`) or 24 hours (`1h`) up to now; at most 1000 buckets.
+ * @summary Alert counts over time by severity, type or domain
+ */
+export const alertsControllerSeries = (
+  params?: AlertsControllerSeriesParams,
+  options?: SecondParameter<typeof apiClient>,
+  signal?: AbortSignal,
+) => {
+  return apiClient<AlertSeriesDto>(
+    { url: `/api/v2/alerts/stats/series`, method: 'GET', params, signal },
+    options,
+  );
+};
+
+export const getAlertsControllerSeriesQueryKey = (params?: AlertsControllerSeriesParams) => {
+  return [`/api/v2/alerts/stats/series`, ...(params ? [params] : [])] as const;
+};
+
+export const getAlertsControllerSeriesQueryOptions = <
+  TData = Awaited<ReturnType<typeof alertsControllerSeries>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: AlertsControllerSeriesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof alertsControllerSeries>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getAlertsControllerSeriesQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof alertsControllerSeries>>> = ({ signal }) =>
+    alertsControllerSeries(params, requestOptions, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof alertsControllerSeries>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type AlertsControllerSeriesQueryResult = NonNullable<
+  Awaited<ReturnType<typeof alertsControllerSeries>>
+>;
+export type AlertsControllerSeriesQueryError = ErrorType<ProblemDetails>;
+
+/**
+ * Visible alerts (the tenancy of GET /alerts) per local hour or day of `tz` of their first occurrence, counted by `groupBy`, every bucket from the one containing `from` to the one containing `to` (zeros included). Default range: 7 days (`1d`) or 24 hours (`1h`) up to now; at most 1000 buckets.
+ * @summary Alert counts over time by severity, type or domain
+ */
+export function useAlertsControllerSeries<
+  TData = Awaited<ReturnType<typeof alertsControllerSeries>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params: undefined | AlertsControllerSeriesParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof alertsControllerSeries>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof alertsControllerSeries>>,
+          TError,
+          Awaited<ReturnType<typeof alertsControllerSeries>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Visible alerts (the tenancy of GET /alerts) per local hour or day of `tz` of their first occurrence, counted by `groupBy`, every bucket from the one containing `from` to the one containing `to` (zeros included). Default range: 7 days (`1d`) or 24 hours (`1h`) up to now; at most 1000 buckets.
+ * @summary Alert counts over time by severity, type or domain
+ */
+export function useAlertsControllerSeries<
+  TData = Awaited<ReturnType<typeof alertsControllerSeries>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: AlertsControllerSeriesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof alertsControllerSeries>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof alertsControllerSeries>>,
+          TError,
+          Awaited<ReturnType<typeof alertsControllerSeries>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Visible alerts (the tenancy of GET /alerts) per local hour or day of `tz` of their first occurrence, counted by `groupBy`, every bucket from the one containing `from` to the one containing `to` (zeros included). Default range: 7 days (`1d`) or 24 hours (`1h`) up to now; at most 1000 buckets.
+ * @summary Alert counts over time by severity, type or domain
+ */
+export function useAlertsControllerSeries<
+  TData = Awaited<ReturnType<typeof alertsControllerSeries>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: AlertsControllerSeriesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof alertsControllerSeries>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Visible alerts (the tenancy of GET /alerts) per local hour or day of `tz` of their first occurrence, counted by `groupBy`, every bucket from the one containing `from` to the one containing `to` (zeros included). Default range: 7 days (`1d`) or 24 hours (`1h`) up to now; at most 1000 buckets.
+ * @summary Alert counts over time by severity, type or domain
+ */
+export function useAlertsControllerSeries<
+  TData = Awaited<ReturnType<typeof alertsControllerSeries>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: AlertsControllerSeriesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof alertsControllerSeries>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getAlertsControllerSeriesQueryOptions(params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+/**
+ * The filters of GET /alerts, newest first, streamed (RFC 4180, UTF-8, CRLF). Column headers follow `Accept-Language` (`id`, default, or `en`); values are the stored codes, UTC ISO-8601 times and the English title and message. At most ALERT_EXPORT_MAX_ROWS rows (default 100 000): more matching alerts set `X-Truncated: true`.
+ * @summary Export alerts as CSV
+ */
+export const alertsControllerExportCsv = (
+  params?: AlertsControllerExportCsvParams,
+  options?: SecondParameter<typeof apiClient>,
+  signal?: AbortSignal,
+) => {
+  return apiClient<string>(
+    { url: `/api/v2/alerts/export.csv`, method: 'GET', params, signal },
+    options,
+  );
+};
+
+export const getAlertsControllerExportCsvQueryKey = (params?: AlertsControllerExportCsvParams) => {
+  return [`/api/v2/alerts/export.csv`, ...(params ? [params] : [])] as const;
+};
+
+export const getAlertsControllerExportCsvQueryOptions = <
+  TData = Awaited<ReturnType<typeof alertsControllerExportCsv>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: AlertsControllerExportCsvParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof alertsControllerExportCsv>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getAlertsControllerExportCsvQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof alertsControllerExportCsv>>> = ({
+    signal,
+  }) => alertsControllerExportCsv(params, requestOptions, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof alertsControllerExportCsv>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type AlertsControllerExportCsvQueryResult = NonNullable<
+  Awaited<ReturnType<typeof alertsControllerExportCsv>>
+>;
+export type AlertsControllerExportCsvQueryError = ErrorType<ProblemDetails>;
+
+/**
+ * The filters of GET /alerts, newest first, streamed (RFC 4180, UTF-8, CRLF). Column headers follow `Accept-Language` (`id`, default, or `en`); values are the stored codes, UTC ISO-8601 times and the English title and message. At most ALERT_EXPORT_MAX_ROWS rows (default 100 000): more matching alerts set `X-Truncated: true`.
+ * @summary Export alerts as CSV
+ */
+export function useAlertsControllerExportCsv<
+  TData = Awaited<ReturnType<typeof alertsControllerExportCsv>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params: undefined | AlertsControllerExportCsvParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof alertsControllerExportCsv>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof alertsControllerExportCsv>>,
+          TError,
+          Awaited<ReturnType<typeof alertsControllerExportCsv>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * The filters of GET /alerts, newest first, streamed (RFC 4180, UTF-8, CRLF). Column headers follow `Accept-Language` (`id`, default, or `en`); values are the stored codes, UTC ISO-8601 times and the English title and message. At most ALERT_EXPORT_MAX_ROWS rows (default 100 000): more matching alerts set `X-Truncated: true`.
+ * @summary Export alerts as CSV
+ */
+export function useAlertsControllerExportCsv<
+  TData = Awaited<ReturnType<typeof alertsControllerExportCsv>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: AlertsControllerExportCsvParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof alertsControllerExportCsv>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof alertsControllerExportCsv>>,
+          TError,
+          Awaited<ReturnType<typeof alertsControllerExportCsv>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * The filters of GET /alerts, newest first, streamed (RFC 4180, UTF-8, CRLF). Column headers follow `Accept-Language` (`id`, default, or `en`); values are the stored codes, UTC ISO-8601 times and the English title and message. At most ALERT_EXPORT_MAX_ROWS rows (default 100 000): more matching alerts set `X-Truncated: true`.
+ * @summary Export alerts as CSV
+ */
+export function useAlertsControllerExportCsv<
+  TData = Awaited<ReturnType<typeof alertsControllerExportCsv>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: AlertsControllerExportCsvParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof alertsControllerExportCsv>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * The filters of GET /alerts, newest first, streamed (RFC 4180, UTF-8, CRLF). Column headers follow `Accept-Language` (`id`, default, or `en`); values are the stored codes, UTC ISO-8601 times and the English title and message. At most ALERT_EXPORT_MAX_ROWS rows (default 100 000): more matching alerts set `X-Truncated: true`.
+ * @summary Export alerts as CSV
+ */
+export function useAlertsControllerExportCsv<
+  TData = Awaited<ReturnType<typeof alertsControllerExportCsv>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: AlertsControllerExportCsvParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof alertsControllerExportCsv>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getAlertsControllerExportCsvQueryOptions(params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+/**
+ * Every alert.raised.v1 stored in the alert: the one that opened it and each merged repeat or escalation, with its own time, severity, texts and measurements (`data`). Detectors publish no de-escalations (the kit's alert emitter only announces raises and escalations), so the history has none. Alerts stored before 0.2.0 have no history.
+ * @summary Occurrence history of an alert, newest first
+ */
+export const alertsControllerOccurrences = (
+  id: string,
+  params?: AlertsControllerOccurrencesParams,
+  options?: SecondParameter<typeof apiClient>,
+  signal?: AbortSignal,
+) => {
+  return apiClient<AlertOccurrencePageDto>(
+    { url: `/api/v2/alerts/${id}/occurrences`, method: 'GET', params, signal },
+    options,
+  );
+};
+
+export const getAlertsControllerOccurrencesQueryKey = (
+  id: string,
+  params?: AlertsControllerOccurrencesParams,
+) => {
+  return [`/api/v2/alerts/${id}/occurrences`, ...(params ? [params] : [])] as const;
+};
+
+export const getAlertsControllerOccurrencesQueryOptions = <
+  TData = Awaited<ReturnType<typeof alertsControllerOccurrences>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  id: string,
+  params?: AlertsControllerOccurrencesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof alertsControllerOccurrences>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getAlertsControllerOccurrencesQueryKey(id, params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof alertsControllerOccurrences>>> = ({
+    signal,
+  }) => alertsControllerOccurrences(id, params, requestOptions, signal);
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: id !== null && id !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<Awaited<ReturnType<typeof alertsControllerOccurrences>>, TError, TData> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+};
+
+export type AlertsControllerOccurrencesQueryResult = NonNullable<
+  Awaited<ReturnType<typeof alertsControllerOccurrences>>
+>;
+export type AlertsControllerOccurrencesQueryError = ErrorType<ProblemDetails>;
+
+/**
+ * Every alert.raised.v1 stored in the alert: the one that opened it and each merged repeat or escalation, with its own time, severity, texts and measurements (`data`). Detectors publish no de-escalations (the kit's alert emitter only announces raises and escalations), so the history has none. Alerts stored before 0.2.0 have no history.
+ * @summary Occurrence history of an alert, newest first
+ */
+export function useAlertsControllerOccurrences<
+  TData = Awaited<ReturnType<typeof alertsControllerOccurrences>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  id: string,
+  params: undefined | AlertsControllerOccurrencesParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof alertsControllerOccurrences>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof alertsControllerOccurrences>>,
+          TError,
+          Awaited<ReturnType<typeof alertsControllerOccurrences>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Every alert.raised.v1 stored in the alert: the one that opened it and each merged repeat or escalation, with its own time, severity, texts and measurements (`data`). Detectors publish no de-escalations (the kit's alert emitter only announces raises and escalations), so the history has none. Alerts stored before 0.2.0 have no history.
+ * @summary Occurrence history of an alert, newest first
+ */
+export function useAlertsControllerOccurrences<
+  TData = Awaited<ReturnType<typeof alertsControllerOccurrences>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  id: string,
+  params?: AlertsControllerOccurrencesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof alertsControllerOccurrences>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof alertsControllerOccurrences>>,
+          TError,
+          Awaited<ReturnType<typeof alertsControllerOccurrences>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Every alert.raised.v1 stored in the alert: the one that opened it and each merged repeat or escalation, with its own time, severity, texts and measurements (`data`). Detectors publish no de-escalations (the kit's alert emitter only announces raises and escalations), so the history has none. Alerts stored before 0.2.0 have no history.
+ * @summary Occurrence history of an alert, newest first
+ */
+export function useAlertsControllerOccurrences<
+  TData = Awaited<ReturnType<typeof alertsControllerOccurrences>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  id: string,
+  params?: AlertsControllerOccurrencesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof alertsControllerOccurrences>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Every alert.raised.v1 stored in the alert: the one that opened it and each merged repeat or escalation, with its own time, severity, texts and measurements (`data`). Detectors publish no de-escalations (the kit's alert emitter only announces raises and escalations), so the history has none. Alerts stored before 0.2.0 have no history.
+ * @summary Occurrence history of an alert, newest first
+ */
+export function useAlertsControllerOccurrences<
+  TData = Awaited<ReturnType<typeof alertsControllerOccurrences>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  id: string,
+  params?: AlertsControllerOccurrencesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof alertsControllerOccurrences>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getAlertsControllerOccurrencesQueryOptions(id, params, options);
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
     queryKey: DataTag<QueryKey, TData, TError>;

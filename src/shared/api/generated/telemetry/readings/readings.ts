@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Telemetry Service
  * Fuel consumption telemetry: readings ingest over REST and MQTT, device registry, queries and status; publishes fuel.reading.recorded.v1
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import { useMutation, useQuery } from '@tanstack/react-query';
 import type {
@@ -26,6 +26,7 @@ import type {
   FuelSummaryDto,
   IngestResultDto,
   ProblemDetails,
+  ReadingsControllerExportCsvParams,
   ReadingsControllerIngestParams,
   ReadingsControllerSeries200,
   ReadingsControllerSeriesParams,
@@ -296,11 +297,11 @@ export function useReadingsControllerVessels<
 }
 
 /**
- * Ascending in time; `[from, to)`; buckets whose start lies in the range. Hourly and daily sums come from the continuous aggregates: readings stored more than an hour after their time (store and forward, imports) are included after the next refresh (fuel_hourly every 15 min, fuel_daily hourly).
+ * Time-ordered cursor pages: ascending by default, `order=desc` newest first (the newest readings: `order=desc&limit=20`; `to` defaults to now, so pass a later `to` for readings up to TELEMETRY_MAX_FUTURE_SKEW_MIN ahead of the server clock). `[from, to)`; buckets whose start lies in the range. Hourly and daily sums come from the continuous aggregates: readings stored more than an hour after their time (store and forward, imports) are included after the next refresh (fuel_hourly every 15 min, fuel_daily hourly).
  * @summary Readings of a vessel, raw or as hourly / daily sums
  */
 export const readingsControllerSeries = (
-  mmsi: number,
+  mmsi: string,
   params?: ReadingsControllerSeriesParams,
   options?: SecondParameter<typeof apiClient>,
   signal?: AbortSignal,
@@ -312,7 +313,7 @@ export const readingsControllerSeries = (
 };
 
 export const getReadingsControllerSeriesQueryKey = (
-  mmsi: number,
+  mmsi: string,
   params?: ReadingsControllerSeriesParams,
 ) => {
   return [`/api/v2/telemetry/vessels/${mmsi}/readings`, ...(params ? [params] : [])] as const;
@@ -322,7 +323,7 @@ export const getReadingsControllerSeriesQueryOptions = <
   TData = Awaited<ReturnType<typeof readingsControllerSeries>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   params?: ReadingsControllerSeriesParams,
   options?: {
     query?: Partial<
@@ -355,14 +356,14 @@ export type ReadingsControllerSeriesQueryResult = NonNullable<
 export type ReadingsControllerSeriesQueryError = ErrorType<ProblemDetails>;
 
 /**
- * Ascending in time; `[from, to)`; buckets whose start lies in the range. Hourly and daily sums come from the continuous aggregates: readings stored more than an hour after their time (store and forward, imports) are included after the next refresh (fuel_hourly every 15 min, fuel_daily hourly).
+ * Time-ordered cursor pages: ascending by default, `order=desc` newest first (the newest readings: `order=desc&limit=20`; `to` defaults to now, so pass a later `to` for readings up to TELEMETRY_MAX_FUTURE_SKEW_MIN ahead of the server clock). `[from, to)`; buckets whose start lies in the range. Hourly and daily sums come from the continuous aggregates: readings stored more than an hour after their time (store and forward, imports) are included after the next refresh (fuel_hourly every 15 min, fuel_daily hourly).
  * @summary Readings of a vessel, raw or as hourly / daily sums
  */
 export function useReadingsControllerSeries<
   TData = Awaited<ReturnType<typeof readingsControllerSeries>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   params: undefined | ReadingsControllerSeriesParams,
   options: {
     query: Partial<
@@ -381,14 +382,14 @@ export function useReadingsControllerSeries<
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
- * Ascending in time; `[from, to)`; buckets whose start lies in the range. Hourly and daily sums come from the continuous aggregates: readings stored more than an hour after their time (store and forward, imports) are included after the next refresh (fuel_hourly every 15 min, fuel_daily hourly).
+ * Time-ordered cursor pages: ascending by default, `order=desc` newest first (the newest readings: `order=desc&limit=20`; `to` defaults to now, so pass a later `to` for readings up to TELEMETRY_MAX_FUTURE_SKEW_MIN ahead of the server clock). `[from, to)`; buckets whose start lies in the range. Hourly and daily sums come from the continuous aggregates: readings stored more than an hour after their time (store and forward, imports) are included after the next refresh (fuel_hourly every 15 min, fuel_daily hourly).
  * @summary Readings of a vessel, raw or as hourly / daily sums
  */
 export function useReadingsControllerSeries<
   TData = Awaited<ReturnType<typeof readingsControllerSeries>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   params?: ReadingsControllerSeriesParams,
   options?: {
     query?: Partial<
@@ -407,14 +408,14 @@ export function useReadingsControllerSeries<
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
- * Ascending in time; `[from, to)`; buckets whose start lies in the range. Hourly and daily sums come from the continuous aggregates: readings stored more than an hour after their time (store and forward, imports) are included after the next refresh (fuel_hourly every 15 min, fuel_daily hourly).
+ * Time-ordered cursor pages: ascending by default, `order=desc` newest first (the newest readings: `order=desc&limit=20`; `to` defaults to now, so pass a later `to` for readings up to TELEMETRY_MAX_FUTURE_SKEW_MIN ahead of the server clock). `[from, to)`; buckets whose start lies in the range. Hourly and daily sums come from the continuous aggregates: readings stored more than an hour after their time (store and forward, imports) are included after the next refresh (fuel_hourly every 15 min, fuel_daily hourly).
  * @summary Readings of a vessel, raw or as hourly / daily sums
  */
 export function useReadingsControllerSeries<
   TData = Awaited<ReturnType<typeof readingsControllerSeries>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   params?: ReadingsControllerSeriesParams,
   options?: {
     query?: Partial<
@@ -425,14 +426,14 @@ export function useReadingsControllerSeries<
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
- * Ascending in time; `[from, to)`; buckets whose start lies in the range. Hourly and daily sums come from the continuous aggregates: readings stored more than an hour after their time (store and forward, imports) are included after the next refresh (fuel_hourly every 15 min, fuel_daily hourly).
+ * Time-ordered cursor pages: ascending by default, `order=desc` newest first (the newest readings: `order=desc&limit=20`; `to` defaults to now, so pass a later `to` for readings up to TELEMETRY_MAX_FUTURE_SKEW_MIN ahead of the server clock). `[from, to)`; buckets whose start lies in the range. Hourly and daily sums come from the continuous aggregates: readings stored more than an hour after their time (store and forward, imports) are included after the next refresh (fuel_hourly every 15 min, fuel_daily hourly).
  * @summary Readings of a vessel, raw or as hourly / daily sums
  */
 export function useReadingsControllerSeries<
   TData = Awaited<ReturnType<typeof readingsControllerSeries>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   params?: ReadingsControllerSeriesParams,
   options?: {
     query?: Partial<
@@ -452,11 +453,167 @@ export function useReadingsControllerSeries<
 }
 
 /**
+ * The series of GET …/readings (same `from`, `to` and `bucket`, defaults and range limits; ascending) as one streamed RFC 4180 file (`Content-Disposition: attachment`): the header line `time,periodStart,fuelMeTon,fuelAeTon,totalFuelTon,readings,source,deviceId`, CRLF line ends, the values of the JSON points (empty for null; periodStart, source and deviceId only for raw readings). Errors before the first byte are problem details; a failure during the transfer aborts the connection, so a cut file never looks complete.
+ * @summary Export the readings or hourly / daily sums of a vessel as CSV
+ */
+export const readingsControllerExportCsv = (
+  mmsi: string,
+  params?: ReadingsControllerExportCsvParams,
+  options?: SecondParameter<typeof apiClient>,
+  signal?: AbortSignal,
+) => {
+  return apiClient<string>(
+    { url: `/api/v2/telemetry/vessels/${mmsi}/readings.csv`, method: 'GET', params, signal },
+    options,
+  );
+};
+
+export const getReadingsControllerExportCsvQueryKey = (
+  mmsi: string,
+  params?: ReadingsControllerExportCsvParams,
+) => {
+  return [`/api/v2/telemetry/vessels/${mmsi}/readings.csv`, ...(params ? [params] : [])] as const;
+};
+
+export const getReadingsControllerExportCsvQueryOptions = <
+  TData = Awaited<ReturnType<typeof readingsControllerExportCsv>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  mmsi: string,
+  params?: ReadingsControllerExportCsvParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof readingsControllerExportCsv>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getReadingsControllerExportCsvQueryKey(mmsi, params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof readingsControllerExportCsv>>> = ({
+    signal,
+  }) => readingsControllerExportCsv(mmsi, params, requestOptions, signal);
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: mmsi !== null && mmsi !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<Awaited<ReturnType<typeof readingsControllerExportCsv>>, TError, TData> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+};
+
+export type ReadingsControllerExportCsvQueryResult = NonNullable<
+  Awaited<ReturnType<typeof readingsControllerExportCsv>>
+>;
+export type ReadingsControllerExportCsvQueryError = ErrorType<ProblemDetails>;
+
+/**
+ * The series of GET …/readings (same `from`, `to` and `bucket`, defaults and range limits; ascending) as one streamed RFC 4180 file (`Content-Disposition: attachment`): the header line `time,periodStart,fuelMeTon,fuelAeTon,totalFuelTon,readings,source,deviceId`, CRLF line ends, the values of the JSON points (empty for null; periodStart, source and deviceId only for raw readings). Errors before the first byte are problem details; a failure during the transfer aborts the connection, so a cut file never looks complete.
+ * @summary Export the readings or hourly / daily sums of a vessel as CSV
+ */
+export function useReadingsControllerExportCsv<
+  TData = Awaited<ReturnType<typeof readingsControllerExportCsv>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  mmsi: string,
+  params: undefined | ReadingsControllerExportCsvParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof readingsControllerExportCsv>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof readingsControllerExportCsv>>,
+          TError,
+          Awaited<ReturnType<typeof readingsControllerExportCsv>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * The series of GET …/readings (same `from`, `to` and `bucket`, defaults and range limits; ascending) as one streamed RFC 4180 file (`Content-Disposition: attachment`): the header line `time,periodStart,fuelMeTon,fuelAeTon,totalFuelTon,readings,source,deviceId`, CRLF line ends, the values of the JSON points (empty for null; periodStart, source and deviceId only for raw readings). Errors before the first byte are problem details; a failure during the transfer aborts the connection, so a cut file never looks complete.
+ * @summary Export the readings or hourly / daily sums of a vessel as CSV
+ */
+export function useReadingsControllerExportCsv<
+  TData = Awaited<ReturnType<typeof readingsControllerExportCsv>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  mmsi: string,
+  params?: ReadingsControllerExportCsvParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof readingsControllerExportCsv>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof readingsControllerExportCsv>>,
+          TError,
+          Awaited<ReturnType<typeof readingsControllerExportCsv>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * The series of GET …/readings (same `from`, `to` and `bucket`, defaults and range limits; ascending) as one streamed RFC 4180 file (`Content-Disposition: attachment`): the header line `time,periodStart,fuelMeTon,fuelAeTon,totalFuelTon,readings,source,deviceId`, CRLF line ends, the values of the JSON points (empty for null; periodStart, source and deviceId only for raw readings). Errors before the first byte are problem details; a failure during the transfer aborts the connection, so a cut file never looks complete.
+ * @summary Export the readings or hourly / daily sums of a vessel as CSV
+ */
+export function useReadingsControllerExportCsv<
+  TData = Awaited<ReturnType<typeof readingsControllerExportCsv>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  mmsi: string,
+  params?: ReadingsControllerExportCsvParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof readingsControllerExportCsv>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * The series of GET …/readings (same `from`, `to` and `bucket`, defaults and range limits; ascending) as one streamed RFC 4180 file (`Content-Disposition: attachment`): the header line `time,periodStart,fuelMeTon,fuelAeTon,totalFuelTon,readings,source,deviceId`, CRLF line ends, the values of the JSON points (empty for null; periodStart, source and deviceId only for raw readings). Errors before the first byte are problem details; a failure during the transfer aborts the connection, so a cut file never looks complete.
+ * @summary Export the readings or hourly / daily sums of a vessel as CSV
+ */
+export function useReadingsControllerExportCsv<
+  TData = Awaited<ReturnType<typeof readingsControllerExportCsv>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  mmsi: string,
+  params?: ReadingsControllerExportCsvParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof readingsControllerExportCsv>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getReadingsControllerExportCsvQueryOptions(mmsi, params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+/**
  * Readings with time in `[from, to)` (default: the last 30 days, at most 5 years): whole UTC days from fuel_daily, whole hours from fuel_hourly, the edges from the raw readings (late readings: see the readings endpoint).
  * @summary Fuel totals of a vessel over a time range
  */
 export const readingsControllerSummary = (
-  mmsi: number,
+  mmsi: string,
   params?: ReadingsControllerSummaryParams,
   options?: SecondParameter<typeof apiClient>,
   signal?: AbortSignal,
@@ -468,7 +625,7 @@ export const readingsControllerSummary = (
 };
 
 export const getReadingsControllerSummaryQueryKey = (
-  mmsi: number,
+  mmsi: string,
   params?: ReadingsControllerSummaryParams,
 ) => {
   return [`/api/v2/telemetry/vessels/${mmsi}/summary`, ...(params ? [params] : [])] as const;
@@ -478,7 +635,7 @@ export const getReadingsControllerSummaryQueryOptions = <
   TData = Awaited<ReturnType<typeof readingsControllerSummary>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   params?: ReadingsControllerSummaryParams,
   options?: {
     query?: Partial<
@@ -518,7 +675,7 @@ export function useReadingsControllerSummary<
   TData = Awaited<ReturnType<typeof readingsControllerSummary>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   params: undefined | ReadingsControllerSummaryParams,
   options: {
     query: Partial<
@@ -544,7 +701,7 @@ export function useReadingsControllerSummary<
   TData = Awaited<ReturnType<typeof readingsControllerSummary>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   params?: ReadingsControllerSummaryParams,
   options?: {
     query?: Partial<
@@ -570,7 +727,7 @@ export function useReadingsControllerSummary<
   TData = Awaited<ReturnType<typeof readingsControllerSummary>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   params?: ReadingsControllerSummaryParams,
   options?: {
     query?: Partial<
@@ -588,7 +745,7 @@ export function useReadingsControllerSummary<
   TData = Awaited<ReturnType<typeof readingsControllerSummary>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   params?: ReadingsControllerSummaryParams,
   options?: {
     query?: Partial<
@@ -612,7 +769,7 @@ export function useReadingsControllerSummary<
  * @summary Whether telemetry of a vessel is active, with its newest reading
  */
 export const readingsControllerStatus = (
-  mmsi: number,
+  mmsi: string,
   options?: SecondParameter<typeof apiClient>,
   signal?: AbortSignal,
 ) => {
@@ -622,7 +779,7 @@ export const readingsControllerStatus = (
   );
 };
 
-export const getReadingsControllerStatusQueryKey = (mmsi: number) => {
+export const getReadingsControllerStatusQueryKey = (mmsi: string) => {
   return [`/api/v2/telemetry/vessels/${mmsi}/status`] as const;
 };
 
@@ -630,7 +787,7 @@ export const getReadingsControllerStatusQueryOptions = <
   TData = Awaited<ReturnType<typeof readingsControllerStatus>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof readingsControllerStatus>>, TError, TData>
@@ -669,7 +826,7 @@ export function useReadingsControllerStatus<
   TData = Awaited<ReturnType<typeof readingsControllerStatus>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   options: {
     query: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof readingsControllerStatus>>, TError, TData>
@@ -694,7 +851,7 @@ export function useReadingsControllerStatus<
   TData = Awaited<ReturnType<typeof readingsControllerStatus>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof readingsControllerStatus>>, TError, TData>
@@ -719,7 +876,7 @@ export function useReadingsControllerStatus<
   TData = Awaited<ReturnType<typeof readingsControllerStatus>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof readingsControllerStatus>>, TError, TData>
@@ -736,7 +893,7 @@ export function useReadingsControllerStatus<
   TData = Awaited<ReturnType<typeof readingsControllerStatus>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof readingsControllerStatus>>, TError, TData>

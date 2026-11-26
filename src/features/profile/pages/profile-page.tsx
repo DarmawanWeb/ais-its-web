@@ -1,64 +1,71 @@
-import { ROLE_LABELS } from '@darmawanweb/ais-its-contracts/auth';
 import { UserRound } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { usePermissions, useSession } from '@/shared/auth/hooks';
-import { useSessionStore } from '@/shared/auth/session';
-import { KeyValueList } from '@/shared/domain-ui/key-value-list';
-import { PlaceholderPage } from '@/shared/domain-ui/placeholder-page';
-import { Section } from '@/shared/domain-ui/section';
-import { formatDateTime } from '@/shared/lib/format';
-import { Badge } from '@/shared/ui/badge';
+import { ErrorState } from '@/shared/domain-ui/feedback';
+import { PageHeader } from '@/shared/domain-ui/page-header';
+import { Skeleton } from '@/shared/ui/skeleton';
 
-/** Profile (scaffold): session details; password/MFA/sessions forms come next. */
+import { useProfile } from '../api/profile-api';
+import { AccountCard } from '../components/account-card';
+import { MembershipsCard } from '../components/memberships-card';
+import { MfaCard } from '../components/mfa-card';
+import { PasswordCard } from '../components/password-card';
+import { PreferencesCard } from '../components/preferences-card';
+import { ProfileHero } from '../components/profile-hero';
+import { SessionsCard } from '../components/sessions-card';
+
+function ProfileSkeleton() {
+  return (
+    <div className="space-y-6" aria-busy>
+      <Skeleton className="h-32 w-full rounded-xl" />
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
+        <div className="space-y-6">
+          <Skeleton className="h-56 w-full rounded-xl" />
+          <Skeleton className="h-72 w-full rounded-xl" />
+        </div>
+        <Skeleton className="h-80 w-full rounded-xl" />
+      </div>
+    </div>
+  );
+}
+
+/** Profile & security: account, preferences, password, MFA, sessions and memberships. */
 export function ProfilePage() {
-  const { t, i18n } = useTranslation('profile');
-  const session = useSession();
-  const permissions = usePermissions();
-  const expiresAt = useSessionStore((state) => state.expiresAt);
-  const locale = i18n.language === 'en' ? 'en' : 'id';
+  const { t } = useTranslation('profile');
+  const profile = useProfile();
 
   return (
-    <PlaceholderPage
-      icon={UserRound}
-      title={t('title')}
-      description={t('description')}
-      capabilities={t('capabilities', { returnObjects: true }) as string[]}
-    >
-      <Section title={t('account.title')}>
-        <KeyValueList
-          columns={2}
-          items={[
-            { label: t('account.name'), value: session.name || '—' },
-            { label: t('account.email'), value: session.email || '—' },
-            { label: t('account.userId'), value: session.userId, mono: true },
-            {
-              label: t('account.organization'),
-              value:
-                session.activeMembership?.orgName ??
-                session.orgId ??
-                t('common:shell.organization.platform'),
-            },
-            {
-              label: t('account.roles'),
-              value: (
-                <span className="flex flex-wrap gap-1">
-                  {session.roles.map((role) => (
-                    <Badge key={role} variant="primary">
-                      {ROLE_LABELS[role][locale]}
-                    </Badge>
-                  ))}
-                </span>
-              ),
-            },
-            { label: t('account.permissions'), value: permissions.size, mono: true },
-            {
-              label: t('account.sessionExpires'),
-              value: formatDateTime(expiresAt, i18n.language, 'dd MMM yyyy HH:mm:ss'),
-            },
-          ]}
-        />
-      </Section>
-    </PlaceholderPage>
+    <div className="flex flex-col gap-6">
+      <PageHeader
+        eyebrow={t('eyebrow')}
+        title={t('title')}
+        description={t('description')}
+        icon={UserRound}
+      />
+      {profile.isPending ? (
+        <ProfileSkeleton />
+      ) : profile.isError ? (
+        <ErrorState error={profile.error} onRetry={() => void profile.refetch()} />
+      ) : (
+        <>
+          <ProfileHero me={profile.data} />
+          <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
+            <div className="flex min-w-0 flex-col gap-6">
+              <AccountCard me={profile.data} />
+              <PasswordCard />
+              <MfaCard enabled={profile.data.mfaEnabled} />
+              <SessionsCard memberships={profile.data.memberships} />
+            </div>
+            <div className="flex min-w-0 flex-col gap-6">
+              <MembershipsCard
+                memberships={profile.data.memberships}
+                activeOrgId={profile.data.activeOrgId}
+              />
+              <PreferencesCard />
+            </div>
+          </div>
+        </>
+      )}
+    </div>
   );
 }

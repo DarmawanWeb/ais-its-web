@@ -15,6 +15,16 @@ export const feature = defineFeature({
       handle: { titleKey: 'cii:cii.title', permission: 'cii:read' },
       lazy: lazyPage(() => import('./pages/cii-page'), 'CiiPage'),
     },
+    {
+      path: 'cii/reduction-factors',
+      handle: { titleKey: 'cii:factors.title', permission: 'cii:read' },
+      lazy: lazyPage(() => import('./pages/reduction-factors-page'), 'ReductionFactorsPage'),
+    },
+    {
+      path: 'cii/vessels/:mmsi',
+      handle: { titleKey: 'cii:vessel.title', permission: 'cii:read' },
+      lazy: lazyPage(() => import('./pages/cii-vessel-page'), 'CiiVesselPage'),
+    },
   ],
   nav: [
     {
@@ -25,7 +35,7 @@ export const feature = defineFeature({
       labelKey: 'cii:nav.cii',
       icon: Leaf,
       permission: 'cii:read',
-      keywords: ['cii', 'emisi', 'emission', 'co2'],
+      keywords: ['cii', 'emisi', 'emission', 'co2', 'karbon', 'carbon', 'dcs', 'imo'],
     },
   ],
 });

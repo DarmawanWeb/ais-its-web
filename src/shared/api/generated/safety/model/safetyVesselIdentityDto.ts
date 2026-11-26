@@ -3,10 +3,16 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Safety Service
  * Navigational safety analytics (pipeline Early Warning System, collision risk CPA/TCPA) built on the Detector SDK
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 
 export interface SafetyVesselIdentityDto {
+  /** Fleet vessel id */
   id: string;
   name: string;
+  /**
+   * Vessel type code of the fleet registry
+   * @nullable
+   */
+  typeCode: string | null;
 }

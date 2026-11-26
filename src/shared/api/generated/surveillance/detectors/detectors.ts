@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Surveillance Service
  * Illegal-activity analytics on the Detector SDK: illegal transhipment, navstatus anomaly, dark vessels, geofence violations and fishing loitering
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import { useQuery } from '@tanstack/react-query';
 import type {
@@ -18,7 +18,7 @@ import type {
   UseQueryResult,
 } from '@tanstack/react-query';
 
-import type { DetectorDescriptionDto, ProblemDetails } from '../model';
+import type { ProblemDetails, SurveillanceDetectorDto } from '../model';
 
 import { apiClient } from '../../../mutator';
 import type { ErrorType } from '../../../mutator';
@@ -41,13 +41,14 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
 };
 
 /**
+ * `thresholds` lists the active `<ID>_*` configuration with a unit and a description per key; `config` is the same map without them (kept for older clients).
  * @summary Detectors of this instance: method ids and active thresholds
  */
 export const detectorsControllerList = (
   options?: SecondParameter<typeof apiClient>,
   signal?: AbortSignal,
 ) => {
-  return apiClient<DetectorDescriptionDto[]>(
+  return apiClient<SurveillanceDetectorDto[]>(
     { url: `/api/v2/surveillance/detectors`, method: 'GET', signal },
     options,
   );
@@ -86,7 +87,10 @@ export type DetectorsControllerListQueryResult = NonNullable<
 >;
 export type DetectorsControllerListQueryError = ErrorType<ProblemDetails>;
 
-/** @summary Detectors of this instance: method ids and active thresholds */
+/**
+ * `thresholds` lists the active `<ID>_*` configuration with a unit and a description per key; `config` is the same map without them (kept for older clients).
+ * @summary Detectors of this instance: method ids and active thresholds
+ */
 export function useDetectorsControllerList<
   TData = Awaited<ReturnType<typeof detectorsControllerList>>,
   TError = ErrorType<ProblemDetails>,
@@ -107,7 +111,10 @@ export function useDetectorsControllerList<
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-/** @summary Detectors of this instance: method ids and active thresholds */
+/**
+ * `thresholds` lists the active `<ID>_*` configuration with a unit and a description per key; `config` is the same map without them (kept for older clients).
+ * @summary Detectors of this instance: method ids and active thresholds
+ */
 export function useDetectorsControllerList<
   TData = Awaited<ReturnType<typeof detectorsControllerList>>,
   TError = ErrorType<ProblemDetails>,
@@ -128,7 +135,10 @@ export function useDetectorsControllerList<
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-/** @summary Detectors of this instance: method ids and active thresholds */
+/**
+ * `thresholds` lists the active `<ID>_*` configuration with a unit and a description per key; `config` is the same map without them (kept for older clients).
+ * @summary Detectors of this instance: method ids and active thresholds
+ */
 export function useDetectorsControllerList<
   TData = Awaited<ReturnType<typeof detectorsControllerList>>,
   TError = ErrorType<ProblemDetails>,
@@ -141,7 +151,10 @@ export function useDetectorsControllerList<
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-/** @summary Detectors of this instance: method ids and active thresholds */
+/**
+ * `thresholds` lists the active `<ID>_*` configuration with a unit and a description per key; `config` is the same map without them (kept for older clients).
+ * @summary Detectors of this instance: method ids and active thresholds
+ */
 export function useDetectorsControllerList<
   TData = Awaited<ReturnType<typeof detectorsControllerList>>,
   TError = ErrorType<ProblemDetails>,

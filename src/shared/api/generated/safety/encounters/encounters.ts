@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Safety Service
  * Navigational safety analytics (pipeline Early Warning System, collision risk CPA/TCPA) built on the Detector SDK
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import { useQuery } from '@tanstack/react-query';
 import type {
@@ -45,7 +45,7 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
 };
 
 /**
- * Encounters of vessel pairs at risk with samples in the range (default: the last 24 h, at most 31 days), newest encounter first (by start; an active encounter keeps its place while it gets new samples), each with its CPA/TCPA history in the range. The cursor keeps the window of the first page: every page reads the same `from` / `to`. Tenancy (spec §8.5): authority and super_admin see every pair, other roles pairs with a vessel of their organization.
+ * Encounters of vessel pairs at risk with samples in the range (default: the last 24 h, at most 31 days), newest encounter first (by start; an active encounter keeps its place while it gets new samples), each with its CPA/TCPA history in the range, the predicted positions at the closest point of approach per sample (`cpaPositions`), the fleet identities of both vessels and a localizable text (`messageKey`, `messageParams`). `active=true` keeps the encounters still in progress (latest sample above `none` and at most `COLLISION_MAX_AGE_S` + `COLLISION_SAMPLE_INTERVAL_S` + 30 s old), `active=false` the ended ones; `bbox` keeps the encounters with a sample in the range where either vessel’s report lies in the box. The cursor keeps the window (and the `active` cut-off) of the first page: every page reads the same `from` / `to`. Tenancy (spec §8.5): authority and super_admin see every pair, other roles pairs with a vessel of their organization.
  * @summary Collision encounters with their CPA/TCPA history
  */
 export const encountersControllerList = (
@@ -96,7 +96,7 @@ export type EncountersControllerListQueryResult = NonNullable<
 export type EncountersControllerListQueryError = ErrorType<ProblemDetails>;
 
 /**
- * Encounters of vessel pairs at risk with samples in the range (default: the last 24 h, at most 31 days), newest encounter first (by start; an active encounter keeps its place while it gets new samples), each with its CPA/TCPA history in the range. The cursor keeps the window of the first page: every page reads the same `from` / `to`. Tenancy (spec §8.5): authority and super_admin see every pair, other roles pairs with a vessel of their organization.
+ * Encounters of vessel pairs at risk with samples in the range (default: the last 24 h, at most 31 days), newest encounter first (by start; an active encounter keeps its place while it gets new samples), each with its CPA/TCPA history in the range, the predicted positions at the closest point of approach per sample (`cpaPositions`), the fleet identities of both vessels and a localizable text (`messageKey`, `messageParams`). `active=true` keeps the encounters still in progress (latest sample above `none` and at most `COLLISION_MAX_AGE_S` + `COLLISION_SAMPLE_INTERVAL_S` + 30 s old), `active=false` the ended ones; `bbox` keeps the encounters with a sample in the range where either vessel’s report lies in the box. The cursor keeps the window (and the `active` cut-off) of the first page: every page reads the same `from` / `to`. Tenancy (spec §8.5): authority and super_admin see every pair, other roles pairs with a vessel of their organization.
  * @summary Collision encounters with their CPA/TCPA history
  */
 export function useEncountersControllerList<
@@ -121,7 +121,7 @@ export function useEncountersControllerList<
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
- * Encounters of vessel pairs at risk with samples in the range (default: the last 24 h, at most 31 days), newest encounter first (by start; an active encounter keeps its place while it gets new samples), each with its CPA/TCPA history in the range. The cursor keeps the window of the first page: every page reads the same `from` / `to`. Tenancy (spec §8.5): authority and super_admin see every pair, other roles pairs with a vessel of their organization.
+ * Encounters of vessel pairs at risk with samples in the range (default: the last 24 h, at most 31 days), newest encounter first (by start; an active encounter keeps its place while it gets new samples), each with its CPA/TCPA history in the range, the predicted positions at the closest point of approach per sample (`cpaPositions`), the fleet identities of both vessels and a localizable text (`messageKey`, `messageParams`). `active=true` keeps the encounters still in progress (latest sample above `none` and at most `COLLISION_MAX_AGE_S` + `COLLISION_SAMPLE_INTERVAL_S` + 30 s old), `active=false` the ended ones; `bbox` keeps the encounters with a sample in the range where either vessel’s report lies in the box. The cursor keeps the window (and the `active` cut-off) of the first page: every page reads the same `from` / `to`. Tenancy (spec §8.5): authority and super_admin see every pair, other roles pairs with a vessel of their organization.
  * @summary Collision encounters with their CPA/TCPA history
  */
 export function useEncountersControllerList<
@@ -146,7 +146,7 @@ export function useEncountersControllerList<
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
- * Encounters of vessel pairs at risk with samples in the range (default: the last 24 h, at most 31 days), newest encounter first (by start; an active encounter keeps its place while it gets new samples), each with its CPA/TCPA history in the range. The cursor keeps the window of the first page: every page reads the same `from` / `to`. Tenancy (spec §8.5): authority and super_admin see every pair, other roles pairs with a vessel of their organization.
+ * Encounters of vessel pairs at risk with samples in the range (default: the last 24 h, at most 31 days), newest encounter first (by start; an active encounter keeps its place while it gets new samples), each with its CPA/TCPA history in the range, the predicted positions at the closest point of approach per sample (`cpaPositions`), the fleet identities of both vessels and a localizable text (`messageKey`, `messageParams`). `active=true` keeps the encounters still in progress (latest sample above `none` and at most `COLLISION_MAX_AGE_S` + `COLLISION_SAMPLE_INTERVAL_S` + 30 s old), `active=false` the ended ones; `bbox` keeps the encounters with a sample in the range where either vessel’s report lies in the box. The cursor keeps the window (and the `active` cut-off) of the first page: every page reads the same `from` / `to`. Tenancy (spec §8.5): authority and super_admin see every pair, other roles pairs with a vessel of their organization.
  * @summary Collision encounters with their CPA/TCPA history
  */
 export function useEncountersControllerList<
@@ -163,7 +163,7 @@ export function useEncountersControllerList<
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
- * Encounters of vessel pairs at risk with samples in the range (default: the last 24 h, at most 31 days), newest encounter first (by start; an active encounter keeps its place while it gets new samples), each with its CPA/TCPA history in the range. The cursor keeps the window of the first page: every page reads the same `from` / `to`. Tenancy (spec §8.5): authority and super_admin see every pair, other roles pairs with a vessel of their organization.
+ * Encounters of vessel pairs at risk with samples in the range (default: the last 24 h, at most 31 days), newest encounter first (by start; an active encounter keeps its place while it gets new samples), each with its CPA/TCPA history in the range, the predicted positions at the closest point of approach per sample (`cpaPositions`), the fleet identities of both vessels and a localizable text (`messageKey`, `messageParams`). `active=true` keeps the encounters still in progress (latest sample above `none` and at most `COLLISION_MAX_AGE_S` + `COLLISION_SAMPLE_INTERVAL_S` + 30 s old), `active=false` the ended ones; `bbox` keeps the encounters with a sample in the range where either vessel’s report lies in the box. The cursor keeps the window (and the `active` cut-off) of the first page: every page reads the same `from` / `to`. Tenancy (spec §8.5): authority and super_admin see every pair, other roles pairs with a vessel of their organization.
  * @summary Collision encounters with their CPA/TCPA history
  */
 export function useEncountersControllerList<

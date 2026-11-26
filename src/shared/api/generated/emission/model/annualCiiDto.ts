@@ -3,14 +3,17 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Emission Service
  * Fuel and CO2 per voyage segment, IMO CII (daily/annual, rating A-E), reduction factors, SEEMP recommendations and what-if simulation, IMO DCS summary
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import type { CiiYearDto } from './ciiYearDto';
 import type { DdVectorDto } from './ddVectorDto';
+import type { VesselIdentityDto } from './vesselIdentityDto';
 
 export interface AnnualCiiDto {
   mmsi: number;
   vesselId: string;
+  /** Identity of the vessel (FLEET projection) */
+  vessel: VesselIdentityDto;
   /** d-vector of the ship type (relative) */
   dVector: DdVectorDto;
   years: CiiYearDto[];

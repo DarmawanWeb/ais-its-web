@@ -1,50 +1,72 @@
 #!/usr/bin/env node
-// Minimal mock of the gateway for e2e tests and screenshots (no dependencies). The core below
-// serves the auth endpoints of spec §13.1 with a rotating HttpOnly refresh cookie, GET /me and
-// organizations; every feature adds its endpoints in routes/<feature>.mjs (loaded
-// automatically, see routes/README.md). Every other /api/v2 route answers 404 problem details,
-// like a service that is not deployed yet.
+// Mock of the gateway for e2e tests, screenshots and backend-less development (`pnpm e2e:mock`):
+//   core          the auth session endpoints of spec §13.1 (rotating HttpOnly refresh cookie)
+//   base/*.mjs    foundation defaults several features read (GET /me, organizations, vessel
+//                 search, live positions, safety states, alert summary)
+//   routes/*.mjs  one module per feature, routes/<feature>.mjs, loaded automatically; a feature
+//                 route replaces the base route with the same method and path (routes/README.md)
+//   /ws           socket.io realtime server of spec §9 (realtime.mjs), fed by the modules'
+//                 realtime hooks, their HTTP handlers and the test controls
+//   /__mock/*     test controls (not proxied to the app): push realtime events, list realtime
+//                 connections, reset module state (e2e/fixtures.ts)
+// Every other /api/v2 route answers 404 problem details, like a service that is not deployed yet.
 import { randomBytes, randomUUID } from 'node:crypto';
-import { readdirSync } from 'node:fs';
+import { existsSync, readdirSync } from 'node:fs';
 import { createServer } from 'node:http';
+import { pathToFileURL } from 'node:url';
 
-import { claimsOf, matchPath, ORGS, problem, readBody, send, USERS } from './lib.mjs';
+import {
+  buildRouteTable,
+  can,
+  claimsOf,
+  decodeToken,
+  membershipsOf,
+  MockHttpError,
+  problem,
+  readBody,
+  send,
+  ACCOUNTS,
+  validateModule,
+} from './lib.mjs';
+import { createRealtime } from './realtime.mjs';
 
-const PORT = Number(process.env.MOCK_PORT ?? 8787);
-
-// --- feature routes -------------------------------------------------------------------------
-
+const BASE_DIR = new URL('./base/', import.meta.url);
 const ROUTES_DIR = new URL('./routes/', import.meta.url);
+const FEATURES_DIR = new URL('../../src/features/', import.meta.url);
 
-async function loadRoutes() {
-  const files = readdirSync(ROUTES_DIR)
-    .filter((file) => file.endsWith('.mjs'))
+/**
+ * Imports the modules of a directory in file name order; files starting with "_" (templates)
+ * are skipped. Feature modules must be named after an existing feature (src/features/<id>/).
+ */
+async function loadModules(dir, prefix, { features = false } = {}) {
+  if (!existsSync(dir)) return [];
+  const files = readdirSync(dir)
+    .filter((file) => file.endsWith('.mjs') && !file.startsWith('_'))
     .sort();
-  const routes = [];
-  const seen = new Map();
+  const modules = [];
   for (const file of files) {
-    const module = await import(new URL(file, ROUTES_DIR).href);
-    if (!Array.isArray(module.routes))
-      throw new Error(`routes/${file} must export "routes" (an array)`);
-    for (const route of module.routes) {
-      if (!route?.method || !route.path || typeof route.handler !== 'function') {
-        throw new Error(`routes/${file}: every route needs method, path and handler`);
-      }
-      const key = `${route.method} ${String(route.path)}`;
-      if (seen.has(key))
-        throw new Error(`${key} is declared by routes/${seen.get(key)} and routes/${file}`);
-      seen.set(key, file);
-      routes.push({ ...route, file });
+    const source = `${prefix}/${file}`;
+    const id = file.slice(0, -'.mjs'.length);
+    if (features && !existsSync(new URL(`${id}/routes.tsx`, FEATURES_DIR))) {
+      throw new Error(
+        `${source}: there is no feature "${id}" (src/features/${id}/routes.tsx); name the module after its feature id`,
+      );
     }
+    modules.push(validateModule(await import(new URL(file, dir).href), source));
   }
-  return routes;
+  return modules;
 }
 
-const featureRoutes = await loadRoutes();
+/** Realtime handshake: an unexpired access token (the mock never verifies signatures). */
+function authenticate(token) {
+  if (typeof token !== 'string' || token === '') return null;
+  const claims = decodeToken(token);
+  if (!claims || claims.typ !== 'access' || typeof claims.sub !== 'string') return null;
+  if (typeof claims.exp === 'number' && claims.exp * 1000 <= Date.now()) return null;
+  return claims;
+}
 
 // --- auth core (spec §13.1) -----------------------------------------------------------------
-
-const sessions = new Map(); // refresh token -> { userId, orgId, sid }
 
 const b64 = (value) => Buffer.from(JSON.stringify(value)).toString('base64url');
 
@@ -81,138 +103,238 @@ function readCookie(req) {
   return /(?:^|;\s*)aisits_rt=([^;]+)/.exec(req.headers.cookie ?? '')?.[1] ?? null;
 }
 
-function startSession(user, orgId, sid = randomUUID()) {
-  const refresh = randomBytes(32).toString('base64url');
-  sessions.set(refresh, { userId: user.id, orgId, sid });
-  return { refresh, token: accessToken(user, orgId, sid), sid };
-}
+/** Session endpoints (reserved: feature modules cannot override them). */
+function coreRoutes() {
+  const sessions = new Map(); // refresh token -> { userId, orgId, sid }
 
-const memberships = (user) =>
-  user.memberships.map((m) => {
-    const org = ORGS.find((o) => o.id === m.orgId);
-    return { ...m, orgName: org?.name ?? m.orgId, orgKind: org?.kind };
-  });
+  function startSession(user, orgId, sid = randomUUID()) {
+    const refresh = randomBytes(32).toString('base64url');
+    sessions.set(refresh, { userId: user.id, orgId, sid });
+    return { refresh, token: accessToken(user, orgId, sid), sid };
+  }
 
-async function core(req, res, { method, path, claims, user }) {
-  if (method === 'POST' && path === '/api/v2/auth/login') {
-    const { email, password } = await readBody(req);
-    const found = USERS.find((u) => u.email === String(email ?? '').toLowerCase());
-    if (!found || found.password !== password)
-      return problem(res, 401, 'INVALID_CREDENTIALS', 'Invalid credentials');
-    const orgId = found.memberships[0]?.orgId ?? null;
-    const session = startSession(found, orgId);
-    return send(
-      res,
-      200,
-      {
-        accessToken: session.token,
-        expiresIn: 900,
-        user: { id: found.id, email: found.email, name: found.name },
-        memberships: memberships(found),
-        activeOrgId: orgId,
+  /** @type {import('./lib.mjs').MockRoute[]} */
+  return [
+    {
+      method: 'POST',
+      path: '/api/v2/auth/login',
+      public: true,
+      handler: async ({ body, send, problem }) => {
+        const { email, password } = await body();
+        const found = ACCOUNTS.find((u) => u.email === String(email ?? '').toLowerCase());
+        if (!found || found.password !== password)
+          return problem(401, 'INVALID_CREDENTIALS', 'Invalid credentials');
+        const orgId = found.memberships[0]?.orgId ?? null;
+        const session = startSession(found, orgId);
+        return send(
+          200,
+          {
+            accessToken: session.token,
+            expiresIn: 900,
+            user: { id: found.id, email: found.email, name: found.name },
+            memberships: membershipsOf(found),
+            activeOrgId: orgId,
+          },
+          { 'Set-Cookie': cookie(session.refresh) },
+        );
       },
-      { 'Set-Cookie': cookie(session.refresh) },
-    );
-  }
-
-  if (method === 'POST' && path === '/api/v2/auth/refresh') {
-    const presented = readCookie(req);
-    const session = presented ? sessions.get(presented) : undefined;
-    if (!session)
-      return problem(res, 401, 'UNAUTHORIZED', 'Unauthorized', {}, { 'Set-Cookie': cookie(null) });
-    sessions.delete(presented);
-    const owner = USERS.find((u) => u.id === session.userId);
-    const next = startSession(owner, session.orgId, session.sid);
-    return send(
-      res,
-      200,
-      { accessToken: next.token, expiresIn: 900 },
-      { 'Set-Cookie': cookie(next.refresh) },
-    );
-  }
-
-  if (method === 'POST' && path === '/api/v2/auth/logout') {
-    const presented = readCookie(req);
-    const session = presented ? sessions.get(presented) : undefined;
-    // Logout revokes the whole family (spec §8.3).
-    if (session)
-      for (const [token, s] of sessions) if (s.sid === session.sid) sessions.delete(token);
-    return send(res, 204, undefined, { 'Set-Cookie': cookie(null) });
-  }
-
-  if (method === 'POST' && path === '/api/v2/auth/password/forgot') return send(res, 202);
-
-  if (!path.startsWith('/api/v2/')) return false;
-  if (!claims) return problem(res, 401, 'UNAUTHORIZED', 'Unauthorized');
-
-  if (method === 'POST' && path === '/api/v2/auth/switch-org') {
-    const { orgId } = await readBody(req);
-    if (!user || !(user.platformAdmin || user.memberships.some((m) => m.orgId === orgId))) {
-      return problem(res, 403, 'FORBIDDEN', 'Forbidden');
-    }
-    for (const session of sessions.values()) if (session.sid === claims.sid) session.orgId = orgId;
-    return send(res, 200, {
-      accessToken: accessToken(user, orgId, claims.sid),
-      expiresIn: 900,
-      activeOrgId: orgId,
-    });
-  }
-
-  if (method === 'GET' && path === '/api/v2/me' && user) {
-    return send(res, 200, {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      status: 'active',
-      mfaEnabled: false,
-      isPlatformAdmin: user.platformAdmin,
-      memberships: memberships(user),
-      activeOrgId: claims.org ?? null,
-      roles: claims.roles ?? [],
-    });
-  }
-
-  if (method === 'GET' && path === '/api/v2/organizations') {
-    if (!claims.roles?.includes('super_admin')) return problem(res, 403, 'FORBIDDEN', 'Forbidden');
-    return send(res, 200, { data: ORGS, meta: { page: 1, pageSize: 100, total: ORGS.length } });
-  }
-  return false;
+    },
+    {
+      method: 'POST',
+      path: '/api/v2/auth/refresh',
+      public: true,
+      handler: ({ req, send, problem }) => {
+        const presented = readCookie(req);
+        const session = presented ? sessions.get(presented) : undefined;
+        if (!session)
+          return problem(401, 'UNAUTHORIZED', 'Unauthorized', {}, { 'Set-Cookie': cookie(null) });
+        sessions.delete(presented);
+        const owner = ACCOUNTS.find((u) => u.id === session.userId);
+        const next = startSession(owner, session.orgId, session.sid);
+        return send(
+          200,
+          { accessToken: next.token, expiresIn: 900 },
+          { 'Set-Cookie': cookie(next.refresh) },
+        );
+      },
+    },
+    {
+      method: 'POST',
+      path: '/api/v2/auth/logout',
+      public: true,
+      handler: ({ req, send }) => {
+        const presented = readCookie(req);
+        const session = presented ? sessions.get(presented) : undefined;
+        // Logout revokes the whole family (spec §8.3).
+        if (session)
+          for (const [token, s] of sessions) if (s.sid === session.sid) sessions.delete(token);
+        return send(204, undefined, { 'Set-Cookie': cookie(null) });
+      },
+    },
+    {
+      method: 'POST',
+      path: '/api/v2/auth/password/forgot',
+      public: true,
+      handler: ({ send }) => send(202),
+    },
+    {
+      method: 'POST',
+      path: '/api/v2/auth/switch-org',
+      handler: async ({ claims, user, body, send, problem }) => {
+        const { orgId } = await body();
+        if (!user || !(user.platformAdmin || user.memberships.some((m) => m.orgId === orgId))) {
+          return problem(403, 'FORBIDDEN', 'Forbidden');
+        }
+        for (const session of sessions.values())
+          if (session.sid === claims.sid) session.orgId = orgId;
+        return send(200, {
+          accessToken: accessToken(user, orgId, claims.sid),
+          expiresIn: 900,
+          activeOrgId: orgId,
+        });
+      },
+    },
+  ];
 }
 
-const server = createServer(async (req, res) => {
-  try {
-    const url = new URL(req.url ?? '/', `http://${req.headers.host ?? 'localhost'}`);
-    const path = url.pathname;
-    const method = req.method ?? 'GET';
-    if (path === '/health') return send(res, 200, { ok: true, routes: featureRoutes.length });
+// --- gateway --------------------------------------------------------------------------------
 
-    const claims = claimsOf(req);
-    const user = USERS.find((u) => u.id === claims?.sub);
-    if ((await core(req, res, { method, path, claims, user })) !== false) return;
+/**
+ * Starts the mock gateway. `port: 0` picks a free port (tests).
+ * @param {{ port?: number, log?: boolean }} [options]
+ */
+export async function startMockGateway({
+  port = Number(process.env.MOCK_PORT ?? 8787),
+  log = true,
+} = {}) {
+  const base = await loadModules(BASE_DIR, 'base');
+  const features = await loadModules(ROUTES_DIR, 'routes', { features: true });
+  const modules = [...base, ...features];
+  const { routes, overrides } = buildRouteTable([
+    { layer: 'core', source: 'server.mjs', routes: coreRoutes() },
+    ...features.map((module) => ({ layer: 'feature', ...module })),
+    ...base.map((module) => ({ layer: 'base', ...module })),
+  ]);
 
-    for (const route of featureRoutes) {
-      if (route.method !== method) continue;
-      const params = matchPath(route.path, path);
-      if (!params) continue;
-      if (!route.public && !claims) return problem(res, 401, 'UNAUTHORIZED', 'Unauthorized');
-      return await route.handler({
-        req,
-        url,
-        params,
-        claims,
-        body: () => readBody(req),
-        send: (status, payload, headers) => send(res, status, payload, headers),
-        problem: (status, code, title, extra) => problem(res, status, code, title, extra),
-      });
+  const server = createServer((req, res) => void handle(req, res));
+  const realtime = createRealtime(server, { authenticate });
+  const rt = realtime.api;
+
+  async function control(req, res, method, path) {
+    if (method === 'GET' && path === '/__mock/realtime') {
+      return send(res, 200, { connections: rt.connections() });
     }
-
+    if (method === 'POST' && path === '/__mock/realtime') {
+      const message = await readBody(req);
+      if (message.kind === 'positions') rt.positions(message.items);
+      else if (message.kind === 'safety:states') rt.safetyStates(message.items);
+      else if (message.kind === 'alert')
+        rt.alert(message.alert, { kind: message.event, orgIds: message.orgIds });
+      else if (message.kind === 'cii:updated') rt.cii(message.update);
+      else if (message.kind === 'emit')
+        rt.emit(message.event, message.payload, { rooms: message.rooms });
+      else {
+        throw new MockHttpError(400, 'VALIDATION_FAILED', 'Unknown realtime message', {
+          detail: 'kind: positions | safety:states | alert | cii:updated | emit',
+        });
+      }
+      return send(res, 200, { ok: true, connections: rt.connections().length });
+    }
+    if (method === 'POST' && path === '/__mock/reset') {
+      for (const module of modules) module.reset?.();
+      return send(res, 204);
+    }
     return problem(res, 404, 'NOT_FOUND', 'Not found', { instance: path });
-  } catch (error) {
-    console.error('[mock] handler failed', error);
-    if (!res.headersSent) problem(res, 500, 'INTERNAL_ERROR', 'Internal error');
   }
-});
 
-server.listen(PORT, () =>
-  console.info(`mock gateway on http://localhost:${PORT} (${featureRoutes.length} feature routes)`),
-);
+  async function handle(req, res) {
+    try {
+      const url = new URL(req.url ?? '/', `http://${req.headers.host ?? 'localhost'}`);
+      const path = url.pathname;
+      const method = req.method ?? 'GET';
+      if (path === '/health') {
+        return send(res, 200, {
+          ok: true,
+          routes: routes.length,
+          modules: modules.map((module) => module.source),
+          realtime: { connections: rt.connections().length },
+        });
+      }
+      if (path.startsWith('/__mock/')) return await control(req, res, method, path);
+
+      const claims = claimsOf(req);
+      const user = ACCOUNTS.find((u) => u.id === claims?.sub) ?? null;
+      for (const route of routes) {
+        if (route.method !== method) continue;
+        const params = route.match(path);
+        if (!params) continue;
+        if (!route.public && !claims) return problem(res, 401, 'UNAUTHORIZED', 'Unauthorized');
+        if (route.permission && !can(claims, route.permission))
+          return problem(res, 403, 'FORBIDDEN', 'Forbidden');
+        let body;
+        await route.handler({
+          req,
+          url,
+          params,
+          claims,
+          user,
+          body: () => (body ??= readBody(req)),
+          send: (status, payload, headers) => send(res, status, payload, headers),
+          problem: (status, code, title, extra, headers) =>
+            problem(res, status, code, title, extra, headers),
+          realtime: rt,
+        });
+        if (!res.headersSent) {
+          console.error(`[mock] ${route.source}: ${route.key} did not answer`);
+          problem(res, 500, 'INTERNAL_ERROR', `${route.source} did not answer ${route.key}`);
+        }
+        return;
+      }
+
+      if (path.startsWith('/api/v2/') && !claims)
+        return problem(res, 401, 'UNAUTHORIZED', 'Unauthorized');
+      return problem(res, 404, 'NOT_FOUND', 'Not found', { instance: path });
+    } catch (error) {
+      if (error instanceof MockHttpError) {
+        if (!res.headersSent) problem(res, error.status, error.code, error.title, error.extra);
+        return;
+      }
+      console.error('[mock] handler failed', error);
+      if (!res.headersSent) problem(res, 500, 'INTERNAL_ERROR', 'Internal error');
+    }
+  }
+
+  for (const module of modules) realtime.use(module.source, module.realtime);
+  await new Promise((resolve, reject) => {
+    server.once('error', reject);
+    server.listen(port, () => resolve(undefined));
+  });
+  const address = server.address();
+  const actualPort = typeof address === 'object' && address ? address.port : port;
+  if (log) {
+    for (const { key, source, replaced } of overrides)
+      console.info(`[mock] ${source} overrides ${key} of ${replaced}`);
+    console.info(
+      `mock gateway on http://localhost:${actualPort} (${routes.length} routes, realtime on /ws; ${modules.map((m) => m.source).join(', ')})`,
+    );
+  }
+  return {
+    url: `http://localhost:${actualPort}`,
+    port: actualPort,
+    routes,
+    overrides,
+    realtime: rt,
+    /** Stops the realtime server, the module hooks and the HTTP server. */
+    close: () => realtime.close(),
+  };
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  const gateway = await startMockGateway();
+  const stop = () => {
+    setTimeout(() => process.exit(0), 2_000).unref();
+    void gateway.close().then(() => process.exit(0));
+  };
+  process.once('SIGINT', stop);
+  process.once('SIGTERM', stop);
+}

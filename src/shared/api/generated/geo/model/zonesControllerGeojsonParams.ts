@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Geo Service
  * Zones and geofences registry: validated GeoJSON zones, map layers and the GEO zone snapshot stream
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import type { ZonesControllerGeojsonKindItem } from './zonesControllerGeojsonKindItem';
 
@@ -14,6 +14,8 @@ export type ZonesControllerGeojsonParams = {
   kind?: ZonesControllerGeojsonKindItem[];
   /** Zones owned by this organization (authority and super_admin: any; others: their own) */
   orgId?: string;
+  /** true = global zones only (shared by every organization); false = organization zones only (within what you may read: your own organization, or every organization for authority and super_admin); both when absent. global=true cannot be combined with orgId */
+  global?: boolean;
   /**
    * Map zoom level: geometries are simplified to half a pixel of it (ST_SimplifyPreserveTopology); full resolution when absent or >= 19
    * @minimum 0

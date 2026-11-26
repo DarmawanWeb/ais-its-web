@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Surveillance Service
  * Illegal-activity analytics on the Detector SDK: illegal transhipment, navstatus anomaly, dark vessels, geofence violations and fishing loitering
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import { useQuery } from '@tanstack/react-query';
 import type {
@@ -22,8 +22,10 @@ import type {
   HeatmapDto,
   ProblemDetails,
   StatisticsControllerHeatmapParams,
+  StatisticsControllerSeriesParams,
   StatisticsControllerStatsParams,
   SurveillanceStatsDto,
+  SurveillanceStatsSeriesDto,
 } from '../model';
 
 import { apiClient } from '../../../mutator';
@@ -302,6 +304,152 @@ export function useStatisticsControllerStats<
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
   const queryOptions = getStatisticsControllerStatsQueryOptions(params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+/**
+ * Every bucket of the range in order (empty ones with zero counts); the first bucket starts at `from`, the last ends at `to`. Buckets follow daylight saving time of `tz`: a repeated hour is two buckets, a skipped hour none, a day lasts 23 to 25 hours. Tenancy as `GET /surveillance/stats`.
+ * @summary Event counts by type and severity per hour or day of a time zone (one query for a chart)
+ */
+export const statisticsControllerSeries = (
+  params?: StatisticsControllerSeriesParams,
+  options?: SecondParameter<typeof apiClient>,
+  signal?: AbortSignal,
+) => {
+  return apiClient<SurveillanceStatsSeriesDto>(
+    { url: `/api/v2/surveillance/stats/series`, method: 'GET', params, signal },
+    options,
+  );
+};
+
+export const getStatisticsControllerSeriesQueryKey = (
+  params?: StatisticsControllerSeriesParams,
+) => {
+  return [`/api/v2/surveillance/stats/series`, ...(params ? [params] : [])] as const;
+};
+
+export const getStatisticsControllerSeriesQueryOptions = <
+  TData = Awaited<ReturnType<typeof statisticsControllerSeries>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: StatisticsControllerSeriesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof statisticsControllerSeries>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getStatisticsControllerSeriesQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof statisticsControllerSeries>>> = ({
+    signal,
+  }) => statisticsControllerSeries(params, requestOptions, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof statisticsControllerSeries>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type StatisticsControllerSeriesQueryResult = NonNullable<
+  Awaited<ReturnType<typeof statisticsControllerSeries>>
+>;
+export type StatisticsControllerSeriesQueryError = ErrorType<ProblemDetails>;
+
+/**
+ * Every bucket of the range in order (empty ones with zero counts); the first bucket starts at `from`, the last ends at `to`. Buckets follow daylight saving time of `tz`: a repeated hour is two buckets, a skipped hour none, a day lasts 23 to 25 hours. Tenancy as `GET /surveillance/stats`.
+ * @summary Event counts by type and severity per hour or day of a time zone (one query for a chart)
+ */
+export function useStatisticsControllerSeries<
+  TData = Awaited<ReturnType<typeof statisticsControllerSeries>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params: undefined | StatisticsControllerSeriesParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof statisticsControllerSeries>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof statisticsControllerSeries>>,
+          TError,
+          Awaited<ReturnType<typeof statisticsControllerSeries>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Every bucket of the range in order (empty ones with zero counts); the first bucket starts at `from`, the last ends at `to`. Buckets follow daylight saving time of `tz`: a repeated hour is two buckets, a skipped hour none, a day lasts 23 to 25 hours. Tenancy as `GET /surveillance/stats`.
+ * @summary Event counts by type and severity per hour or day of a time zone (one query for a chart)
+ */
+export function useStatisticsControllerSeries<
+  TData = Awaited<ReturnType<typeof statisticsControllerSeries>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: StatisticsControllerSeriesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof statisticsControllerSeries>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof statisticsControllerSeries>>,
+          TError,
+          Awaited<ReturnType<typeof statisticsControllerSeries>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Every bucket of the range in order (empty ones with zero counts); the first bucket starts at `from`, the last ends at `to`. Buckets follow daylight saving time of `tz`: a repeated hour is two buckets, a skipped hour none, a day lasts 23 to 25 hours. Tenancy as `GET /surveillance/stats`.
+ * @summary Event counts by type and severity per hour or day of a time zone (one query for a chart)
+ */
+export function useStatisticsControllerSeries<
+  TData = Awaited<ReturnType<typeof statisticsControllerSeries>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: StatisticsControllerSeriesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof statisticsControllerSeries>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Every bucket of the range in order (empty ones with zero counts); the first bucket starts at `from`, the last ends at `to`. Buckets follow daylight saving time of `tz`: a repeated hour is two buckets, a skipped hour none, a day lasts 23 to 25 hours. Tenancy as `GET /surveillance/stats`.
+ * @summary Event counts by type and severity per hour or day of a time zone (one query for a chart)
+ */
+export function useStatisticsControllerSeries<
+  TData = Awaited<ReturnType<typeof statisticsControllerSeries>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: StatisticsControllerSeriesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof statisticsControllerSeries>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getStatisticsControllerSeriesQueryOptions(params, options);
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
     queryKey: DataTag<QueryKey, TData, TError>;

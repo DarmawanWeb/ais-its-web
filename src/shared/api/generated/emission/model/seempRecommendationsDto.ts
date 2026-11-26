@@ -3,15 +3,18 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Emission Service
  * Fuel and CO2 per voyage segment, IMO CII (daily/annual, rating A-E), reduction factors, SEEMP recommendations and what-if simulation, IMO DCS summary
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import type { SeempRecommendationDto } from './seempRecommendationDto';
 import type { SeempRecommendationsDtoBaselineSource } from './seempRecommendationsDtoBaselineSource';
 import type { SeempRecommendationsDtoCiiGradeBefore } from './seempRecommendationsDtoCiiGradeBefore';
+import type { VesselIdentityDto } from './vesselIdentityDto';
 
 export interface SeempRecommendationsDto {
   mmsi: number;
   vesselId: string;
+  /** Identity of the vessel (FLEET projection) */
+  vessel: VesselIdentityDto;
   /** Year of the baseline CII figures */
   baselineYear: number;
   baselineSource: SeempRecommendationsDtoBaselineSource;
@@ -25,8 +28,12 @@ export interface SeempRecommendationsDto {
   ciiRatingBefore: number | null;
   /** @nullable */
   ciiGradeBefore: SeempRecommendationsDtoCiiGradeBefore;
-  /** Measures with grade A–C after, cheapest first */
+  /** CO2 of the baseline year, t (a manual record without CO2: its fuel × C_F of the current fuel) */
+  baselineCo2Ton: number;
+  /** Measures with grade A–C after (with includeAll: every measure), cheapest first */
   recommendations: SeempRecommendationDto[];
+  /** Whether includeAll was requested */
+  includeAll: boolean;
   /** Methodology catalog ids behind the figure */
   methodIds: string[];
 }

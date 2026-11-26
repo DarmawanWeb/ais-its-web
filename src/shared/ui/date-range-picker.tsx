@@ -42,7 +42,10 @@ export interface DateRangePickerProps {
   presets?: readonly DateRangePreset[];
   className?: string;
   disabled?: boolean;
-  /** Accessible label of the trigger button. */
+  /**
+   * What the range filters ("Waktu kejadian"). It prefixes the trigger's accessible name as
+   * visually hidden text, so the name still contains the visible range (WCAG 2.5.3).
+   */
   label?: string;
 }
 
@@ -69,14 +72,14 @@ export function DateRangePicker({
         <Button
           variant="outline"
           disabled={disabled}
-          aria-label={label ?? t('dateRange.placeholder')}
           className={cn(
             'justify-start gap-2 text-left font-normal',
             !value?.from && 'text-muted-foreground',
             className,
           )}
         >
-          <CalendarIcon className="size-4" />
+          <CalendarIcon className="size-4" aria-hidden />
+          {label && <span className="sr-only">{label}: </span>}
           <span className="truncate tabular-nums">{text}</span>
         </Button>
       </PopoverTrigger>

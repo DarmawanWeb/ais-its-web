@@ -10,7 +10,6 @@ import { Kbd } from '@/shared/ui/kbd';
 
 import { features } from '../features';
 import { singleSlotComponent, slotContributions } from '../navigation';
-import { AlertsBellPlaceholder } from './alerts-bell';
 import { useCommandPalette } from './command-palette';
 import { OrgSwitcher } from './org-switcher';
 import { RealtimeIndicator } from './realtime-indicator';
@@ -45,7 +44,8 @@ function useBreadcrumb(): { section: string | null; title: string | null } {
 }
 
 /** Components plugged by features into the top bar (resolved once: features are static). */
-const AlertsSlot = singleSlotComponent(features, 'topbar.alerts') ?? AlertsBellPlaceholder;
+// The alerts feature owns the bell (single-owner slot); nothing renders without it.
+const AlertsSlot = singleSlotComponent(features, 'topbar.alerts');
 const topbarActions = slotContributions(features, 'topbar.actions');
 
 export function Topbar({ onOpenMobileNav }: { onOpenMobileNav: () => void }) {
@@ -99,7 +99,7 @@ export function Topbar({ onOpenMobileNav }: { onOpenMobileNav: () => void }) {
         {topbarActions.map(({ key, component: Action }) => (
           <Action key={key} />
         ))}
-        <AlertsSlot />
+        {AlertsSlot && <AlertsSlot />}
         <ThemeToggle />
         <LanguageToggle />
         <OrgSwitcher className="hidden md:inline-flex" />

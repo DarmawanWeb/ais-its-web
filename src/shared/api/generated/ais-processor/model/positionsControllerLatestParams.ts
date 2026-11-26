@@ -3,17 +3,22 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Pipeline: processor
  * AIS processing and query API (spec §13.2): latest positions, tracks (raw / 1-minute), pair tracks and live statistics. AIS data is shared across tenants (`ais:read`; API keys with `ais:read`).
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 
 export type PositionsControllerLatestParams = {
   /** minLon,minLat,maxLon,maxLat (WGS 84 degrees) */
   bbox?: string;
-  /** Only vessels whose latest position is at or after this time (default: 24 h ago) */
+  /** Only vessels whose latest position is at or after this time (default: 24 h ago; with `mmsi`, no default) */
   since?: string;
   /**
    * @minimum 1
    * @maximum 50000
    */
   limit?: number;
+  /**
+   * Only these vessels: up to 100 comma-separated MMSIs (batch lookup, e.g. "last seen" of a vessel list). Vessels without a recorded position are omitted; without `since` their latest positions are returned whatever their age.
+   * @pattern ^[0-9]{9}(,[0-9]{9}){0,99}$
+   */
+  mmsi?: string;
 };

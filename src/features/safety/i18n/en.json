@@ -1,26 +1,191 @@
 {
-  "ews": {
-    "title": "Subsea Pipeline Early Warning",
-    "description": "EWS status of vessels near pipeline corridors: safe, warning (≤ 1,750 m) and danger (≤ 500 m), using the predicted anchoring status.",
-    "capabilities": [
-      "Map of pipeline corridors (geo zones) and vessels coloured by EWS status",
-      "EWS events (GET /api/v2/safety/events?detector=ews)",
-      "Vessel details: distance to the pipeline, navigational status and track",
-      "ⓘ method source popovers"
-    ]
-  },
   "nav": {
     "ews": "Pipeline EWS",
     "collision": "Collision Risk"
   },
+  "ews": {
+    "title": "Subsea Pipeline Early Warning",
+    "description": "Vessels predicted at anchor around subsea pipeline corridors: danger below 500 m, warning below 1,750 m. Watch the distances, see them on the map and trace the event history.",
+    "status": {
+      "danger": "Danger",
+      "warning": "Warning",
+      "safe": "Safe"
+    },
+    "stats": {
+      "danger": "Vessels in danger",
+      "dangerHint": "At anchor < {{meters}} m from a pipeline",
+      "warning": "Vessels warned",
+      "warningHint": "At anchor < {{meters}} m from a pipeline",
+      "pipelines": "Monitored pipelines",
+      "pipelinesHint": "Active pipeline zones (global and your organization's)",
+      "pipelinesForbidden": "The zone:read permission is needed to see pipelines"
+    },
+    "vessels": {
+      "title": "Vessels near pipelines",
+      "description": "Most dangerous and nearest to a pipeline first. Select a row to see it on the map.",
+      "filter": "Filter EWS status",
+      "truncated": "Showing the first {{count}} vessels. Narrow the statuses to see the others.",
+      "empty": "No vessels with this status",
+      "emptyDescription": "No anchored vessel is near a pipeline. Add the \"Safe\" status to see every rated vessel."
+    },
+    "table": {
+      "vessel": "Vessel",
+      "status": "EWS status",
+      "distance": "Distance to pipeline",
+      "distanceHidden": "The nearest pipeline is a private zone of another organization, or there is no pipeline zone",
+      "pipeline": "Nearest pipeline",
+      "pipelineUnknown": "Pipeline (not visible)",
+      "noPipeline": "None",
+      "navstatus": "Navigational status",
+      "updated": "Last position",
+      "actions": "Actions",
+      "openMap": "Show {{name}} on the live map",
+      "openMapShort": "Show on the live map",
+      "selected": "Selected on the map"
+    },
+    "map": {
+      "label": "Subsea pipeline EWS map",
+      "legend": "EWS legend",
+      "pipeline": "Subsea pipeline",
+      "dangerCorridor": "Danger corridor ±{{meters}} m",
+      "warningCorridor": "Warning corridor ±{{meters}} m",
+      "bufferMethod": "Corridors drawn from the active thresholds",
+      "truncated": "The pipeline data was cut by the zone service budgets. Some pipelines may be missing."
+    },
+    "rule": {
+      "title": "How the EWS rule works",
+      "fallbackSummary": "The distance from the vessel to the nearest pipeline line is rated for vessels predicted at anchor only: below the danger threshold it is 0 (danger), below the warning threshold 1 (warning), otherwise 3 (safe).",
+      "activeThresholds": "Active detector thresholds",
+      "defaultThresholds": "Default thresholds",
+      "bands": "EWS statuses and their thresholds",
+      "code": "code {{code}}",
+      "below": "Distance < {{meters}} m",
+      "atLeast": "Distance ≥ {{meters}} m",
+      "anchoredOnly": "Only vessels with predicted navigational status 1 (at anchor) are rated; vessels under way are always safe under this rule.",
+      "sources": "Threshold sources",
+      "sourcesPending": "The method sources are not loaded yet.",
+      "opensInNewTab": "(opens in a new tab)"
+    }
+  },
+  "events": {
+    "title": "EWS event history",
+    "description": "Every warning and danger recorded by the detector and how it ended (last 7 days; open events are always shown).",
+    "statusFilter": "Filter event status",
+    "statuses": {
+      "all": "All",
+      "open": "Open",
+      "resolved": "Resolved"
+    },
+    "time": "Time",
+    "vessel": "Vessel",
+    "severity": "Severity",
+    "distance": "Distance",
+    "status": "Status",
+    "message": "Details",
+    "alert": "Alert",
+    "openAlert": "Open alert {{title}}",
+    "openAlertShort": "Open alert",
+    "empty": "No EWS events yet",
+    "emptyDescription": "New events are recorded when an anchored vessel comes too close to a pipeline.",
+    "summary": "At anchor {{distance}} from {{pipeline}}",
+    "summaryThreshold": "At anchor {{distance}} from {{pipeline}} · {{band}} threshold < {{threshold}}",
+    "unknownPipeline": "the nearest pipeline"
+  },
   "collision": {
     "title": "Collision Risk (CPA/TCPA)",
-    "description": "Vessel encounters with a risky closest point of approach (CPA) and time to CPA (TCPA).",
-    "capabilities": [
-      "Map of encounters and CPA lines",
-      "Encounter history (GET /api/v2/safety/encounters)",
-      "Low / medium / high risk bands from the detector",
-      "ⓘ popovers for CPA and TCPA"
-    ]
+    "description": "Vessel encounters whose closest point of approach (CPA) and time to it (TCPA) are risky, with their history and both vessels' tracks.",
+    "stats": {
+      "high": "High-risk pairs",
+      "medium": "Medium-risk pairs",
+      "liveHint": "Current state from the detector",
+      "encounters": "Recorded encounters"
+    },
+    "ranges": {
+      "1h": "Last hour",
+      "6h": "Last 6 hours",
+      "24h": "Last 24 hours",
+      "7d": "Last 7 days",
+      "31d": "Last 31 days"
+    },
+    "filters": {
+      "label": "Encounter filters",
+      "risk": "Peak risk band",
+      "range": "Time range",
+      "mmsi": "MMSI of either vessel",
+      "mmsiPlaceholder": "Vessel MMSI…",
+      "reset": "Reset"
+    },
+    "bands": {
+      "title": "Collision risk bands",
+      "active": "Active detector thresholds",
+      "defaults": "Default thresholds (need validation)",
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low",
+      "limits": "CPA < {{cpa}} nm · TCPA < {{tcpa}} min",
+      "alertCritical": "Critical alert",
+      "alertWarning": "Warning alert",
+      "alertNone": "No alert (state only)",
+      "hysteresis": "Hysteresis {{percent}} %: a pair keeps its band until it leaves the widened limits. Candidates within {{radius}} nm; vessels below {{sog}} kn, at anchor, moored or aground are excluded."
+    },
+    "table": {
+      "title": "Vessel encounters",
+      "description": "Newest encounters first. Select a row to see the CPA/TCPA chart and both vessels' tracks.",
+      "pair": "Vessel pair",
+      "peak": "Peak risk",
+      "minCpa": "Minimum CPA",
+      "tcpa": "TCPA at min. CPA",
+      "started": "Started",
+      "duration": "Duration",
+      "state": "State",
+      "active": "Active",
+      "ended": "Ended",
+      "empty": "No risky encounters",
+      "emptyHint": "No vessel pair came close to the risk limits in this time range.",
+      "emptyFiltered": "No encounters match",
+      "emptyFilteredHint": "Widen the time range, add risk bands or clear the MMSI filter."
+    },
+    "chart": {
+      "cpaTitle": "CPA (nm) against the risk bands",
+      "tcpaTitle": "TCPA (minutes) against the band time limits"
+    },
+    "detail": {
+      "title": "{{a}} ↔ {{b}}",
+      "window": "Encounter {{from}} – {{to}}",
+      "loadingTitle": "Encounter details",
+      "notFound": "This encounter was not found or is outside your organization's scope.",
+      "minCpa": "Minimum CPA",
+      "tcpaAtMin": "TCPA at min. CPA",
+      "rangeAtMin": "Range at min. CPA",
+      "duration": "Duration",
+      "sampleCount_one": "{{count}} sample",
+      "sampleCount_other": "{{count}} samples",
+      "history": "CPA/TCPA history",
+      "fewSamples": "Not enough samples for a chart yet.",
+      "showSamples_one": "Show the data of {{count}} sample",
+      "showSamples_other": "Show the data of {{count}} samples",
+      "samplesCaption": "CPA/TCPA samples of the encounter",
+      "time": "Time",
+      "range": "Range",
+      "band": "Band",
+      "tracks": "Tracks of both vessels",
+      "mapLabel": "Map of both vessels' tracks",
+      "closestLine": "Range at minimum CPA",
+      "samples": "Sample positions (band colour)",
+      "trackFallback": "AIS tracks unavailable: showing the sample positions.",
+      "openOnMap": "Show vessel {{mmsi}} on the live map",
+      "openOnMapShort": "Show on the live map",
+      "relatedAlerts": "Related collision alerts"
+    }
+  },
+  "problems": {
+    "validation": "The filters could not be applied",
+    "validationDetail": "Check the time range (31 days at most) and the filter values, then try again.",
+    "eventNotFound": "Event not found",
+    "eventNotFoundDetail": "This event does not exist or is outside your organization's scope.",
+    "stateNotFound": "No safety state yet",
+    "stateNotFoundDetail": "The detectors have not assessed this vessel (no position in the last 24 hours).",
+    "trackNotFound": "Vessel tracks unavailable",
+    "trackNotFoundDetail": "Neither vessel has AIS positions in the range of this encounter."
   }
 }

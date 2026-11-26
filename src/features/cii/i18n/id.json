@@ -1,15 +1,412 @@
 {
+  "nav": { "cii": "Emisi & CII" },
   "cii": {
     "title": "Emisi & CII",
-    "description": "Carbon Intensity Indicator tahun berjalan per kapal: attained, required, rating dan peringkat A–E.",
-    "capabilities": [
-      "Ringkasan CII armada dan distribusi peringkat A–E",
-      "Riwayat CII per kapal dan tahun",
-      "Pembaruan realtime cii:updated (useCiiUpdates)",
-      "Popover ⓘ sumber metode (cii.attained, cii.required, …)"
-    ]
+    "description": "Carbon Intensity Indicator (CII) tahunan armada: CII tercapai terhadap CII yang disyaratkan, rasio dan peringkat A–E sesuai MARPOL Annex VI peraturan 28."
   },
-  "nav": {
-    "cii": "Emisi & CII"
+  "units": { "cii": "g CO₂/kap·nm" },
+  "subnav": {
+    "label": "Navigasi Emisi & CII",
+    "fleet": "Ringkasan armada",
+    "reductionFactors": "Faktor reduksi Z"
+  },
+  "grade": {
+    "none": "Belum ada peringkat",
+    "aria": "Peringkat CII {{grade}} ({{label}})",
+    "short": "Peringkat {{grade}}"
+  },
+  "gradeMeaning": {
+    "A": "jauh lebih baik dari yang disyaratkan",
+    "B": "sedikit lebih baik dari yang disyaratkan",
+    "C": "sesuai CII yang disyaratkan",
+    "D": "perlu rencana tindakan bila 3 tahun berturut-turut",
+    "E": "wajib rencana tindakan korektif di SEEMP"
+  },
+  "source": {
+    "manual": "Manual",
+    "manualHint": "Catatan manual / impor: dipakai karena tahun ini tidak memiliki segmen pelayaran yang dihitung.",
+    "segments": "Segmen AIS",
+    "segmentsHint": "Dihitung dari segmen pelayaran AIS (telemetri, rumus pertama atau Holtrop)."
+  },
+  "methods": {
+    "telemetry": "Telemetri",
+    "first_formula": "Rumus pertama",
+    "holtrop": "Holtrop + cuaca",
+    "none": "Tidak dihitung"
+  },
+  "methodsUsed": "Metode:",
+  "live": { "updated": "Diperbarui {{time}}" },
+  "problems": {
+    "notAvailable": {
+      "title": "Belum ada data CII untuk {{year}}",
+      "description": "Tidak ada segmen pelayaran yang dihitung maupun catatan manual untuk tahun ini. Data akan muncul otomatis setelah posisi AIS kapal diproses; untuk tahun lampau Anda dapat mengisi catatan manual."
+    },
+    "vesselNotFound": {
+      "title": "Kapal tidak ditemukan",
+      "description": "Tidak ada kapal dengan MMSI ini di layanan emisi. Periksa MMSI atau daftarkan kapal di modul Kapal."
+    },
+    "forbidden": {
+      "title": "Data kapal ini milik organisasi lain",
+      "description": "Data CII, emisi dan SEEMP bersifat privat per organisasi. Beralihlah ke organisasi pemilik kapal untuk melihatnya."
+    },
+    "reductionFactorMissing": {
+      "title": "Faktor reduksi Z belum tersedia",
+      "description": "CII yang disyaratkan tidak dapat dihitung karena faktor reduksi Z tahun ini belum diisi. Administrator platform dapat menambahkannya di halaman Faktor reduksi Z."
+    },
+    "manualNotFound": {
+      "title": "Belum ada catatan manual",
+      "description": "Tahun ini belum memiliki catatan manual atau impor."
+    },
+    "recomputeRange": {
+      "title": "Rentang hitung ulang tidak valid",
+      "description": "Rentang harus maksimal 7 hari, berakhir paling lambat sekarang dan masih di dalam jendela stream 7 hari."
+    },
+    "recomputeInProgress": {
+      "title": "Hitung ulang sedang berjalan",
+      "description": "Kapal ini sedang dihitung ulang. Tunggu hingga pekerjaan tersebut selesai sebelum memulai yang baru."
+    },
+    "superAdminRequired": {
+      "title": "Khusus administrator platform",
+      "description": "Tindakan ini hanya dapat dilakukan oleh administrator platform (super_admin)."
+    },
+    "jobNotFound": {
+      "title": "Pekerjaan hitung ulang tidak ditemukan",
+      "description": "Pekerjaan ini sudah tidak tersedia di server."
+    },
+    "validation": {
+      "title": "Data tidak valid",
+      "description": "Periksa kembali isian yang ditandai lalu coba lagi."
+    }
+  },
+  "fleet": {
+    "organization": "Organisasi",
+    "allOrganizations": "Semua organisasi",
+    "activeOrganization": "aktif",
+    "year": "Tahun",
+    "regulationTitle": "Ambang regulasi {{year}}",
+    "regulationDescription": "Faktor reduksi tahun berjalan dan arti tiap peringkat (MEPC.354(78)).",
+    "reductionFactor": "Faktor reduksi Z {{year}}",
+    "reductionFactorMissing": "Belum diisi untuk tahun ini",
+    "reductionFactorsLink": "Lihat semua tahun",
+    "gradeMeaning": "Arti peringkat CII",
+    "actionPlan": "{{count}} kapal berperingkat D atau E. Peringkat E, atau D selama tiga tahun berturut-turut, mewajibkan rencana tindakan korektif di SEEMP Bagian III.",
+    "noActionPlan": "Tidak ada kapal berperingkat D atau E pada tahun ini.",
+    "distributionTitle": "Distribusi peringkat {{year}}",
+    "distributionDescription": "Jumlah kapal per peringkat A–E dari seluruh armada organisasi (semua halaman).",
+    "distributionCaption": "{{count}} kapal berperingkat",
+    "tableTitle": "Kapal armada {{year}}",
+    "tableDescription": "CII tercapai terhadap yang disyaratkan, rasio, peringkat dan tren terhadap tahun sebelumnya. Pilih baris untuk membuka rincian kapal.",
+    "tableLabel": "CII kapal armada tahun {{year}}",
+    "vessels": "Kapal",
+    "share": "Porsi",
+    "view": "Tampilan",
+    "chartView": "Grafik",
+    "tableView": "Tabel",
+    "notAvailableNote": "{{count}} kapal belum memiliki data CII untuk tahun ini dan tidak dihitung dalam distribusi.",
+    "emptyTitle": "Belum ada kapal di armada ini",
+    "emptyDescription": "Tambahkan kapal di modul Kapal; CII-nya muncul setelah posisi AIS pertama diproses.",
+    "unitNote": "Nilai CII dalam"
+  },
+  "kpi": {
+    "vessels": "Kapal dalam armada",
+    "vesselsDescription": "Seluruh kapal organisasi",
+    "rated": "Kapal dengan CII",
+    "ofVessels": "dari {{count}}",
+    "ratedDescription": "Memiliki data CII {{year}}",
+    "goodShare": "Peringkat A–C",
+    "goodShareDescription": "Porsi kapal yang memenuhi syarat",
+    "needAction": "Perlu tindakan (D–E)",
+    "needActionDescription": "Kandidat rencana tindakan korektif"
+  },
+  "columns": {
+    "vessel": "Kapal",
+    "grade": "Peringkat",
+    "rating": "Rasio",
+    "attained": "Tercapai",
+    "required": "Disyaratkan",
+    "trend": "Tren vs {{year}}",
+    "source": "Sumber",
+    "year": "Tahun",
+    "distance": "Jarak (nm)",
+    "co2": "CO₂ (t)",
+    "actions": "Tindakan"
+  },
+  "trend": {
+    "none": "Tidak ada data {{year}}",
+    "better": "Membaik",
+    "worse": "Memburuk",
+    "same": "Stabil",
+    "gradeChange": "{{year}}:"
+  },
+  "daily": {
+    "title": "Kurva CII kumulatif {{year}}",
+    "description": "CII tercapai sejak 1 Januari hingga akhir tiap hari terhadap pita peringkat A–E tahun ini (batas dᵢ × CII yang disyaratkan).",
+    "cumulative": "CII kumulatif",
+    "rating": "Rasio kumulatif",
+    "daily": "CII harian",
+    "required": "CII disyaratkan",
+    "distance": "Jarak",
+    "co2": "CO₂",
+    "segments": "Segmen",
+    "legend": "Keterangan grafik",
+    "bands": "Pita peringkat A–E",
+    "showDaily": "Tampilkan CII harian",
+    "summary": "CII kumulatif {{year}} pada {{day}}: {{value}} (peringkat {{grade}}).",
+    "day": "Hari",
+    "emptyTitle": "Belum ada titik harian",
+    "emptyDescription": "Kurva harian muncul setelah segmen pelayaran pertama tahun ini dihitung."
+  },
+  "summary": {
+    "grade": "Peringkat {{year}}",
+    "asOf": "Data hingga {{time}}",
+    "attained": "CII tercapai",
+    "attainedShort": "Tercapai",
+    "attainedDescription": "Σ CO₂ × 10⁶ / (kapasitas × Σ jarak)",
+    "required": "CII disyaratkan",
+    "requiredShort": "Disyaratkan",
+    "zMissing": "Faktor Z tahun ini belum ada",
+    "zOfYear": "Faktor reduksi Z {{year}} = {{z}}%",
+    "rating": "Rasio CII",
+    "ratingDescription": "Tercapai ÷ disyaratkan; makin kecil makin baik",
+    "scaleTitle": "Posisi pada skala peringkat",
+    "scaleDescription": "Batas antarperingkat = vektor d jenis kapal × CII yang disyaratkan tahun ini.",
+    "scaleAria": "Skala peringkat CII: tercapai {{attained}} berada di peringkat {{grade}}. Batas A ≤ {{d1}}, B ≤ {{d2}}, C ≤ {{d3}}, D ≤ {{d4}}, di atasnya E."
+  },
+  "totals": {
+    "title": "Data operasional sejak awal tahun",
+    "description": "Total segmen yang dihitung pada {{year}} serta metode bahan bakar yang dipakai.",
+    "distance": "Jarak tempuh",
+    "co2": "Emisi CO₂",
+    "fuelMe": "BBM mesin induk (ME)",
+    "fuelAe": "BBM mesin bantu (AE)",
+    "segments": "Segmen dihitung",
+    "manualNoSegments": "— (catatan manual)",
+    "capacity": "Kapasitas CII",
+    "methodMix": "Metode bahan bakar",
+    "lastMethod": "Terakhir:",
+    "noMethods": "Tidak ada segmen yang dihitung (catatan manual)."
+  },
+  "projection": {
+    "title": "Proyeksi akhir tahun",
+    "description": "Total sejak awal tahun diekstrapolasi linear ke 31 Desember.",
+    "elapsed": "Tahun berjalan",
+    "grade": "Proyeksi peringkat {{grade}} · rasio {{rating}}",
+    "sameAsYtd": "Proyeksi linear menskalakan CO₂ dan jarak secara sama, sehingga CII, rasio dan peringkat proyeksi sama dengan nilai sejak awal tahun.",
+    "distance": "Jarak proyeksi",
+    "co2": "CO₂ proyeksi",
+    "fuelMe": "BBM ME proyeksi",
+    "fuelAe": "BBM AE proyeksi",
+    "none": "Proyeksi hanya tersedia untuk tahun berjalan yang dihitung dari segmen pelayaran."
+  },
+  "manual": {
+    "title": "Catatan CII manual / impor",
+    "description": "Catatan tahunan manual (misalnya impor data lama atau laporan DCS) dipakai hanya untuk tahun yang tidak memiliki segmen pelayaran. Nilai yang dikosongkan dihitung oleh layanan.",
+    "year": "Tahun",
+    "newRecord": "Catatan baru",
+    "existingRecord": "Mengubah catatan yang ada",
+    "lastUpdated": "Terakhir diubah {{time}}",
+    "segmentYearNote": "Tahun {{year}} memiliki segmen pelayaran: catatan manual disimpan tetapi tidak dipakai selama data segmen ada.",
+    "optional": "opsional",
+    "gradeAuto": "Otomatis (dari vektor d)",
+    "notePlaceholder": "Misalnya: impor laporan DCS 2024 dari sistem lama",
+    "computedHint": "Kosongkan CII disyaratkan, rasio atau peringkat agar dihitung dari faktor Z dan vektor d.",
+    "saved": "Catatan manual {{year}} disimpan",
+    "saveFailed": "Catatan manual gagal disimpan",
+    "fields": {
+      "attained": "CII tercapai",
+      "distanceNm": "Jarak",
+      "fuelMeTon": "BBM ME",
+      "fuelAeTon": "BBM AE",
+      "required": "CII disyaratkan",
+      "rating": "Rasio",
+      "co2Ton": "CO₂",
+      "grade": "Peringkat",
+      "note": "Catatan"
+    },
+    "errors": {
+      "required": "Wajib diisi",
+      "number": "Masukkan angka, misalnya 12,5",
+      "positive": "Harus lebih besar dari 0",
+      "nonNegative": "Tidak boleh negatif",
+      "noteLength": "Maksimal 2000 karakter"
+    }
+  },
+  "annual": {
+    "title": "Riwayat CII tahunan",
+    "description": "CII per tahun kalender dari segmen pelayaran, atau dari catatan manual / impor bila tahun itu tidak memiliki segmen.",
+    "addManual": "Tambah catatan manual",
+    "editManual": "Data manual",
+    "editManualFor": "Data manual {{year}}",
+    "attainedLegend": "CII tercapai (warna peringkat)",
+    "manualLegend": "Catatan manual / impor (arsir)",
+    "tableLabel": "Riwayat CII tahunan",
+    "manualNote": "{{count}} tahun memakai catatan manual / impor (ditandai Manual dan arsir).",
+    "segmentsNote": "Semua tahun dihitung dari segmen pelayaran AIS."
+  },
+  "segments": {
+    "title": "Segmen pelayaran",
+    "description": "Setiap segmen menghubungkan dua posisi AIS berurutan; bahan bakar dihitung dengan prioritas telemetri → rumus pertama → Holtrop + cuaca.",
+    "tableLabel": "Segmen pelayaran",
+    "range": "Rentang segmen",
+    "time": "Waktu",
+    "minutes": "{{count}} menit",
+    "distance": "Jarak (nm)",
+    "speed": "Kecepatan (kn)",
+    "fuel": "BBM (t)",
+    "co2": "CO₂ (t)",
+    "method": "Metode",
+    "navstatus": "Status navigasi",
+    "weather": "Angin",
+    "calmFallback": "Cuaca tenang (fallback)",
+    "beaufort": "Beaufort {{value}}",
+    "encounter": "sudut {{value}}°",
+    "flags": "Penanda",
+    "emptyTitle": "Tidak ada segmen pada rentang ini",
+    "emptyDescription": "Pilih rentang lain (maksimal 31 hari) atau tunggu posisi AIS berikutnya.",
+    "note": "Segmen \"Tidak dihitung\" (celah > 6 jam, tanpa model bahan bakar, hasil tidak valid) tidak masuk CII."
+  },
+  "flags": {
+    "gap": {
+      "label": "Celah data",
+      "hint": "Selang antarposisi lebih dari 360 menit; segmen tidak dihitung."
+    },
+    "no_fuel_model": {
+      "label": "Tanpa model BBM",
+      "hint": "Tidak ada telemetri, rumus bahan bakar maupun mesin induk dengan SFOC."
+    },
+    "weather_unavailable": {
+      "label": "Cuaca tak tersedia",
+      "hint": "Open-Meteo tidak dapat dihubungi; dipakai cuaca tenang (0 kn)."
+    },
+    "telemetry_reattributed": {
+      "label": "Telemetri diatribusi ulang",
+      "hint": "Bahan bakar segmen diganti dengan pembacaan telemetri yang tiba belakangan."
+    },
+    "formula_error": {
+      "label": "Rumus tidak valid",
+      "hint": "Rumus bahan bakar pertama tidak dapat dievaluasi; dipakai 0,5 L/menit (legacy)."
+    },
+    "fuel_not_finite": {
+      "label": "Hasil tak hingga",
+      "hint": "Model Holtrop/Kwon menghasilkan nilai tak hingga (angin sangat kencang pada lambung kecil)."
+    },
+    "fuel_negative": {
+      "label": "Hasil negatif",
+      "hint": "Model Holtrop/Kwon menghasilkan bahan bakar negatif; segmen tidak dihitung."
+    }
+  },
+  "dcs": {
+    "title": "Ringkasan gaya IMO DCS {{year}}",
+    "description": "Konsumsi bahan bakar tahunan per jenis bahan bakar, jarak, jam berlayar dan CO₂.",
+    "downloadCsv": "Unduh CSV",
+    "downloaded": "Ringkasan DCS {{year}} diunduh",
+    "downloadFailed": "CSV gagal diunduh",
+    "distance": "Jarak tempuh",
+    "hoursUnderWay": "Jam berlayar (≥ 1 kn)",
+    "hoursUnknown": "Tidak diketahui (catatan manual)",
+    "hours": "jam",
+    "co2": "CO₂ (t)",
+    "tableLabel": "Bahan bakar per jenis {{year}}",
+    "fuel": "Bahan bakar",
+    "conversionFactor": "C_F (t CO₂/t)",
+    "fuelMe": "ME (t)",
+    "fuelAe": "AE (t)",
+    "fuelTotal": "Total (t)",
+    "total": "Total",
+    "noFuel": "Tidak ada konsumsi bahan bakar yang tercatat.",
+    "disclaimer": "Ringkasan ini memuat inti data DCS sebelum 2026 (bahan bakar, jarak, jam berlayar). Bukan laporan DCS resmi: data granular wajib sejak 2026 (MEPC.385(81)) belum termasuk."
+  },
+  "recompute": {
+    "open": "Hitung ulang",
+    "title": "Hitung ulang segmen",
+    "description": "Memutar ulang posisi AIS dan membangun kembali segmen pada rentang ini dengan profil kapal, telemetri dan cuaca terkini (maksimal {{days}} hari, di dalam jendela stream 7 hari).",
+    "from": "Dari",
+    "to": "Sampai",
+    "issues": {
+      "order": "Waktu mulai harus sebelum waktu selesai.",
+      "future": "Waktu selesai tidak boleh di masa depan.",
+      "tooLong": "Rentang maksimal {{days}} hari.",
+      "tooOld": "Waktu mulai harus dalam {{days}} hari terakhir (jendela stream)."
+    },
+    "warningTitle": "Segmen lama dapat diganti",
+    "warning": "Segmen yang tidak dihasilkan lagi oleh pemutaran ulang yang lengkap akan dihapus. Tindakan ini dicatat di log audit.",
+    "start": "Mulai hitung ulang",
+    "started": "Hitung ulang dimulai",
+    "succeeded": "Hitung ulang selesai: {{segments}} segmen ditulis",
+    "failed": "Hitung ulang gagal",
+    "jobTitle": "Pekerjaan hitung ulang",
+    "jobId": "ID pekerjaan",
+    "loading": "Memuat status pekerjaan…",
+    "status": { "running": "Berjalan", "succeeded": "Berhasil", "failed": "Gagal" },
+    "range": "Rentang",
+    "replayed": "Posisi diputar ulang",
+    "segments": "Segmen ditulis",
+    "deleted": "Segmen dihapus",
+    "heartbeat": "Tanda hidup terakhir",
+    "finished": "Selesai",
+    "errors": {
+      "INTERRUPTED": "Terputus (instans berhenti)",
+      "REPLAY_INCOMPLETE": "Pemutaran ulang tidak lengkap",
+      "NO_POSITIONS": "Tidak ada posisi pada rentang ini",
+      "VESSEL_CHANGED": "MMSI dialihkan ke kapal lain selama proses"
+    }
+  },
+  "vessel": {
+    "title": "CII kapal",
+    "fallbackTitle": "Kapal MMSI {{mmsi}}",
+    "back": "Kembali ke Emisi & CII",
+    "invalidTitle": "MMSI tidak valid",
+    "invalidDescription": "MMSI harus terdiri dari 9 digit.",
+    "seemp": "Rekomendasi SEEMP",
+    "addManual": "Isi catatan manual {{year}}",
+    "tabs": "Bagian CII kapal",
+    "tab": {
+      "summary": "Ringkasan",
+      "history": "Riwayat tahunan",
+      "segments": "Segmen pelayaran",
+      "dcs": "Laporan DCS"
+    }
+  },
+  "factors": {
+    "title": "Faktor reduksi Z",
+    "description": "Faktor reduksi tahunan terhadap garis referensi 2019 yang menentukan CII yang disyaratkan (MEPC.338(76) untuk 2023–2026, MEPC.400(83) untuk 2027–2030).",
+    "edit": "Ubah faktor",
+    "editTitle": "Ubah faktor reduksi Z",
+    "editDescription": "Ubah atau tambah tahun. Hanya tahun yang berubah yang dikirim; tahun lain tetap. Setelah disimpan, semua CII dipublikasikan ulang.",
+    "editTableLabel": "Faktor reduksi yang dapat diubah",
+    "source": "Sumber",
+    "yearOf": "Tahun baris {{index}}",
+    "zOf": "Z tahun {{year}} (%)",
+    "sourceOf": "Sumber tahun {{year}}",
+    "issues": {
+      "year": "Tahun 2019–2100",
+      "duplicate": "Tahun ganda",
+      "z": "Z antara 0 dan 99,999%",
+      "source": "Sumber wajib (maks. 500 karakter)"
+    },
+    "removeRow": "Hapus baris {{year}}",
+    "addYear": "Tambah tahun",
+    "changes": "{{count}} perubahan siap disimpan",
+    "fixErrors": "Perbaiki isian yang ditandai",
+    "confirmTitle": "Simpan faktor reduksi?",
+    "confirmDescription": "{{count}} tahun akan diperbarui dan semua CII kapal dipublikasikan ulang dengan faktor baru. Tindakan ini dicatat di log audit.",
+    "confirm": "Simpan & publikasikan ulang",
+    "saved": "{{count}} faktor reduksi disimpan",
+    "saveFailed": "Faktor reduksi gagal disimpan",
+    "emptyTitle": "Belum ada faktor reduksi",
+    "emptyDescription": "Tanpa faktor Z, CII yang disyaratkan tidak dapat dihitung. Administrator platform dapat menambahkannya.",
+    "chartTitle": "Lintasan faktor Z",
+    "chartDescription": "Persentase reduksi terhadap garis referensi 2019 per tahun.",
+    "past": "Tahun lalu",
+    "current": "Tahun berjalan ({{year}})",
+    "future": "Tahun mendatang",
+    "howTitle": "Cara faktor Z dipakai",
+    "howDescription": "CII yang disyaratkan tiap tahun mengecil sesuai Z.",
+    "howZ": "Z(y): faktor reduksi tahun y dalam persen.",
+    "howRef": "a × Kap^(−c): garis referensi jenis kapal (MEPC.353(78)) dengan kapasitas DWT atau GT.",
+    "howRepublish": "Mengubah Z menghitung ulang rasio dan peringkat semua kapal untuk tahun tersebut.",
+    "tableTitle": "Faktor reduksi per tahun",
+    "multiplier": "Pengali (1 − Z/100)",
+    "thisYear": "Tahun berjalan"
   }
 }

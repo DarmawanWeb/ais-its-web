@@ -1,26 +1,189 @@
 {
-  "ews": {
-    "title": "Peringatan Dini Pipa Bawah Laut",
-    "description": "Status EWS kapal di sekitar koridor pipa: aman, peringatan (≤ 1.750 m) dan bahaya (≤ 500 m), memakai prediksi status labuh jangkar.",
-    "capabilities": [
-      "Peta koridor pipa (zona geo) dan kapal berwarna sesuai status EWS",
-      "Daftar kejadian EWS (GET /api/v2/safety/events?detector=ews)",
-      "Detail kapal: jarak ke pipa, status navigasi dan riwayat posisi",
-      "Popover ⓘ sumber metode EWS"
-    ]
-  },
   "nav": {
     "ews": "EWS Pipa",
     "collision": "Risiko Tubrukan"
   },
+  "ews": {
+    "title": "Peringatan Dini Pipa Bawah Laut",
+    "description": "Kapal yang diprediksi berlabuh jangkar di sekitar koridor pipa bawah laut: bahaya di bawah 500 m, peringatan di bawah 1.750 m. Pantau jaraknya, lihat di peta dan telusuri riwayat kejadian.",
+    "status": {
+      "danger": "Bahaya",
+      "warning": "Peringatan",
+      "safe": "Aman"
+    },
+    "stats": {
+      "danger": "Kapal dalam bahaya",
+      "dangerHint": "Berlabuh jangkar < {{meters}} m dari pipa",
+      "warning": "Kapal dalam peringatan",
+      "warningHint": "Berlabuh jangkar < {{meters}} m dari pipa",
+      "pipelines": "Pipa terpantau",
+      "pipelinesHint": "Zona pipa aktif (global dan organisasi Anda)",
+      "pipelinesForbidden": "Butuh izin zone:read untuk melihat pipa"
+    },
+    "vessels": {
+      "title": "Kapal di sekitar pipa",
+      "description": "Diurutkan dari yang paling berbahaya dan terdekat ke pipa. Pilih baris untuk melihatnya di peta.",
+      "filter": "Saring status EWS",
+      "truncated": "Menampilkan {{count}} kapal pertama. Persempit status untuk melihat yang lain.",
+      "empty": "Tidak ada kapal dengan status ini",
+      "emptyDescription": "Tidak ada kapal berlabuh jangkar di dekat pipa. Tambahkan status \"Aman\" untuk melihat semua kapal yang dinilai."
+    },
+    "table": {
+      "vessel": "Kapal",
+      "status": "Status EWS",
+      "distance": "Jarak ke pipa",
+      "distanceHidden": "Pipa terdekat adalah zona privat organisasi lain atau belum ada zona pipa",
+      "pipeline": "Pipa terdekat",
+      "pipelineUnknown": "Pipa (tidak dapat dilihat)",
+      "noPipeline": "Tidak ada",
+      "navstatus": "Status navigasi",
+      "updated": "Posisi terakhir",
+      "actions": "Aksi",
+      "openMap": "Lihat {{name}} di peta live",
+      "openMapShort": "Lihat di peta live",
+      "selected": "Dipilih di peta"
+    },
+    "map": {
+      "label": "Peta EWS pipa bawah laut",
+      "legend": "Legenda EWS",
+      "pipeline": "Pipa bawah laut",
+      "dangerCorridor": "Koridor bahaya ±{{meters}} m",
+      "warningCorridor": "Koridor peringatan ±{{meters}} m",
+      "bufferMethod": "Koridor digambar dari ambang aktif",
+      "truncated": "Data pipa terpotong oleh batas layanan zona. Sebagian pipa mungkin tidak tampil."
+    },
+    "rule": {
+      "title": "Cara kerja aturan EWS",
+      "fallbackSummary": "Jarak posisi kapal ke garis pipa terdekat dinilai hanya untuk kapal yang diprediksi berlabuh jangkar: di bawah ambang bahaya berstatus 0 (bahaya), di bawah ambang peringatan berstatus 1 (peringatan), selain itu 3 (aman).",
+      "activeThresholds": "Ambang aktif detektor",
+      "defaultThresholds": "Ambang bawaan",
+      "bands": "Status EWS dan ambangnya",
+      "code": "kode {{code}}",
+      "below": "Jarak < {{meters}} m",
+      "atLeast": "Jarak ≥ {{meters}} m",
+      "anchoredOnly": "Hanya kapal dengan status navigasi prediksi 1 (berlabuh jangkar) yang dinilai; kapal yang berlayar selalu aman menurut aturan ini.",
+      "sources": "Sumber ambang",
+      "sourcesPending": "Sumber metode belum dimuat.",
+      "opensInNewTab": "(membuka tab baru)"
+    }
+  },
+  "events": {
+    "title": "Riwayat kejadian EWS",
+    "description": "Setiap peringatan dan bahaya yang tercatat detektor beserta penyelesaiannya (7 hari terakhir; kejadian terbuka selalu tampil).",
+    "statusFilter": "Saring status kejadian",
+    "statuses": {
+      "all": "Semua",
+      "open": "Terbuka",
+      "resolved": "Selesai"
+    },
+    "time": "Waktu",
+    "vessel": "Kapal",
+    "severity": "Tingkat",
+    "distance": "Jarak",
+    "status": "Status",
+    "message": "Keterangan",
+    "alert": "Alert",
+    "openAlert": "Buka alert {{title}}",
+    "openAlertShort": "Buka alert",
+    "empty": "Belum ada kejadian EWS",
+    "emptyDescription": "Kejadian baru akan tercatat saat kapal berlabuh jangkar terlalu dekat dengan pipa.",
+    "summary": "Berlabuh jangkar {{distance}} dari {{pipeline}}",
+    "summaryThreshold": "Berlabuh jangkar {{distance}} dari {{pipeline}} · ambang {{band}} < {{threshold}}",
+    "unknownPipeline": "pipa terdekat"
+  },
   "collision": {
     "title": "Risiko Tubrukan (CPA/TCPA)",
-    "description": "Pertemuan kapal dengan jarak titik terdekat (CPA) dan waktu menuju CPA (TCPA) yang berisiko.",
-    "capabilities": [
-      "Peta pertemuan kapal dan garis CPA",
-      "Riwayat encounter (GET /api/v2/safety/encounters)",
-      "Pita risiko rendah / sedang / tinggi dari detektor",
-      "Popover ⓘ untuk CPA dan TCPA"
-    ]
+    "description": "Pertemuan kapal dengan jarak titik terdekat (CPA) dan waktu menuju CPA (TCPA) yang berisiko, beserta riwayat dan jejak kedua kapal.",
+    "stats": {
+      "high": "Pasangan risiko tinggi",
+      "medium": "Pasangan risiko sedang",
+      "liveHint": "Status terkini dari detektor",
+      "encounters": "Pertemuan tercatat"
+    },
+    "ranges": {
+      "1h": "1 jam terakhir",
+      "6h": "6 jam terakhir",
+      "24h": "24 jam terakhir",
+      "7d": "7 hari terakhir",
+      "31d": "31 hari terakhir"
+    },
+    "filters": {
+      "label": "Filter pertemuan",
+      "risk": "Pita risiko puncak",
+      "range": "Rentang waktu",
+      "mmsi": "MMSI salah satu kapal",
+      "mmsiPlaceholder": "MMSI kapal…",
+      "reset": "Atur ulang"
+    },
+    "bands": {
+      "title": "Pita risiko tubrukan",
+      "active": "Ambang aktif detektor",
+      "defaults": "Ambang bawaan (perlu validasi)",
+      "high": "Tinggi",
+      "medium": "Sedang",
+      "low": "Rendah",
+      "limits": "CPA < {{cpa}} nm · TCPA < {{tcpa}} mnt",
+      "alertCritical": "Alert kritis",
+      "alertWarning": "Alert peringatan",
+      "alertNone": "Tanpa alert (hanya status)",
+      "hysteresis": "Histeresis {{percent}} %: pasangan tetap di pitanya sampai keluar dari batas yang diperlebar. Kandidat dalam radius {{radius}} nm; kapal di bawah {{sog}} kn, berlabuh atau kandas dikecualikan."
+    },
+    "table": {
+      "title": "Pertemuan kapal",
+      "description": "Pertemuan terbaru lebih dulu. Pilih baris untuk melihat grafik CPA/TCPA dan jejak kedua kapal.",
+      "pair": "Pasangan kapal",
+      "peak": "Risiko puncak",
+      "minCpa": "CPA minimum",
+      "tcpa": "TCPA saat CPA min.",
+      "started": "Mulai",
+      "duration": "Durasi",
+      "state": "Keadaan",
+      "active": "Aktif",
+      "ended": "Selesai",
+      "empty": "Tidak ada pertemuan berisiko",
+      "emptyHint": "Tidak ada pasangan kapal yang mendekati batas risiko dalam rentang waktu ini.",
+      "emptyFiltered": "Tidak ada pertemuan yang cocok",
+      "emptyFilteredHint": "Perluas rentang waktu, tambahkan pita risiko atau hapus filter MMSI."
+    },
+    "chart": {
+      "cpaTitle": "CPA (nm) terhadap pita risiko",
+      "tcpaTitle": "TCPA (menit) terhadap batas waktu pita"
+    },
+    "detail": {
+      "title": "{{a}} ↔ {{b}}",
+      "window": "Pertemuan {{from}} – {{to}}",
+      "loadingTitle": "Detail pertemuan",
+      "notFound": "Pertemuan ini tidak ditemukan atau tidak termasuk cakupan organisasi Anda.",
+      "minCpa": "CPA minimum",
+      "tcpaAtMin": "TCPA saat CPA min.",
+      "rangeAtMin": "Jarak saat CPA min.",
+      "duration": "Durasi",
+      "sampleCount": "{{count}} sampel",
+      "history": "Riwayat CPA/TCPA",
+      "fewSamples": "Sampel belum cukup untuk grafik.",
+      "showSamples": "Tampilkan data {{count}} sampel",
+      "samplesCaption": "Sampel CPA/TCPA pertemuan",
+      "time": "Waktu",
+      "range": "Jarak",
+      "band": "Pita",
+      "tracks": "Jejak kedua kapal",
+      "mapLabel": "Peta jejak kedua kapal",
+      "closestLine": "Jarak saat CPA minimum",
+      "samples": "Posisi sampel (warna pita)",
+      "trackFallback": "Jejak AIS tidak tersedia: menampilkan posisi sampel.",
+      "openOnMap": "Lihat kapal {{mmsi}} di peta live",
+      "openOnMapShort": "Lihat di peta live",
+      "relatedAlerts": "Alert tubrukan terkait"
+    }
+  },
+  "problems": {
+    "validation": "Filter tidak dapat diproses",
+    "validationDetail": "Periksa rentang waktu (maksimal 31 hari) dan nilai filter, lalu coba lagi.",
+    "eventNotFound": "Kejadian tidak ditemukan",
+    "eventNotFoundDetail": "Kejadian ini tidak ada atau berada di luar cakupan organisasi Anda.",
+    "stateNotFound": "Status keselamatan belum tersedia",
+    "stateNotFoundDetail": "Kapal ini belum dinilai detektor (tidak ada posisi dalam 24 jam terakhir).",
+    "trackNotFound": "Jejak kapal tidak tersedia",
+    "trackNotFoundDetail": "Tidak ada posisi AIS kedua kapal pada rentang pertemuan ini."
   }
 }

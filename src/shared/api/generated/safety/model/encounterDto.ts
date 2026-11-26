@@ -3,10 +3,12 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Safety Service
  * Navigational safety analytics (pipeline Early Warning System, collision risk CPA/TCPA) built on the Detector SDK
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
+import type { EncounterDtoMessageParams } from './encounterDtoMessageParams';
 import type { EncounterDtoPeakRisk } from './encounterDtoPeakRisk';
 import type { EncounterSampleDto } from './encounterSampleDto';
+import type { SafetyVesselIdentityDto } from './safetyVesselIdentityDto';
 
 export interface EncounterDto {
   encounterId: string;
@@ -14,6 +16,16 @@ export interface EncounterDto {
   mmsiA: number;
   /** Higher MMSI of the pair */
   mmsiB: number;
+  /**
+   * Fleet identity of `mmsiA` (shared across tenants, spec §8.5); `null` for an unregistered MMSI
+   * @nullable
+   */
+  vesselA: SafetyVesselIdentityDto | null;
+  /**
+   * Fleet identity of `mmsiB`; `null` for an unregistered MMSI
+   * @nullable
+   */
+  vesselB: SafetyVesselIdentityDto | null;
   /** First sample in the range */
   startedAt: string;
   /** Latest sample in the range */
@@ -24,4 +36,8 @@ export interface EncounterDto {
   minCpaNm: number;
   /** CPA/TCPA samples in the range, oldest first */
   history: EncounterSampleDto[];
+  /** Stable key of the encounter’s sentence (README "Localizable texts"): `safety.collision.encounter` */
+  messageKey: string;
+  /** Values of the sentence: `vesselA` / `vesselB` (name with MMSI, or the MMSI), `mmsiA`, `mmsiB`, `peakRisk`, `minCpaM` (whole metres, the platform unit of distance params) and `minCpaNm` (2 decimals, the unit of the English sentence) */
+  messageParams: EncounterDtoMessageParams;
 }

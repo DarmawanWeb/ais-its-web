@@ -3,13 +3,16 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Telemetry Service
  * Fuel consumption telemetry: readings ingest over REST and MQTT, device registry, queries and status; publishes fuel.reading.recorded.v1
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import type { DevicesControllerListKind } from './devicesControllerListKind';
 import type { DevicesControllerListStatus } from './devicesControllerListStatus';
 
 export type DevicesControllerListParams = {
-  /** @minimum 1 */
+  /**
+   * @minimum 1
+   * @maximum 1000000
+   */
   page?: number;
   /**
    * @minimum 1

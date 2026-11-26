@@ -9,14 +9,22 @@ import { defineConfig, devices } from '@playwright/test';
  *
  * The build sets VITE_E2E_HOOKS=true: test hooks such as window.__AIS_E2E_MAPS__ (the live
  * MapLibre maps) exist only in this build.
+ *
+ * Runs in parallel (several engineers, one checkout): give each run its own ports,
+ * `E2E_WEB_PORT=4273 E2E_MOCK_PORT=8887 pnpm test:e2e`. A run builds into
+ * node_modules/.e2e/web-<port> and writes test-results/<port>, so runs never share files, and
+ * servers already listening on the ports are an error unless E2E_REUSE_SERVERS=true (a reused
+ * server may hold another run's build or mock modules).
  */
 const MOCK_PORT = Number(process.env.E2E_MOCK_PORT ?? 8787);
 const WEB_PORT = Number(process.env.E2E_WEB_PORT ?? 4173);
 const CI = !!process.env.CI;
+const REUSE_SERVERS = !CI && process.env.E2E_REUSE_SERVERS === 'true';
+const DIST_DIR = `node_modules/.e2e/web-${WEB_PORT}`;
 
 export default defineConfig({
   testDir: './e2e',
-  outputDir: './test-results',
+  outputDir: `./test-results/${WEB_PORT}`,
   fullyParallel: false,
   workers: 1,
   retries: CI ? 1 : 0,
@@ -48,18 +56,18 @@ export default defineConfig({
       command: 'node e2e/mock-server/server.mjs',
       url: `http://localhost:${MOCK_PORT}/health`,
       env: { MOCK_PORT: String(MOCK_PORT) },
-      reuseExistingServer: !CI,
+      reuseExistingServer: REUSE_SERVERS,
       stdout: 'ignore',
     },
     {
-      command: `pnpm exec vite build --logLevel warn && pnpm exec vite preview --port ${WEB_PORT} --strictPort`,
+      command: `pnpm exec vite build --logLevel warn --outDir ${DIST_DIR} && pnpm exec vite preview --outDir ${DIST_DIR} --port ${WEB_PORT} --strictPort`,
       url: `http://localhost:${WEB_PORT}`,
       env: {
         VITE_DEV_PROXY_TARGET: `http://localhost:${MOCK_PORT}`,
         VITE_QUERY_DEVTOOLS: 'false',
         VITE_E2E_HOOKS: 'true',
       },
-      reuseExistingServer: !CI,
+      reuseExistingServer: REUSE_SERVERS,
       timeout: 180_000,
       stdout: 'ignore',
     },

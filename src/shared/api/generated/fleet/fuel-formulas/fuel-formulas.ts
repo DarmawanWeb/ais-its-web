@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Fleet Service
  * Vessel master data and reference data (vessel types, fuels, engines, fuel formulas, ports, registry); publishes VesselSnapshotV1 to the FLEET stream
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import { useMutation, useQuery } from '@tanstack/react-query';
 import type {
@@ -24,10 +24,12 @@ import type {
 import type {
   CreateFuelFormulaDto,
   FuelFormulaDto,
+  FuelFormulaValidationDto,
   FuelFormulasControllerList200,
   FuelFormulasControllerListParams,
   ProblemDetails,
   UpdateFuelFormulaDto,
+  ValidateFuelFormulaDto,
 } from '../model';
 
 import { apiClient } from '../../../mutator';
@@ -584,4 +586,99 @@ export const useFuelFormulasControllerRemove = <
   TContext
 > => {
   return useMutation(getFuelFormulasControllerRemoveMutationOptions(options), queryClient);
+};
+/**
+ * The grammar the service stores formulas with (contracts validateFuelFormula: numbers, speedKnot, + - * / ** ^, parentheses, exp, log/ln, sqrt, pow, abs, min, max; at most 500 characters, depth 32). Always 200 with { valid, problem }: the first problem with a stable code, its position and token. Nothing is stored. Clients on contracts >= 0.4 can run validateFuelFormula locally instead.
+ * @summary Check a formula against the safe grammar
+ */
+export const fuelFormulasControllerValidate = (
+  validateFuelFormulaDto: BodyType<ValidateFuelFormulaDto>,
+  options?: SecondParameter<typeof apiClient>,
+  signal?: AbortSignal,
+) => {
+  return apiClient<FuelFormulaValidationDto>(
+    {
+      url: `/api/v2/fuel-formulas/validate`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      data: validateFuelFormulaDto,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getFuelFormulasControllerValidateMutationKey = () =>
+  ['fuelFormulasControllerValidate'] as const;
+
+export const getFuelFormulasControllerValidateMutationOptions = <
+  TError = ErrorType<ProblemDetails>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof fuelFormulasControllerValidate>>,
+    TError,
+    FuelFormulasControllerValidateMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof apiClient>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof fuelFormulasControllerValidate>>,
+  TError,
+  FuelFormulasControllerValidateMutationVariables,
+  TContext
+> => {
+  const mutationKey = getFuelFormulasControllerValidateMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof fuelFormulasControllerValidate>>,
+    FuelFormulasControllerValidateMutationVariables
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return fuelFormulasControllerValidate(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type FuelFormulasControllerValidateMutationResult = NonNullable<
+  Awaited<ReturnType<typeof fuelFormulasControllerValidate>>
+>;
+export type FuelFormulasControllerValidateMutationBody = BodyType<ValidateFuelFormulaDto>;
+export type FuelFormulasControllerValidateMutationError = ErrorType<ProblemDetails>;
+export type FuelFormulasControllerValidateMutationVariables = {
+  data: BodyType<ValidateFuelFormulaDto>;
+};
+
+/**
+ * The grammar the service stores formulas with (contracts validateFuelFormula: numbers, speedKnot, + - * / ** ^, parentheses, exp, log/ln, sqrt, pow, abs, min, max; at most 500 characters, depth 32). Always 200 with { valid, problem }: the first problem with a stable code, its position and token. Nothing is stored. Clients on contracts >= 0.4 can run validateFuelFormula locally instead.
+ * @summary Check a formula against the safe grammar
+ */
+export const useFuelFormulasControllerValidate = <
+  TError = ErrorType<ProblemDetails>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof fuelFormulasControllerValidate>>,
+      TError,
+      FuelFormulasControllerValidateMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof fuelFormulasControllerValidate>>,
+  TError,
+  FuelFormulasControllerValidateMutationVariables,
+  TContext
+> => {
+  return useMutation(getFuelFormulasControllerValidateMutationOptions(options), queryClient);
 };

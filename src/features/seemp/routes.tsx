@@ -15,6 +15,11 @@ export const feature = defineFeature({
       handle: { titleKey: 'seemp:seemp.title', permission: 'seemp:read' },
       lazy: lazyPage(() => import('./pages/seemp-page'), 'SeempPage'),
     },
+    {
+      path: 'seemp/vessels/:mmsi',
+      handle: { titleKey: 'seemp:vessel.title', permission: 'seemp:read' },
+      lazy: lazyPage(() => import('./pages/seemp-vessel-page'), 'SeempVesselPage'),
+    },
   ],
   nav: [
     {
@@ -25,7 +30,15 @@ export const feature = defineFeature({
       labelKey: 'seemp:nav.seemp',
       icon: ClipboardCheck,
       permission: 'seemp:read',
-      keywords: ['seemp', 'efisiensi', 'efficiency'],
+      keywords: [
+        'seemp',
+        'efisiensi',
+        'efficiency',
+        'simulasi',
+        'simulation',
+        'skenario',
+        'scenario',
+      ],
     },
   ],
 });

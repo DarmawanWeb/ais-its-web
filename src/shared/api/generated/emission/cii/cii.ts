@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Emission Service
  * Fuel and CO2 per voyage segment, IMO CII (daily/annual, rating A-E), reduction factors, SEEMP recommendations and what-if simulation, IMO DCS summary
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import { useMutation, useQuery } from '@tanstack/react-query';
 import type {
@@ -26,12 +26,16 @@ import type {
   AnnualManualDto,
   CiiControllerCurrentParams,
   CiiControllerDailyParams,
+  CiiControllerFleetFuelParams,
   CiiControllerFleetSummaryParams,
-  CiiControllerSegments200,
+  CiiControllerRecomputeJobs200,
+  CiiControllerRecomputeJobsParams,
+  CiiControllerSegments200One,
   CiiControllerSegmentsParams,
   CiiControllerStartRecomputeParams,
   CiiSummaryDto,
   DailyCiiDto,
+  FleetFuelDto,
   FleetSummaryDto,
   ProblemDetails,
   PutAnnualManualDto,
@@ -62,7 +66,7 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
  * @summary Year-to-date CII of a vessel with a linear year-end projection
  */
 export const ciiControllerCurrent = (
-  mmsi: number,
+  mmsi: string,
   params?: CiiControllerCurrentParams,
   options?: SecondParameter<typeof apiClient>,
   signal?: AbortSignal,
@@ -74,7 +78,7 @@ export const ciiControllerCurrent = (
 };
 
 export const getCiiControllerCurrentQueryKey = (
-  mmsi: number,
+  mmsi: string,
   params?: CiiControllerCurrentParams,
 ) => {
   return [`/api/v2/cii/vessels/${mmsi}/current`, ...(params ? [params] : [])] as const;
@@ -84,7 +88,7 @@ export const getCiiControllerCurrentQueryOptions = <
   TData = Awaited<ReturnType<typeof ciiControllerCurrent>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   params?: CiiControllerCurrentParams,
   options?: {
     query?: Partial<
@@ -120,7 +124,7 @@ export function useCiiControllerCurrent<
   TData = Awaited<ReturnType<typeof ciiControllerCurrent>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   params: undefined | CiiControllerCurrentParams,
   options: {
     query: Partial<
@@ -143,7 +147,7 @@ export function useCiiControllerCurrent<
   TData = Awaited<ReturnType<typeof ciiControllerCurrent>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   params?: CiiControllerCurrentParams,
   options?: {
     query?: Partial<
@@ -166,7 +170,7 @@ export function useCiiControllerCurrent<
   TData = Awaited<ReturnType<typeof ciiControllerCurrent>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   params?: CiiControllerCurrentParams,
   options?: {
     query?: Partial<
@@ -181,7 +185,7 @@ export function useCiiControllerCurrent<
   TData = Awaited<ReturnType<typeof ciiControllerCurrent>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   params?: CiiControllerCurrentParams,
   options?: {
     query?: Partial<
@@ -204,7 +208,7 @@ export function useCiiControllerCurrent<
  * @summary Daily CII points with the cumulative (year-to-date) attained CII; default from 1 January of the year of to
  */
 export const ciiControllerDaily = (
-  mmsi: number,
+  mmsi: string,
   params?: CiiControllerDailyParams,
   options?: SecondParameter<typeof apiClient>,
   signal?: AbortSignal,
@@ -215,7 +219,7 @@ export const ciiControllerDaily = (
   );
 };
 
-export const getCiiControllerDailyQueryKey = (mmsi: number, params?: CiiControllerDailyParams) => {
+export const getCiiControllerDailyQueryKey = (mmsi: string, params?: CiiControllerDailyParams) => {
   return [`/api/v2/cii/vessels/${mmsi}/daily`, ...(params ? [params] : [])] as const;
 };
 
@@ -223,7 +227,7 @@ export const getCiiControllerDailyQueryOptions = <
   TData = Awaited<ReturnType<typeof ciiControllerDaily>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   params?: CiiControllerDailyParams,
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof ciiControllerDaily>>, TError, TData>>;
@@ -257,7 +261,7 @@ export function useCiiControllerDaily<
   TData = Awaited<ReturnType<typeof ciiControllerDaily>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   params: undefined | CiiControllerDailyParams,
   options: {
     query: Partial<UseQueryOptions<Awaited<ReturnType<typeof ciiControllerDaily>>, TError, TData>> &
@@ -278,7 +282,7 @@ export function useCiiControllerDaily<
   TData = Awaited<ReturnType<typeof ciiControllerDaily>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   params?: CiiControllerDailyParams,
   options?: {
     query?: Partial<
@@ -301,7 +305,7 @@ export function useCiiControllerDaily<
   TData = Awaited<ReturnType<typeof ciiControllerDaily>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   params?: CiiControllerDailyParams,
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof ciiControllerDaily>>, TError, TData>>;
@@ -314,7 +318,7 @@ export function useCiiControllerDaily<
   TData = Awaited<ReturnType<typeof ciiControllerDaily>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   params?: CiiControllerDailyParams,
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof ciiControllerDaily>>, TError, TData>>;
@@ -335,7 +339,7 @@ export function useCiiControllerDaily<
  * @summary Annual CII per year with the grade boundaries d_i × required
  */
 export const ciiControllerAnnual = (
-  mmsi: number,
+  mmsi: string,
   options?: SecondParameter<typeof apiClient>,
   signal?: AbortSignal,
 ) => {
@@ -345,7 +349,7 @@ export const ciiControllerAnnual = (
   );
 };
 
-export const getCiiControllerAnnualQueryKey = (mmsi: number) => {
+export const getCiiControllerAnnualQueryKey = (mmsi: string) => {
   return [`/api/v2/cii/vessels/${mmsi}/annual`] as const;
 };
 
@@ -353,7 +357,7 @@ export const getCiiControllerAnnualQueryOptions = <
   TData = Awaited<ReturnType<typeof ciiControllerAnnual>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof ciiControllerAnnual>>, TError, TData>
@@ -388,7 +392,7 @@ export function useCiiControllerAnnual<
   TData = Awaited<ReturnType<typeof ciiControllerAnnual>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   options: {
     query: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof ciiControllerAnnual>>, TError, TData>
@@ -410,7 +414,7 @@ export function useCiiControllerAnnual<
   TData = Awaited<ReturnType<typeof ciiControllerAnnual>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof ciiControllerAnnual>>, TError, TData>
@@ -432,7 +436,7 @@ export function useCiiControllerAnnual<
   TData = Awaited<ReturnType<typeof ciiControllerAnnual>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof ciiControllerAnnual>>, TError, TData>
@@ -446,7 +450,7 @@ export function useCiiControllerAnnual<
   TData = Awaited<ReturnType<typeof ciiControllerAnnual>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof ciiControllerAnnual>>, TError, TData>
@@ -465,22 +469,23 @@ export function useCiiControllerAnnual<
 }
 
 /**
- * @summary Voyage segments of a vessel, newest first (default: the last 24 h, at most 31 days)
+ * With `Accept: text/csv` the response is a CSV of every matching segment of the range, oldest first, without cursor paging; at most 50,000 rows, and `X-Truncated: true` when the range holds more (narrow `from`/`to`).
+ * @summary Voyage segments of a vessel, newest first (default: the last 24 h, at most 31 days); Accept: text/csv exports the range
  */
 export const ciiControllerSegments = (
-  mmsi: number,
+  mmsi: string,
   params?: CiiControllerSegmentsParams,
   options?: SecondParameter<typeof apiClient>,
   signal?: AbortSignal,
 ) => {
-  return apiClient<CiiControllerSegments200>(
+  return apiClient<CiiControllerSegments200One | string>(
     { url: `/api/v2/cii/vessels/${mmsi}/segments`, method: 'GET', params, signal },
     options,
   );
 };
 
 export const getCiiControllerSegmentsQueryKey = (
-  mmsi: number,
+  mmsi: string,
   params?: CiiControllerSegmentsParams,
 ) => {
   return [`/api/v2/cii/vessels/${mmsi}/segments`, ...(params ? [params] : [])] as const;
@@ -490,7 +495,7 @@ export const getCiiControllerSegmentsQueryOptions = <
   TData = Awaited<ReturnType<typeof ciiControllerSegments>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   params?: CiiControllerSegmentsParams,
   options?: {
     query?: Partial<
@@ -521,12 +526,15 @@ export type CiiControllerSegmentsQueryResult = NonNullable<
 >;
 export type CiiControllerSegmentsQueryError = ErrorType<ProblemDetails>;
 
-/** @summary Voyage segments of a vessel, newest first (default: the last 24 h, at most 31 days) */
+/**
+ * With `Accept: text/csv` the response is a CSV of every matching segment of the range, oldest first, without cursor paging; at most 50,000 rows, and `X-Truncated: true` when the range holds more (narrow `from`/`to`).
+ * @summary Voyage segments of a vessel, newest first (default: the last 24 h, at most 31 days); Accept: text/csv exports the range
+ */
 export function useCiiControllerSegments<
   TData = Awaited<ReturnType<typeof ciiControllerSegments>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   params: undefined | CiiControllerSegmentsParams,
   options: {
     query: Partial<
@@ -544,12 +552,15 @@ export function useCiiControllerSegments<
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-/** @summary Voyage segments of a vessel, newest first (default: the last 24 h, at most 31 days) */
+/**
+ * With `Accept: text/csv` the response is a CSV of every matching segment of the range, oldest first, without cursor paging; at most 50,000 rows, and `X-Truncated: true` when the range holds more (narrow `from`/`to`).
+ * @summary Voyage segments of a vessel, newest first (default: the last 24 h, at most 31 days); Accept: text/csv exports the range
+ */
 export function useCiiControllerSegments<
   TData = Awaited<ReturnType<typeof ciiControllerSegments>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   params?: CiiControllerSegmentsParams,
   options?: {
     query?: Partial<
@@ -567,12 +578,15 @@ export function useCiiControllerSegments<
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-/** @summary Voyage segments of a vessel, newest first (default: the last 24 h, at most 31 days) */
+/**
+ * With `Accept: text/csv` the response is a CSV of every matching segment of the range, oldest first, without cursor paging; at most 50,000 rows, and `X-Truncated: true` when the range holds more (narrow `from`/`to`).
+ * @summary Voyage segments of a vessel, newest first (default: the last 24 h, at most 31 days); Accept: text/csv exports the range
+ */
 export function useCiiControllerSegments<
   TData = Awaited<ReturnType<typeof ciiControllerSegments>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   params?: CiiControllerSegmentsParams,
   options?: {
     query?: Partial<
@@ -582,12 +596,15 @@ export function useCiiControllerSegments<
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-/** @summary Voyage segments of a vessel, newest first (default: the last 24 h, at most 31 days) */
+/**
+ * With `Accept: text/csv` the response is a CSV of every matching segment of the range, oldest first, without cursor paging; at most 50,000 rows, and `X-Truncated: true` when the range holds more (narrow `from`/`to`).
+ * @summary Voyage segments of a vessel, newest first (default: the last 24 h, at most 31 days); Accept: text/csv exports the range
+ */
 export function useCiiControllerSegments<
   TData = Awaited<ReturnType<typeof ciiControllerSegments>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   params?: CiiControllerSegmentsParams,
   options?: {
     query?: Partial<
@@ -607,6 +624,7 @@ export function useCiiControllerSegments<
 }
 
 /**
+ * `grade`, `search` and `sort` select and order `items` (and `meta.total`); `vessels`, `grades` and `notAvailable` always describe the whole fleet. Each item carries the previous year's rating and grade for the trend.
  * @summary CII grade distribution of the fleet of the active organization (super_admin: all or ?orgId) with one page of its vessels
  */
 export const ciiControllerFleetSummary = (
@@ -656,7 +674,10 @@ export type CiiControllerFleetSummaryQueryResult = NonNullable<
 >;
 export type CiiControllerFleetSummaryQueryError = ErrorType<ProblemDetails>;
 
-/** @summary CII grade distribution of the fleet of the active organization (super_admin: all or ?orgId) with one page of its vessels */
+/**
+ * `grade`, `search` and `sort` select and order `items` (and `meta.total`); `vessels`, `grades` and `notAvailable` always describe the whole fleet. Each item carries the previous year's rating and grade for the trend.
+ * @summary CII grade distribution of the fleet of the active organization (super_admin: all or ?orgId) with one page of its vessels
+ */
 export function useCiiControllerFleetSummary<
   TData = Awaited<ReturnType<typeof ciiControllerFleetSummary>>,
   TError = ErrorType<ProblemDetails>,
@@ -678,7 +699,10 @@ export function useCiiControllerFleetSummary<
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-/** @summary CII grade distribution of the fleet of the active organization (super_admin: all or ?orgId) with one page of its vessels */
+/**
+ * `grade`, `search` and `sort` select and order `items` (and `meta.total`); `vessels`, `grades` and `notAvailable` always describe the whole fleet. Each item carries the previous year's rating and grade for the trend.
+ * @summary CII grade distribution of the fleet of the active organization (super_admin: all or ?orgId) with one page of its vessels
+ */
 export function useCiiControllerFleetSummary<
   TData = Awaited<ReturnType<typeof ciiControllerFleetSummary>>,
   TError = ErrorType<ProblemDetails>,
@@ -700,7 +724,10 @@ export function useCiiControllerFleetSummary<
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-/** @summary CII grade distribution of the fleet of the active organization (super_admin: all or ?orgId) with one page of its vessels */
+/**
+ * `grade`, `search` and `sort` select and order `items` (and `meta.total`); `vessels`, `grades` and `notAvailable` always describe the whole fleet. Each item carries the previous year's rating and grade for the trend.
+ * @summary CII grade distribution of the fleet of the active organization (super_admin: all or ?orgId) with one page of its vessels
+ */
 export function useCiiControllerFleetSummary<
   TData = Awaited<ReturnType<typeof ciiControllerFleetSummary>>,
   TError = ErrorType<ProblemDetails>,
@@ -714,7 +741,10 @@ export function useCiiControllerFleetSummary<
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-/** @summary CII grade distribution of the fleet of the active organization (super_admin: all or ?orgId) with one page of its vessels */
+/**
+ * `grade`, `search` and `sort` select and order `items` (and `meta.total`); `vessels`, `grades` and `notAvailable` always describe the whole fleet. Each item carries the previous year's rating and grade for the trend.
+ * @summary CII grade distribution of the fleet of the active organization (super_admin: all or ?orgId) with one page of its vessels
+ */
 export function useCiiControllerFleetSummary<
   TData = Awaited<ReturnType<typeof ciiControllerFleetSummary>>,
   TError = ErrorType<ProblemDetails>,
@@ -738,10 +768,153 @@ export function useCiiControllerFleetSummary<
 }
 
 /**
+ * Per vessel, the counted segments of the period. For the year, a vessel without counted segments contributes its manual annual record (CO2 from its current fuel when the record has none); the month counts segments only. Fleet of the active organization (super_admin: all or ?orgId).
+ * @summary Fuel (ME, AE, total) and CO2 of the fleet in a calendar year and one of its months (UTC)
+ */
+export const ciiControllerFleetFuel = (
+  params?: CiiControllerFleetFuelParams,
+  options?: SecondParameter<typeof apiClient>,
+  signal?: AbortSignal,
+) => {
+  return apiClient<FleetFuelDto>(
+    { url: `/api/v2/cii/fleet/fuel`, method: 'GET', params, signal },
+    options,
+  );
+};
+
+export const getCiiControllerFleetFuelQueryKey = (params?: CiiControllerFleetFuelParams) => {
+  return [`/api/v2/cii/fleet/fuel`, ...(params ? [params] : [])] as const;
+};
+
+export const getCiiControllerFleetFuelQueryOptions = <
+  TData = Awaited<ReturnType<typeof ciiControllerFleetFuel>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: CiiControllerFleetFuelParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof ciiControllerFleetFuel>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getCiiControllerFleetFuelQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof ciiControllerFleetFuel>>> = ({ signal }) =>
+    ciiControllerFleetFuel(params, requestOptions, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof ciiControllerFleetFuel>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type CiiControllerFleetFuelQueryResult = NonNullable<
+  Awaited<ReturnType<typeof ciiControllerFleetFuel>>
+>;
+export type CiiControllerFleetFuelQueryError = ErrorType<ProblemDetails>;
+
+/**
+ * Per vessel, the counted segments of the period. For the year, a vessel without counted segments contributes its manual annual record (CO2 from its current fuel when the record has none); the month counts segments only. Fleet of the active organization (super_admin: all or ?orgId).
+ * @summary Fuel (ME, AE, total) and CO2 of the fleet in a calendar year and one of its months (UTC)
+ */
+export function useCiiControllerFleetFuel<
+  TData = Awaited<ReturnType<typeof ciiControllerFleetFuel>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params: undefined | CiiControllerFleetFuelParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof ciiControllerFleetFuel>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof ciiControllerFleetFuel>>,
+          TError,
+          Awaited<ReturnType<typeof ciiControllerFleetFuel>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Per vessel, the counted segments of the period. For the year, a vessel without counted segments contributes its manual annual record (CO2 from its current fuel when the record has none); the month counts segments only. Fleet of the active organization (super_admin: all or ?orgId).
+ * @summary Fuel (ME, AE, total) and CO2 of the fleet in a calendar year and one of its months (UTC)
+ */
+export function useCiiControllerFleetFuel<
+  TData = Awaited<ReturnType<typeof ciiControllerFleetFuel>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: CiiControllerFleetFuelParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof ciiControllerFleetFuel>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof ciiControllerFleetFuel>>,
+          TError,
+          Awaited<ReturnType<typeof ciiControllerFleetFuel>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Per vessel, the counted segments of the period. For the year, a vessel without counted segments contributes its manual annual record (CO2 from its current fuel when the record has none); the month counts segments only. Fleet of the active organization (super_admin: all or ?orgId).
+ * @summary Fuel (ME, AE, total) and CO2 of the fleet in a calendar year and one of its months (UTC)
+ */
+export function useCiiControllerFleetFuel<
+  TData = Awaited<ReturnType<typeof ciiControllerFleetFuel>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: CiiControllerFleetFuelParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof ciiControllerFleetFuel>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Per vessel, the counted segments of the period. For the year, a vessel without counted segments contributes its manual annual record (CO2 from its current fuel when the record has none); the month counts segments only. Fleet of the active organization (super_admin: all or ?orgId).
+ * @summary Fuel (ME, AE, total) and CO2 of the fleet in a calendar year and one of its months (UTC)
+ */
+export function useCiiControllerFleetFuel<
+  TData = Awaited<ReturnType<typeof ciiControllerFleetFuel>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: CiiControllerFleetFuelParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof ciiControllerFleetFuel>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getCiiControllerFleetFuelQueryOptions(params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+/**
  * @summary Manual / imported annual CII record of a vessel-year
  */
 export const ciiControllerGetManual = (
-  mmsi: number,
+  mmsi: string,
   year: number,
   options?: SecondParameter<typeof apiClient>,
   signal?: AbortSignal,
@@ -752,7 +925,7 @@ export const ciiControllerGetManual = (
   );
 };
 
-export const getCiiControllerGetManualQueryKey = (mmsi: number, year: number) => {
+export const getCiiControllerGetManualQueryKey = (mmsi: string, year: number) => {
   return [`/api/v2/cii/vessels/${mmsi}/annual-manual/${year}`] as const;
 };
 
@@ -760,7 +933,7 @@ export const getCiiControllerGetManualQueryOptions = <
   TData = Awaited<ReturnType<typeof ciiControllerGetManual>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   year: number,
   options?: {
     query?: Partial<
@@ -796,7 +969,7 @@ export function useCiiControllerGetManual<
   TData = Awaited<ReturnType<typeof ciiControllerGetManual>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   year: number,
   options: {
     query: Partial<
@@ -819,7 +992,7 @@ export function useCiiControllerGetManual<
   TData = Awaited<ReturnType<typeof ciiControllerGetManual>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   year: number,
   options?: {
     query?: Partial<
@@ -842,7 +1015,7 @@ export function useCiiControllerGetManual<
   TData = Awaited<ReturnType<typeof ciiControllerGetManual>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   year: number,
   options?: {
     query?: Partial<
@@ -857,7 +1030,7 @@ export function useCiiControllerGetManual<
   TData = Awaited<ReturnType<typeof ciiControllerGetManual>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   year: number,
   options?: {
     query?: Partial<
@@ -880,7 +1053,7 @@ export function useCiiControllerGetManual<
  * @summary Create or replace the manual annual CII of a vessel-year (used when the year has no segments)
  */
 export const ciiControllerPutManual = (
-  mmsi: number,
+  mmsi: string,
   year: number,
   putAnnualManualDto: BodyType<PutAnnualManualDto>,
   options?: SecondParameter<typeof apiClient>,
@@ -942,7 +1115,7 @@ export type CiiControllerPutManualMutationResult = NonNullable<
 export type CiiControllerPutManualMutationBody = BodyType<PutAnnualManualDto>;
 export type CiiControllerPutManualMutationError = ErrorType<ProblemDetails>;
 export type CiiControllerPutManualMutationVariables = {
-  mmsi: number;
+  mmsi: string;
   year: number;
   data: BodyType<PutAnnualManualDto>;
 };
@@ -968,10 +1141,98 @@ export const useCiiControllerPutManual = <TError = ErrorType<ProblemDetails>, TC
   return useMutation(getCiiControllerPutManualMutationOptions(options), queryClient);
 };
 /**
- * @summary Recompute the segments of a range by replaying AIS_POSITION (super_admin, ≤ 7 days)
+ * The year falls back to its segments (or answers 404 CII_NOT_AVAILABLE without any). Audited as cii_annual_manual.delete.
+ * @summary Remove the manual / imported annual CII record of a vessel-year
+ */
+export const ciiControllerDeleteManual = (
+  mmsi: string,
+  year: number,
+  options?: SecondParameter<typeof apiClient>,
+  signal?: AbortSignal,
+) => {
+  return apiClient<void>(
+    { url: `/api/v2/cii/vessels/${mmsi}/annual-manual/${year}`, method: 'DELETE', signal },
+    options,
+  );
+};
+
+export const getCiiControllerDeleteManualMutationKey = () => ['ciiControllerDeleteManual'] as const;
+
+export const getCiiControllerDeleteManualMutationOptions = <
+  TError = ErrorType<void | ProblemDetails>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof ciiControllerDeleteManual>>,
+    TError,
+    CiiControllerDeleteManualMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof apiClient>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof ciiControllerDeleteManual>>,
+  TError,
+  CiiControllerDeleteManualMutationVariables,
+  TContext
+> => {
+  const mutationKey = getCiiControllerDeleteManualMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof ciiControllerDeleteManual>>,
+    CiiControllerDeleteManualMutationVariables
+  > = (props) => {
+    const { mmsi, year } = props ?? {};
+
+    return ciiControllerDeleteManual(mmsi, year, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CiiControllerDeleteManualMutationResult = NonNullable<
+  Awaited<ReturnType<typeof ciiControllerDeleteManual>>
+>;
+
+export type CiiControllerDeleteManualMutationError = ErrorType<void | ProblemDetails>;
+export type CiiControllerDeleteManualMutationVariables = { mmsi: string; year: number };
+
+/**
+ * The year falls back to its segments (or answers 404 CII_NOT_AVAILABLE without any). Audited as cii_annual_manual.delete.
+ * @summary Remove the manual / imported annual CII record of a vessel-year
+ */
+export const useCiiControllerDeleteManual = <
+  TError = ErrorType<void | ProblemDetails>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof ciiControllerDeleteManual>>,
+      TError,
+      CiiControllerDeleteManualMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof ciiControllerDeleteManual>>,
+  TError,
+  CiiControllerDeleteManualMutationVariables,
+  TContext
+> => {
+  return useMutation(getCiiControllerDeleteManualMutationOptions(options), queryClient);
+};
+/**
+ * Requires a platform administrator (super_admin); other users and API keys get 403 PLATFORM_ADMIN_REQUIRED.
+ * @summary Recompute the segments of a range by replaying AIS_POSITION (≤ 7 days)
  */
 export const ciiControllerStartRecompute = (
-  mmsi: number,
+  mmsi: string,
   params?: CiiControllerStartRecomputeParams,
   options?: SecondParameter<typeof apiClient>,
   signal?: AbortSignal,
@@ -1027,11 +1288,14 @@ export type CiiControllerStartRecomputeMutationResult = NonNullable<
 
 export type CiiControllerStartRecomputeMutationError = ErrorType<ProblemDetails>;
 export type CiiControllerStartRecomputeMutationVariables = {
-  mmsi: number;
+  mmsi: string;
   params?: CiiControllerStartRecomputeParams;
 };
 
-/** @summary Recompute the segments of a range by replaying AIS_POSITION (super_admin, ≤ 7 days) */
+/**
+ * Requires a platform administrator (super_admin); other users and API keys get 403 PLATFORM_ADMIN_REQUIRED.
+ * @summary Recompute the segments of a range by replaying AIS_POSITION (≤ 7 days)
+ */
 export const useCiiControllerStartRecompute = <
   TError = ErrorType<ProblemDetails>,
   TContext = unknown,
@@ -1055,7 +1319,164 @@ export const useCiiControllerStartRecompute = <
   return useMutation(getCiiControllerStartRecomputeMutationOptions(options), queryClient);
 };
 /**
- * @summary Status of a recomputation (super_admin)
+ * Shows the jobs started by any administrator or instance (e.g. the running job behind 409 RECOMPUTE_IN_PROGRESS); running jobs of a stopped instance are failed first.
+ *
+ * Requires a platform administrator (super_admin); other users and API keys get 403 PLATFORM_ADMIN_REQUIRED.
+ * @summary Recomputation jobs, newest first, optionally of one vessel and status
+ */
+export const ciiControllerRecomputeJobs = (
+  params?: CiiControllerRecomputeJobsParams,
+  options?: SecondParameter<typeof apiClient>,
+  signal?: AbortSignal,
+) => {
+  return apiClient<CiiControllerRecomputeJobs200>(
+    { url: `/api/v2/cii/recompute-jobs`, method: 'GET', params, signal },
+    options,
+  );
+};
+
+export const getCiiControllerRecomputeJobsQueryKey = (
+  params?: CiiControllerRecomputeJobsParams,
+) => {
+  return [`/api/v2/cii/recompute-jobs`, ...(params ? [params] : [])] as const;
+};
+
+export const getCiiControllerRecomputeJobsQueryOptions = <
+  TData = Awaited<ReturnType<typeof ciiControllerRecomputeJobs>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: CiiControllerRecomputeJobsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof ciiControllerRecomputeJobs>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getCiiControllerRecomputeJobsQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof ciiControllerRecomputeJobs>>> = ({
+    signal,
+  }) => ciiControllerRecomputeJobs(params, requestOptions, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof ciiControllerRecomputeJobs>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type CiiControllerRecomputeJobsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof ciiControllerRecomputeJobs>>
+>;
+export type CiiControllerRecomputeJobsQueryError = ErrorType<ProblemDetails>;
+
+/**
+ * Shows the jobs started by any administrator or instance (e.g. the running job behind 409 RECOMPUTE_IN_PROGRESS); running jobs of a stopped instance are failed first.
+ *
+ * Requires a platform administrator (super_admin); other users and API keys get 403 PLATFORM_ADMIN_REQUIRED.
+ * @summary Recomputation jobs, newest first, optionally of one vessel and status
+ */
+export function useCiiControllerRecomputeJobs<
+  TData = Awaited<ReturnType<typeof ciiControllerRecomputeJobs>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params: undefined | CiiControllerRecomputeJobsParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof ciiControllerRecomputeJobs>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof ciiControllerRecomputeJobs>>,
+          TError,
+          Awaited<ReturnType<typeof ciiControllerRecomputeJobs>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Shows the jobs started by any administrator or instance (e.g. the running job behind 409 RECOMPUTE_IN_PROGRESS); running jobs of a stopped instance are failed first.
+ *
+ * Requires a platform administrator (super_admin); other users and API keys get 403 PLATFORM_ADMIN_REQUIRED.
+ * @summary Recomputation jobs, newest first, optionally of one vessel and status
+ */
+export function useCiiControllerRecomputeJobs<
+  TData = Awaited<ReturnType<typeof ciiControllerRecomputeJobs>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: CiiControllerRecomputeJobsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof ciiControllerRecomputeJobs>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof ciiControllerRecomputeJobs>>,
+          TError,
+          Awaited<ReturnType<typeof ciiControllerRecomputeJobs>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Shows the jobs started by any administrator or instance (e.g. the running job behind 409 RECOMPUTE_IN_PROGRESS); running jobs of a stopped instance are failed first.
+ *
+ * Requires a platform administrator (super_admin); other users and API keys get 403 PLATFORM_ADMIN_REQUIRED.
+ * @summary Recomputation jobs, newest first, optionally of one vessel and status
+ */
+export function useCiiControllerRecomputeJobs<
+  TData = Awaited<ReturnType<typeof ciiControllerRecomputeJobs>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: CiiControllerRecomputeJobsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof ciiControllerRecomputeJobs>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Shows the jobs started by any administrator or instance (e.g. the running job behind 409 RECOMPUTE_IN_PROGRESS); running jobs of a stopped instance are failed first.
+ *
+ * Requires a platform administrator (super_admin); other users and API keys get 403 PLATFORM_ADMIN_REQUIRED.
+ * @summary Recomputation jobs, newest first, optionally of one vessel and status
+ */
+export function useCiiControllerRecomputeJobs<
+  TData = Awaited<ReturnType<typeof ciiControllerRecomputeJobs>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: CiiControllerRecomputeJobsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof ciiControllerRecomputeJobs>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getCiiControllerRecomputeJobsQueryOptions(params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+/**
+ * Requires a platform administrator (super_admin); other users and API keys get 403 PLATFORM_ADMIN_REQUIRED.
+ * @summary Status of a recomputation
  */
 export const ciiControllerRecomputeJob = (
   id: string,
@@ -1107,7 +1528,10 @@ export type CiiControllerRecomputeJobQueryResult = NonNullable<
 >;
 export type CiiControllerRecomputeJobQueryError = ErrorType<ProblemDetails>;
 
-/** @summary Status of a recomputation (super_admin) */
+/**
+ * Requires a platform administrator (super_admin); other users and API keys get 403 PLATFORM_ADMIN_REQUIRED.
+ * @summary Status of a recomputation
+ */
 export function useCiiControllerRecomputeJob<
   TData = Awaited<ReturnType<typeof ciiControllerRecomputeJob>>,
   TError = ErrorType<ProblemDetails>,
@@ -1129,7 +1553,10 @@ export function useCiiControllerRecomputeJob<
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-/** @summary Status of a recomputation (super_admin) */
+/**
+ * Requires a platform administrator (super_admin); other users and API keys get 403 PLATFORM_ADMIN_REQUIRED.
+ * @summary Status of a recomputation
+ */
 export function useCiiControllerRecomputeJob<
   TData = Awaited<ReturnType<typeof ciiControllerRecomputeJob>>,
   TError = ErrorType<ProblemDetails>,
@@ -1151,7 +1578,10 @@ export function useCiiControllerRecomputeJob<
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-/** @summary Status of a recomputation (super_admin) */
+/**
+ * Requires a platform administrator (super_admin); other users and API keys get 403 PLATFORM_ADMIN_REQUIRED.
+ * @summary Status of a recomputation
+ */
 export function useCiiControllerRecomputeJob<
   TData = Awaited<ReturnType<typeof ciiControllerRecomputeJob>>,
   TError = ErrorType<ProblemDetails>,
@@ -1165,7 +1595,10 @@ export function useCiiControllerRecomputeJob<
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-/** @summary Status of a recomputation (super_admin) */
+/**
+ * Requires a platform administrator (super_admin); other users and API keys get 403 PLATFORM_ADMIN_REQUIRED.
+ * @summary Status of a recomputation
+ */
 export function useCiiControllerRecomputeJob<
   TData = Awaited<ReturnType<typeof ciiControllerRecomputeJob>>,
   TError = ErrorType<ProblemDetails>,

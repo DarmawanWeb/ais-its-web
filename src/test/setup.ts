@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom/vitest';
 import '@/shared/i18n';
 
-import { cleanup } from '@testing-library/react';
+import { cleanup, configure } from '@testing-library/react';
 import { afterAll, afterEach, beforeAll } from 'vitest';
 
 import { resetSessionForTests } from '@/shared/auth/session';
@@ -9,6 +9,10 @@ import { i18n } from '@/shared/i18n';
 
 import { resetAuthMock } from './msw/auth-handlers';
 import { server } from './msw/server';
+
+// Page tests render the real router with lazy pages: under a parallel full run (or a busy CI
+// machine) the first findBy* can take longer than the 1 s default.
+configure({ asyncUtilTimeout: 4_000 });
 
 // jsdom gaps used by Radix UI, cmdk and the shell.
 if (!window.matchMedia) {

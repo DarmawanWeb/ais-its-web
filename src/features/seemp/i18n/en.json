@@ -1,14 +1,292 @@
 {
-  "seemp": {
-    "title": "SEEMP",
-    "description": "Ship Energy Efficiency Management Plan: energy efficiency measure recommendations and their simulated CII impact.",
-    "capabilities": [
-      "SEEMP measure recommendations per vessel",
-      "Reduction factor simulation (seemp:simulate)",
-      "Projected CII per year chart"
-    ]
-  },
   "nav": {
     "seemp": "SEEMP"
+  },
+  "seemp": {
+    "title": "SEEMP",
+    "description": "Ship Energy Efficiency Management Plan: energy-efficiency measures recommended per vessel, a simulation of their CII impact and their costs and benefits.",
+    "tabs": "SEEMP sections",
+    "tab": {
+      "vessels": "Vessels",
+      "measures": "Measure catalog",
+      "scenarios": "Saved scenarios"
+    }
+  },
+  "units": {
+    "cii": "g CO₂/cap·nm"
+  },
+  "grade": {
+    "none": "No grade yet",
+    "aria": "CII grade {{grade}} ({{label}})",
+    "to": "becomes",
+    "up_one": "up {{count}} grade",
+    "up_other": "up {{count}} grades",
+    "down_one": "down {{count}} grade",
+    "down_other": "down {{count}} grades"
+  },
+  "categories": {
+    "technical": "Technical",
+    "operational": "Operational",
+    "fuel": "Fuel",
+    "energy": "Energy source"
+  },
+  "measureNames": {
+    "air_lubrication": {
+      "name": "Hull air cavity lubrication",
+      "description": "A layer of air under the hull lowers the frictional resistance."
+    },
+    "resistance_reduction_devices": {
+      "name": "Resistance reduction devices",
+      "description": "Modified and installed resistance reduction devices on the hull."
+    },
+    "hull_coating": {
+      "name": "Hull coating maintenance",
+      "description": "Recoating and cleaning keep the hull surface smooth."
+    },
+    "power_system_machinery": {
+      "name": "Variable speed power generation",
+      "description": "Generator speed follows the ship's electrical load."
+    },
+    "propulsion_efficiency_devices": {
+      "name": "Propulsion efficiency devices",
+      "description": "Devices around the propeller (e.g. pre-swirl stators) raise the propulsive efficiency."
+    },
+    "waste_heat_recovery": {
+      "name": "Waste heat recovery",
+      "description": "Engine waste heat is turned into useful energy on board."
+    },
+    "lng": {
+      "name": "LNG for main and auxiliary engines",
+      "description": "A switch to LNG with a lower CO₂ conversion factor."
+    },
+    "biofuel": {
+      "name": "Biofuels for main and auxiliary engines",
+      "description": "Biofuels replace fossil fuel."
+    },
+    "solar": {
+      "name": "Solar panels",
+      "description": "Solar energy supplies part of the ship's electricity."
+    },
+    "wind": {
+      "name": "Wind power",
+      "description": "Wind energy supplies part of the ship's electricity."
+    },
+    "cold_ironing": {
+      "name": "Cold ironing (shore power)",
+      "description": "Shore electricity at berth replaces the auxiliary engines in port."
+    },
+    "fuel_cells": {
+      "name": "Fuel cells",
+      "description": "Fuel cells supply the ship's electricity."
+    }
+  },
+  "methodsUsed": "Methods:",
+  "problems": {
+    "notAvailable": {
+      "title": "No baseline CII for this vessel yet",
+      "description": "SEEMP recommendations need the CII of a baseline year (from voyage segments or a manual record). Check the vessel's CII history or enter a manual record for the previous year."
+    },
+    "vesselNotFound": {
+      "title": "Vessel not found",
+      "description": "The emission service knows no vessel with this MMSI. Check the vessel's MMSI."
+    },
+    "forbidden": {
+      "title": "This vessel belongs to another organization",
+      "description": "SEEMP data is private to each organization. Switch to the vessel's organization to see it."
+    },
+    "reductionFactorMissing": {
+      "title": "Reduction factor Z not available",
+      "description": "The required CII of the target year cannot be computed. Pick another target year or ask a platform administrator to add the factor Z."
+    },
+    "measureUnknown": {
+      "title": "Unknown measure",
+      "description": "One of the selected measures is not in the service's catalog. Reload the page and select again."
+    },
+    "incompatible": {
+      "title": "Invalid combination of measures",
+      "description": "Only one fuel switch (LNG or biofuel) can be simulated at a time."
+    },
+    "scenarioNotFound": {
+      "title": "Scenario not found",
+      "description": "This scenario was deleted or belongs to another organization."
+    },
+    "validation": {
+      "title": "Invalid data",
+      "description": "Check the input and try again."
+    }
+  },
+  "reduction": {
+    "operational": "Up to {{p}}% less CII, in proportion to the share of the year at sea",
+    "fuelSwitch": "Fuel switch: C_F {{cf}} t CO₂/t fuel",
+    "coldIroning": "Shore power at berth: less auxiliary fuel in port ({{share}}% potential)",
+    "auxiliary": "Replaces {{share}}% of the auxiliary engine fuel"
+  },
+  "cost": {
+    "loaUpTo": "LOA ≤ {{m}} m",
+    "loaAbove": "LOA > {{m}} m",
+    "wettedSurface": "{{usd}} per m² of wetted surface",
+    "powerBoth": "{{usd}} per kW of main + auxiliary power",
+    "powerMain": "{{usd}} per kW of main engine power",
+    "powerAux": "{{usd}} per kW of auxiliary power"
+  },
+  "catalog": {
+    "title": "Catalog of the 12 SEEMP measures",
+    "description": "Energy-efficiency measures with their reduction model, investment cost and source. Cost per year of a vessel = investment divided by the years until the grade falls to D/E.",
+    "legacyOrder": "Measure {{order}}",
+    "savings": "Savings",
+    "investment": "Investment",
+    "source": "Source",
+    "note": "Potentials and costs come from the MVP model (thesis) and are flagged as needing a citation in the methodology catalog.",
+    "emptyTitle": "The measure catalog is empty",
+    "emptyDescription": "The emission service has no SEEMP measures yet. Contact a platform administrator."
+  },
+  "recommendations": {
+    "title": "Recommended measures",
+    "description": "Measures that keep the vessel at grades A–C in {{year}}, cheapest per year first.",
+    "rank": "Recommendation rank {{rank}}",
+    "reduction": "CII change",
+    "ratingAfter": "Rating after",
+    "costPerYear": "Cost/year",
+    "amortization": "Amortization",
+    "years_one": "{{count}} year",
+    "years_other": "{{count}} years",
+    "select": "Simulate",
+    "emptyTitle": "No measure reaches grades A–C",
+    "emptyDescription": "No single measure brings the vessel to grades A–C. Try a combination of measures in the simulation panel."
+  },
+  "simulation": {
+    "title": "Measure simulation",
+    "description": "Pick measures and run the simulation to see their combined CII, grade, cost and benefit.",
+    "choose": "Measures to simulate",
+    "clear": "Clear",
+    "incompatible": "LNG and biofuels both switch the fuel: pick only one of them.",
+    "run_one": "Simulate {{count}} measure",
+    "run_other": "Simulate {{count}} measures",
+    "result": "Simulation result",
+    "stale": "The selection changed; run the simulation again",
+    "before": "Before ({{year}})",
+    "after": "After ({{year}})",
+    "ratingShort": "rating",
+    "reduction": "CII reduction",
+    "costPerYear": "Cost per year",
+    "amortization": "Amortization",
+    "costPerPercent": "Cost per 1% reduction",
+    "co2Avoided": "CO₂ avoided/year",
+    "co2Unknown": "Baseline CO₂ unknown",
+    "costPerTonne": "Cost per t CO₂",
+    "fuelAfter": "Fuel after the measures",
+    "readOnlyTitle": "Simulation is not available for your role",
+    "readOnlyDescription": "Running and saving simulations needs the seemp:simulate permission (fleet managers or organization admins)."
+  },
+  "scenarios": {
+    "title": "Saved scenarios",
+    "description": "Every simulation scenario of the organization, newest first. Pick up to three scenarios to compare.",
+    "vesselTitle": "Scenarios of this vessel",
+    "vesselDescription": "Simulations saved for this vessel. Pick up to three scenarios to compare.",
+    "tableLabel": "Saved SEEMP scenarios",
+    "name": "Scenario name",
+    "namePlaceholder": "E.g. Technical package 2026",
+    "save": "Save scenario",
+    "saved": "Scenario \"{{name}}\" saved",
+    "saveFailed": "The scenario could not be saved",
+    "measures": "Measures",
+    "vessel": "Vessel",
+    "grade": "Grade",
+    "reduction": "Reduction",
+    "costPerYear": "Cost/year",
+    "years": "Baseline → target",
+    "created": "Created",
+    "actions": "Actions",
+    "view": "View scenario {{name}}",
+    "viewDescription": "Baseline year {{baseline}} → target year {{target}} · saved {{time}}. The result is the simulation at saving time.",
+    "delete": "Delete scenario {{name}}",
+    "deleteTitle": "Delete the scenario?",
+    "deleteDescription": "Scenario \"{{name}}\" is deleted permanently. The action is recorded in the audit log.",
+    "deleteConfirm": "Delete",
+    "deleted": "Scenario \"{{name}}\" deleted",
+    "deleteFailed": "The scenario could not be deleted",
+    "emptyTitle": "No saved scenarios yet",
+    "emptyDescription": "Run a simulation on a vessel's page and save the result as a scenario.",
+    "emptyReadOnly": "Fleet managers create scenarios from a vessel's simulation."
+  },
+  "compare": {
+    "title": "Scenario comparison",
+    "description": "Scenarios side by side; every result is the simulation at its saving time.",
+    "metric": "Metric",
+    "select": "Select to compare",
+    "selectScenario": "Compare {{name}}",
+    "button": "Compare ({{count}})",
+    "hint": "Pick 2–{{max}} scenarios",
+    "selected_one": "{{count}} scenario selected",
+    "selected_other": "{{count}} scenarios selected",
+    "grade": "Grade",
+    "ratingAfter": "Rating after",
+    "reduction": "CII reduction",
+    "best": "largest",
+    "costPerYear": "Cost per year",
+    "cheapest": "cheapest",
+    "costPerPercent": "Cost per 1% reduction",
+    "amortization": "Amortization",
+    "fuelAfter": "Fuel after",
+    "years": "Baseline → target"
+  },
+  "vessels": {
+    "title": "Fleet vessels ({{year}})",
+    "description": "Pick a vessel to see the recommended measures and run simulations. The grade is the current year's CII.",
+    "tableLabel": "Vessels for SEEMP",
+    "openByMmsi": "Open a vessel by MMSI",
+    "open": "Open",
+    "vessel": "Vessel",
+    "grade": "Grade",
+    "rating": "Rating",
+    "action": "Action",
+    "recommendations": "Recommendations",
+    "emptyTitle": "No vessels in this fleet yet",
+    "emptyDescription": "Add vessels in the Vessels module; recommendations become available once their CII is computed.",
+    "noFleetTitle": "The fleet list is not available",
+    "noFleetDescription": "The list needs the cii:read permission. Open a vessel directly with its MMSI.",
+    "attained": "Attained CII",
+    "priority": "Priority"
+  },
+  "vessel": {
+    "title": "Vessel SEEMP",
+    "fallbackTitle": "Vessel MMSI {{mmsi}}",
+    "back": "Back to SEEMP",
+    "invalidTitle": "Invalid MMSI",
+    "invalidDescription": "An MMSI has 9 digits.",
+    "baselineYear": "Baseline year",
+    "targetYear": "Target year",
+    "auto": "Automatic",
+    "cii": "Vessel CII",
+    "openCii": "Open the vessel's CII"
+  },
+  "baseline": {
+    "attained": "Baseline CII ({{year}})",
+    "manual": "Manual record",
+    "required": "Required CII {{year}}",
+    "rating": "Rating before",
+    "ratingDescription": "Record of {{year}}",
+    "grade": "Grade before",
+    "gradeDescription": "Grade of {{year}}, the starting point of the recommendations"
+  },
+  "kpi": {
+    "needAction": "Need a corrective plan",
+    "needActionDescription": "Vessels rated D or E in {{year}}",
+    "measures": "Efficiency measures",
+    "measuresDescription": "Technical, operational, fuel and auxiliary-energy measures",
+    "scenarios": "Saved scenarios",
+    "scenariosDescription": "Simulations saved by the organization",
+    "rated": "Rated vessels",
+    "ratedDescription": "With a CII grade in {{year}}"
+  },
+  "priority": {
+    "corrective": "Corrective plan",
+    "monitor": "Monitor",
+    "compliant": "On track",
+    "noData": "No CII data",
+    "correctiveHint": "Grade D or E: a corrective action plan is required in SEEMP Part III.",
+    "monitorHint": "Grade C: meets the required CII without margin; the required CII tightens every year.",
+    "compliantHint": "Grade A or B: better than required.",
+    "noDataHint": "No counted segments and no manual record for this year yet."
   }
 }

@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Notification Service
  * Alert inbox, alert rules and deliveries (e-mail, Telegram, webhook), transactional e-mail and the realtime WebSocket gateway. Realtime: socket.io at path /ws on the same origin (handshake auth { token }, events of @darmawanweb/ais-its-contracts/realtime).
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import type { TestNotificationResultDtoChannel } from './testNotificationResultDtoChannel';
 import type { TestNotificationResultDtoStatus } from './testNotificationResultDtoStatus';
@@ -15,4 +15,9 @@ export interface TestNotificationResultDto {
   status: TestNotificationResultDtoStatus;
   /** @nullable */
   error: string | null;
+  /**
+   * Webhook tests: the X-AIS-ITS-Key-Id that signed the request — the key of the organization's channel with this target, `deployment` for a channel from before 0.2.0, or `test` (a throwaway key: the target is no channel yet, so the request proves reachability only); null for other channels
+   * @nullable
+   */
+  keyId: string | null;
 }

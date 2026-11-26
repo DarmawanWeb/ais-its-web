@@ -20,7 +20,11 @@ function RootLayout() {
   return (
     <>
       <Outlet />
-      <ScrollRestoration />
+      {/* Every initial load has the key "default": key those by path, so a full page load
+          never restores the scroll position of a different page. */}
+      <ScrollRestoration
+        getKey={(location) => (location.key === 'default' ? location.pathname : location.key)}
+      />
     </>
   );
 }

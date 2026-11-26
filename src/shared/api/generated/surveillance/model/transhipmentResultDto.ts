@@ -3,14 +3,10 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Surveillance Service
  * Illegal-activity analytics on the Detector SDK: illegal transhipment, navstatus anomaly, dark vessels, geofence violations and fishing loitering
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import type { PriorityDistributionDto } from './priorityDistributionDto';
-import type { TranshipmentResultDtoLat } from './transhipmentResultDtoLat';
-import type { TranshipmentResultDtoLon } from './transhipmentResultDtoLon';
 import type { TranshipmentResultDtoSeverity } from './transhipmentResultDtoSeverity';
-import type { TranshipmentResultDtoShip1Name } from './transhipmentResultDtoShip1Name';
-import type { TranshipmentResultDtoShip2Name } from './transhipmentResultDtoShip2Name';
 import type { TranshipmentResultDtoStatus } from './transhipmentResultDtoStatus';
 
 export interface TranshipmentResultDto {
@@ -23,9 +19,9 @@ export interface TranshipmentResultDto {
   /** Larger MMSI of the pair */
   ship2MMSI: number;
   /** @nullable */
-  ship1Name: TranshipmentResultDtoShip1Name;
+  ship1Name: string | null;
   /** @nullable */
-  ship2Name: TranshipmentResultDtoShip2Name;
+  ship2Name: string | null;
   /** Always true: only positive analyses are stored */
   isIllegal: boolean;
   startTimestamp: string;
@@ -48,8 +44,8 @@ export interface TranshipmentResultDto {
    * Midpoint of the two vessels in the middle of the window
    * @nullable
    */
-  lat: TranshipmentResultDtoLat;
+  lat: number | null;
   /** @nullable */
-  lon: TranshipmentResultDtoLon;
+  lon: number | null;
   methodId: string;
 }

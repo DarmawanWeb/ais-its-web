@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Surveillance Service
  * Illegal-activity analytics on the Detector SDK: illegal transhipment, navstatus anomaly, dark vessels, geofence violations and fishing loitering
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import type { EventsControllerListSeverity } from './eventsControllerListSeverity';
 import type { EventsControllerListStatus } from './eventsControllerListStatus';
@@ -31,4 +31,14 @@ export type EventsControllerListParams = {
   status?: EventsControllerListStatus;
   /** Vessel (matches mmsi or relatedMmsi) */
   mmsi?: number;
+  /** Detector lifecycle, apart from the review `status`: `true` = the occurrence is still open (`resolvedAt` null, e.g. still dark), `false` = the detector ended it (e.g. reappeared) */
+  active?: boolean;
+  /** Only events of this zone (geofence, fishing) */
+  zoneId?: string;
+  /**
+   * Vessel search: part of the name of the vessel or the related vessel (case-insensitive), or the leading digits of an MMSI; 2–100 characters once surrounding spaces are trimmed
+   * @minLength 2
+   * @maxLength 100
+   */
+  q?: string;
 };

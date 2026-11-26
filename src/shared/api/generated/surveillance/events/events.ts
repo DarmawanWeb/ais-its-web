@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Surveillance Service
  * Illegal-activity analytics on the Detector SDK: illegal transhipment, navstatus anomaly, dark vessels, geofence violations and fishing loitering
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import { useMutation, useQuery } from '@tanstack/react-query';
 import type {
@@ -22,11 +22,15 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  AnomalyEventDto,
+  DarkEventDto,
   EventsControllerList200,
   EventsControllerListParams,
+  FishingEventDto,
+  GeofenceEventDto,
   ProblemDetails,
   ReviewEventDto,
-  SurveillanceEventDto,
+  TranshipmentEventDto,
 } from '../model';
 
 import { apiClient } from '../../../mutator';
@@ -50,6 +54,7 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
 };
 
 /**
+ * Filters combine with AND; `active` selects by the detector lifecycle (`resolvedAt`), `status` by the review. Each event has `data.messageKey` / `messageParams` for a localized title and, once ended, `resolution.code`.
  * @summary Surveillance events, newest first (tenancy: own vessels unless authority)
  */
 export const eventsControllerList = (
@@ -98,7 +103,10 @@ export type EventsControllerListQueryResult = NonNullable<
 >;
 export type EventsControllerListQueryError = ErrorType<ProblemDetails>;
 
-/** @summary Surveillance events, newest first (tenancy: own vessels unless authority) */
+/**
+ * Filters combine with AND; `active` selects by the detector lifecycle (`resolvedAt`), `status` by the review. Each event has `data.messageKey` / `messageParams` for a localized title and, once ended, `resolution.code`.
+ * @summary Surveillance events, newest first (tenancy: own vessels unless authority)
+ */
 export function useEventsControllerList<
   TData = Awaited<ReturnType<typeof eventsControllerList>>,
   TError = ErrorType<ProblemDetails>,
@@ -120,7 +128,10 @@ export function useEventsControllerList<
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-/** @summary Surveillance events, newest first (tenancy: own vessels unless authority) */
+/**
+ * Filters combine with AND; `active` selects by the detector lifecycle (`resolvedAt`), `status` by the review. Each event has `data.messageKey` / `messageParams` for a localized title and, once ended, `resolution.code`.
+ * @summary Surveillance events, newest first (tenancy: own vessels unless authority)
+ */
 export function useEventsControllerList<
   TData = Awaited<ReturnType<typeof eventsControllerList>>,
   TError = ErrorType<ProblemDetails>,
@@ -142,7 +153,10 @@ export function useEventsControllerList<
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-/** @summary Surveillance events, newest first (tenancy: own vessels unless authority) */
+/**
+ * Filters combine with AND; `active` selects by the detector lifecycle (`resolvedAt`), `status` by the review. Each event has `data.messageKey` / `messageParams` for a localized title and, once ended, `resolution.code`.
+ * @summary Surveillance events, newest first (tenancy: own vessels unless authority)
+ */
 export function useEventsControllerList<
   TData = Awaited<ReturnType<typeof eventsControllerList>>,
   TError = ErrorType<ProblemDetails>,
@@ -156,7 +170,10 @@ export function useEventsControllerList<
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-/** @summary Surveillance events, newest first (tenancy: own vessels unless authority) */
+/**
+ * Filters combine with AND; `active` selects by the detector lifecycle (`resolvedAt`), `status` by the review. Each event has `data.messageKey` / `messageParams` for a localized title and, once ended, `resolution.code`.
+ * @summary Surveillance events, newest first (tenancy: own vessels unless authority)
+ */
 export function useEventsControllerList<
   TData = Awaited<ReturnType<typeof eventsControllerList>>,
   TError = ErrorType<ProblemDetails>,
@@ -187,10 +204,9 @@ export const eventsControllerGet = (
   options?: SecondParameter<typeof apiClient>,
   signal?: AbortSignal,
 ) => {
-  return apiClient<SurveillanceEventDto>(
-    { url: `/api/v2/surveillance/events/${id}`, method: 'GET', signal },
-    options,
-  );
+  return apiClient<
+    TranshipmentEventDto | AnomalyEventDto | DarkEventDto | GeofenceEventDto | FishingEventDto
+  >({ url: `/api/v2/surveillance/events/${id}`, method: 'GET', signal }, options);
 };
 
 export const getEventsControllerGetQueryKey = (id: string) => {
@@ -321,7 +337,9 @@ export const eventsControllerReview = (
   options?: SecondParameter<typeof apiClient>,
   signal?: AbortSignal,
 ) => {
-  return apiClient<SurveillanceEventDto>(
+  return apiClient<
+    TranshipmentEventDto | AnomalyEventDto | DarkEventDto | GeofenceEventDto | FishingEventDto
+  >(
     {
       url: `/api/v2/surveillance/events/${id}`,
       method: 'PATCH',

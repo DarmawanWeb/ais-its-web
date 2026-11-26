@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Geo Service
  * Zones and geofences registry: validated GeoJSON zones, map layers and the GEO zone snapshot stream
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import type { GeoJsonGeometryDto } from './geoJsonGeometryDto';
 import type { UpdateZoneDtoKind } from './updateZoneDtoKind';

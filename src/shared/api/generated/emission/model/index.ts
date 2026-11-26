@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Emission Service
  * Fuel and CO2 per voyage segment, IMO CII (daily/annual, rating A-E), reduction factors, SEEMP recommendations and what-if simulation, IMO DCS summary
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 
 export * from './annualCiiDto';
@@ -11,8 +11,14 @@ export * from './annualManualDto';
 export * from './annualManualDtoGrade';
 export * from './ciiControllerCurrentParams';
 export * from './ciiControllerDailyParams';
+export * from './ciiControllerFleetFuelParams';
 export * from './ciiControllerFleetSummaryParams';
-export * from './ciiControllerSegments200';
+export * from './ciiControllerFleetSummarySort';
+export * from './ciiControllerRecomputeJobs200';
+export * from './ciiControllerRecomputeJobsParams';
+export * from './ciiControllerRecomputeJobsStatus';
+export * from './ciiControllerSegments200One';
+export * from './ciiControllerSegmentsFlag';
 export * from './ciiControllerSegmentsParams';
 export * from './ciiControllerStartRecomputeParams';
 export * from './ciiProjectionDto';
@@ -30,12 +36,17 @@ export * from './cursorPageInfoDto';
 export * from './dailyCiiDto';
 export * from './dailyCiiPointDto';
 export * from './dailyCiiPointDtoCumulativeGrade';
+export * from './dcsControllerFleetParams';
 export * from './dcsControllerSummaryParams';
 export * from './dcsFuelLineDto';
 export * from './dcsSummaryDto';
 export * from './dcsSummaryDtoSource';
 export * from './ddVectorDto';
 export * from './emissionMethodologyDto';
+export * from './fleetDcsDto';
+export * from './fleetDcsMissingDto';
+export * from './fleetFuelDto';
+export * from './fleetFuelPeriodDto';
 export * from './fleetSummaryDto';
 export * from './fleetVesselCiiDto';
 export * from './fleetVesselCiiDtoGrade';
@@ -51,6 +62,9 @@ export * from './methodSummaryDtoDomain';
 export * from './methodSummaryDtoStatus';
 export * from './methodVariableDto';
 export * from './pageMetaDto';
+export * from './previousYearCiiDto';
+export * from './previousYearCiiDtoGrade';
+export * from './previousYearCiiDtoSource';
 export * from './problemDetails';
 export * from './problemDetailsErrorsItem';
 export * from './putAnnualManualDto';
@@ -63,8 +77,10 @@ export * from './recomputeJobDtoStatus';
 export * from './reductionFactorDto';
 export * from './reductionFactorInputDto';
 export * from './reductionFactorListDto';
+export * from './renameScenarioDto';
 export * from './seempControllerListScenarios200';
 export * from './seempControllerListScenariosParams';
+export * from './seempControllerListScenariosSort';
 export * from './seempControllerRecommendationsParams';
 export * from './seempMeasureDto';
 export * from './seempMeasureDtoCategory';
@@ -78,6 +94,9 @@ export * from './seempRecommendationsDto';
 export * from './seempRecommendationsDtoBaselineSource';
 export * from './seempRecommendationsDtoCiiGradeBefore';
 export * from './seempScenarioDto';
+export * from './seempScenarioResultDto';
+export * from './seempScenarioResultDtoBaselineSource';
+export * from './seempScenarioResultDtoCiiGradeBefore';
 export * from './seempSimulationDto';
 export * from './seempSimulationDtoBaselineSource';
 export * from './seempSimulationDtoCiiGradeBefore';
@@ -86,5 +105,6 @@ export * from './segmentDtoMethod';
 export * from './segmentWeatherDto';
 export * from './segmentWeatherDtoSource';
 export * from './simulateDto';
+export * from './vesselIdentityDto';
 export * from './vesselTypeParametersDto';
 export * from './vesselTypeParametersDtoCapacityUnit';

@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Telemetry Service
  * Fuel consumption telemetry: readings ingest over REST and MQTT, device registry, queries and status; publishes fuel.reading.recorded.v1
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 
 export * from './createDeviceDto';
@@ -33,10 +33,13 @@ export * from './methodSummaryDtoStatus';
 export * from './pageMetaDto';
 export * from './problemDetails';
 export * from './problemDetailsErrorsItem';
+export * from './readingsControllerExportCsvBucket';
+export * from './readingsControllerExportCsvParams';
 export * from './readingsControllerIngestParams';
 export * from './readingsControllerIngestSource';
 export * from './readingsControllerSeries200';
 export * from './readingsControllerSeriesBucket';
+export * from './readingsControllerSeriesOrder';
 export * from './readingsControllerSeriesParams';
 export * from './readingsControllerSummaryParams';
 export * from './readingsControllerVessels200';
@@ -47,3 +50,8 @@ export * from './telemetryVesselDtoStatus';
 export * from './updateDeviceDto';
 export * from './updateDeviceDtoKind';
 export * from './updateDeviceDtoStatus';
+export * from './vesselDeviceDto';
+export * from './vesselDeviceDtoKind';
+export * from './vesselDeviceDtoStatus';
+export * from './vesselDevicesControllerList200';
+export * from './vesselDevicesControllerListParams';

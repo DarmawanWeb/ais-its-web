@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Geo Service
  * Zones and geofences registry: validated GeoJSON zones, map layers and the GEO zone snapshot stream
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import type { ZoneSummaryDtoGeometryType } from './zoneSummaryDtoGeometryType';
 import type { ZoneSummaryDtoKind } from './zoneSummaryDtoKind';
@@ -39,6 +39,8 @@ export interface ZoneSummaryDto {
   createdBy: string | null;
   createdAt: string;
   updatedAt: string;
+  /** Version of the zone, the value of the ETag response header of GET /zones/:id and the writes: send it in If-Match on PATCH or DELETE to change exactly this version (412 ZONE_VERSION_CONFLICT otherwise). An opaque strong entity tag, quotes included; it changes with every change of the zone */
+  etag: string;
   geometryType: ZoneSummaryDtoGeometryType;
   /** Number of positions, ring closures included */
   vertexCount: number;

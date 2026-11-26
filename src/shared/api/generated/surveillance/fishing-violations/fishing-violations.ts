@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Surveillance Service
  * Illegal-activity analytics on the Detector SDK: illegal transhipment, navstatus anomaly, dark vessels, geofence violations and fishing loitering
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import { useQuery } from '@tanstack/react-query';
 import type {
@@ -19,6 +19,9 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  FishingViolationHeatmapDto,
+  FishingViolationYearsDto,
+  FishingViolationsControllerHeatmapParams,
   FishingViolationsControllerList200,
   FishingViolationsControllerListParams,
   ProblemDetails,
@@ -169,6 +172,262 @@ export function useFishingViolationsControllerList<
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
   const queryOptions = getFishingViolationsControllerListQueryOptions(params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+/**
+ * @summary Historical illegal-fishing records per year (year facets)
+ */
+export const fishingViolationsControllerYears = (
+  options?: SecondParameter<typeof apiClient>,
+  signal?: AbortSignal,
+) => {
+  return apiClient<FishingViolationYearsDto>(
+    { url: `/api/v2/surveillance/fishing-violations/years`, method: 'GET', signal },
+    options,
+  );
+};
+
+export const getFishingViolationsControllerYearsQueryKey = () => {
+  return [`/api/v2/surveillance/fishing-violations/years`] as const;
+};
+
+export const getFishingViolationsControllerYearsQueryOptions = <
+  TData = Awaited<ReturnType<typeof fishingViolationsControllerYears>>,
+  TError = ErrorType<ProblemDetails>,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<Awaited<ReturnType<typeof fishingViolationsControllerYears>>, TError, TData>
+  >;
+  request?: SecondParameter<typeof apiClient>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getFishingViolationsControllerYearsQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof fishingViolationsControllerYears>>> = ({
+    signal,
+  }) => fishingViolationsControllerYears(requestOptions, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof fishingViolationsControllerYears>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type FishingViolationsControllerYearsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof fishingViolationsControllerYears>>
+>;
+export type FishingViolationsControllerYearsQueryError = ErrorType<ProblemDetails>;
+
+/** @summary Historical illegal-fishing records per year (year facets) */
+export function useFishingViolationsControllerYears<
+  TData = Awaited<ReturnType<typeof fishingViolationsControllerYears>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof fishingViolationsControllerYears>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof fishingViolationsControllerYears>>,
+          TError,
+          Awaited<ReturnType<typeof fishingViolationsControllerYears>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/** @summary Historical illegal-fishing records per year (year facets) */
+export function useFishingViolationsControllerYears<
+  TData = Awaited<ReturnType<typeof fishingViolationsControllerYears>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof fishingViolationsControllerYears>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof fishingViolationsControllerYears>>,
+          TError,
+          Awaited<ReturnType<typeof fishingViolationsControllerYears>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/** @summary Historical illegal-fishing records per year (year facets) */
+export function useFishingViolationsControllerYears<
+  TData = Awaited<ReturnType<typeof fishingViolationsControllerYears>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof fishingViolationsControllerYears>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/** @summary Historical illegal-fishing records per year (year facets) */
+export function useFishingViolationsControllerYears<
+  TData = Awaited<ReturnType<typeof fishingViolationsControllerYears>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof fishingViolationsControllerYears>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getFishingViolationsControllerYearsQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+/**
+ * @summary Historical illegal-fishing records per grid cell (ST_SnapToGrid, cell size in km): the heat layer
+ */
+export const fishingViolationsControllerHeatmap = (
+  params?: FishingViolationsControllerHeatmapParams,
+  options?: SecondParameter<typeof apiClient>,
+  signal?: AbortSignal,
+) => {
+  return apiClient<FishingViolationHeatmapDto>(
+    { url: `/api/v2/surveillance/fishing-violations/heatmap`, method: 'GET', params, signal },
+    options,
+  );
+};
+
+export const getFishingViolationsControllerHeatmapQueryKey = (
+  params?: FishingViolationsControllerHeatmapParams,
+) => {
+  return [`/api/v2/surveillance/fishing-violations/heatmap`, ...(params ? [params] : [])] as const;
+};
+
+export const getFishingViolationsControllerHeatmapQueryOptions = <
+  TData = Awaited<ReturnType<typeof fishingViolationsControllerHeatmap>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: FishingViolationsControllerHeatmapParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof fishingViolationsControllerHeatmap>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getFishingViolationsControllerHeatmapQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof fishingViolationsControllerHeatmap>>> = ({
+    signal,
+  }) => fishingViolationsControllerHeatmap(params, requestOptions, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof fishingViolationsControllerHeatmap>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type FishingViolationsControllerHeatmapQueryResult = NonNullable<
+  Awaited<ReturnType<typeof fishingViolationsControllerHeatmap>>
+>;
+export type FishingViolationsControllerHeatmapQueryError = ErrorType<ProblemDetails>;
+
+/** @summary Historical illegal-fishing records per grid cell (ST_SnapToGrid, cell size in km): the heat layer */
+export function useFishingViolationsControllerHeatmap<
+  TData = Awaited<ReturnType<typeof fishingViolationsControllerHeatmap>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params: undefined | FishingViolationsControllerHeatmapParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof fishingViolationsControllerHeatmap>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof fishingViolationsControllerHeatmap>>,
+          TError,
+          Awaited<ReturnType<typeof fishingViolationsControllerHeatmap>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/** @summary Historical illegal-fishing records per grid cell (ST_SnapToGrid, cell size in km): the heat layer */
+export function useFishingViolationsControllerHeatmap<
+  TData = Awaited<ReturnType<typeof fishingViolationsControllerHeatmap>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: FishingViolationsControllerHeatmapParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof fishingViolationsControllerHeatmap>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof fishingViolationsControllerHeatmap>>,
+          TError,
+          Awaited<ReturnType<typeof fishingViolationsControllerHeatmap>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/** @summary Historical illegal-fishing records per grid cell (ST_SnapToGrid, cell size in km): the heat layer */
+export function useFishingViolationsControllerHeatmap<
+  TData = Awaited<ReturnType<typeof fishingViolationsControllerHeatmap>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: FishingViolationsControllerHeatmapParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof fishingViolationsControllerHeatmap>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/** @summary Historical illegal-fishing records per grid cell (ST_SnapToGrid, cell size in km): the heat layer */
+export function useFishingViolationsControllerHeatmap<
+  TData = Awaited<ReturnType<typeof fishingViolationsControllerHeatmap>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: FishingViolationsControllerHeatmapParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof fishingViolationsControllerHeatmap>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getFishingViolationsControllerHeatmapQueryOptions(params, options);
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
     queryKey: DataTag<QueryKey, TData, TError>;

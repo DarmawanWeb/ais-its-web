@@ -1,14 +1,288 @@
 {
-  "zones": {
-    "title": "Zona & Geofence",
-    "description": "Kelola koridor pipa, area transhipment, daerah tangkapan ikan, kawasan konservasi, area terlarang dan zona khusus.",
-    "capabilities": [
-      "Gambar dan ubah zona di peta (terra-draw)",
-      "Impor GeoJSON (≤ 50.000 titik)",
-      "Zona global dan zona milik organisasi (zone:write)"
-    ]
-  },
   "nav": {
     "zones": "Zona"
+  },
+  "zones": {
+    "title": "Zona & Geofence",
+    "description": "Registri koridor pipa, area transhipment, daerah penangkapan ikan, kawasan konservasi, area terlarang, labuh jangkar, pelabuhan dan zona khusus yang dipakai detektor keselamatan dan pengawasan.",
+    "tableLabel": "Daftar zona",
+    "mapLabel": "Peta zona"
+  },
+  "scope": {
+    "all": "Semua",
+    "global": "Global",
+    "yourOrg": "Organisasi saya",
+    "otherOrg": "Organisasi lain"
+  },
+  "state": {
+    "active": "Aktif",
+    "inactive": "Nonaktif",
+    "alerting": "Alert"
+  },
+  "filters": {
+    "label": "Filter zona",
+    "search": "Cari",
+    "searchPlaceholder": "Nama atau kode zona",
+    "scope": "Cakupan",
+    "kind": "Jenis zona",
+    "allKinds": "Semua jenis",
+    "kindsSelected": "{{value}} jenis dipilih",
+    "clearKinds": "Hapus pilihan jenis",
+    "state": "Status",
+    "allStates": "Semua status",
+    "reset": "Atur ulang filter"
+  },
+  "table": {
+    "name": "Zona",
+    "kind": "Jenis",
+    "scope": "Cakupan",
+    "geometry": "Geometri",
+    "vertices": "{{value}} titik",
+    "buffer": "Buffer",
+    "state": "Status",
+    "actions": "Aksi",
+    "actionsFor": "Aksi untuk {{name}}",
+    "updatedAgo": "diperbarui {{when}}"
+  },
+  "actions": {
+    "create": "Zona baru",
+    "edit": "Ubah zona",
+    "view": "Lihat zona",
+    "import": "Impor GeoJSON",
+    "exportGeojson": "Ekspor GeoJSON",
+    "exportCsv": "Ekspor CSV"
+  },
+  "map": {
+    "legend": "Jenis zona",
+    "count": "{{value}} zona di peta",
+    "truncated": "Peta dipotong oleh batas layanan — persempit filter.",
+    "simplified": "Geometri disederhanakan untuk tampilan"
+  },
+  "empty": {
+    "title": "Belum ada zona",
+    "hintWrite": "Buat zona baru dengan menggambarnya di peta atau impor file GeoJSON.",
+    "hintRead": "Zona dibuat oleh administrator organisasi atau otoritas. Hubungi mereka bila zona yang Anda butuhkan belum ada.",
+    "filteredTitle": "Tidak ada zona yang cocok",
+    "filteredHint": "Ubah kata kunci, jenis atau cakupan, atau atur ulang filter."
+  },
+  "delete": {
+    "title": "Hapus zona {{name}}?",
+    "description": "Zona dihapus permanen dan detektor berhenti memakainya. Tindakan ini tercatat di log audit.",
+    "descriptionGlobal": "Zona global dipakai semua organisasi. Menghapusnya menghentikan deteksi di zona ini untuk semua pengguna. Tindakan ini tercatat di log audit."
+  },
+  "conflict": {
+    "title": "Zona telah diubah orang lain",
+    "descriptionSave": "Versi zona di server lebih baru daripada versi yang Anda buka. Muat ulang untuk melihat perubahan terbaru (perubahan Anda dibuang), atau timpa dengan menyimpan perubahan Anda di atas versi terbaru.",
+    "descriptionDelete": "Zona ini diubah sejak Anda membukanya. Muat ulang untuk meninjau versi terbaru, atau tetap hapus versi terbaru.",
+    "reload": "Muat ulang versi terbaru",
+    "overwrite": "Timpa dengan perubahan saya",
+    "deleteAnyway": "Tetap hapus"
+  },
+  "leave": {
+    "title": "Tinggalkan tanpa menyimpan?",
+    "description": "Perubahan geometri dan properti zona yang belum disimpan akan hilang.",
+    "confirm": "Tinggalkan"
+  },
+  "readOnly": {
+    "noPermission": "Anda dapat melihat zona ini tetapi tidak memiliki izin mengubah zona (zone:write).",
+    "global": "Zona global dipakai semua organisasi dan hanya dapat diubah oleh super admin atau otoritas.",
+    "otherOrg": "Zona ini milik organisasi lain dan hanya dapat diubah oleh organisasi pemiliknya."
+  },
+  "editor": {
+    "title": "Zona",
+    "newTitle": "Zona baru",
+    "mapLabel": "Peta editor zona",
+    "back": "Kembali ke daftar zona",
+    "properties": "Properti zona",
+    "geometry": "Geometri",
+    "collapse": "Ciutkan panel geometri",
+    "expand": "Bentangkan panel geometri",
+    "tools": "Alat gambar",
+    "modes": {
+      "select": "Pilih",
+      "polygon": "Poligon",
+      "linestring": "Garis",
+      "point": "Titik",
+      "static": "Lihat"
+    },
+    "modeHints": {
+      "select": "Klik bentuk untuk memilih; seret titik untuk mengubah, Delete untuk menghapus titik.",
+      "polygon": "Klik untuk menambah titik; klik titik pertama atau tekan Enter untuk menutup poligon, Esc untuk batal.",
+      "linestring": "Klik untuk menambah titik; klik dua kali atau tekan Enter untuk menyelesaikan garis, Esc untuk batal.",
+      "point": "Klik peta untuk menaruh titik. Zona titik membutuhkan buffer lebih dari 0 m.",
+      "static": "Geometri hanya dapat dilihat."
+    },
+    "toolNotAllowed": "{{tool}} tidak diizinkan untuk jenis zona ini",
+    "deleteSelected": "Hapus terpilih",
+    "nothingSelected": "Pilih bentuk dengan alat Pilih terlebih dahulu.",
+    "clear": "Bersihkan",
+    "clearTitle": "Bersihkan semua geometri?",
+    "clearDescription": "Semua bentuk yang digambar dihapus dari editor. Zona tersimpan baru berubah setelah Anda menyimpan.",
+    "addPoint": "Tambah titik dari koordinat",
+    "addPointButton": "Tambah titik",
+    "type": "Jenis geometri",
+    "vertices": "Jumlah titik",
+    "bufferSet": "Buffer {{value}} m diatur otomatis untuk zona titik.",
+    "notFound": "Zona tidak ditemukan",
+    "notFoundHint": "Zona mungkin sudah dihapus atau milik organisasi lain."
+  },
+  "issues": {
+    "GEOMETRY_REQUIRED": "Gambar geometri zona di peta atau impor file GeoJSON.",
+    "ZONE_GEOMETRY_TYPE_NOT_ALLOWED": "Geometri {{type}} tidak diizinkan untuk jenis zona ini (diizinkan: {{allowed}}).",
+    "ZONE_GEOMETRY_TOO_COMPLEX": "Geometri memiliki {{count}} titik; maksimal {{max}}. Sederhanakan geometri.",
+    "ZONE_BUFFER_REQUIRED": "Zona titik membutuhkan buffer lebih dari 0 m.",
+    "ZONE_GEOMETRY_CROSSES_ANTIMERIDIAN": "Ada sisi yang melintasi garis bujur 180°. Pisahkan geometri di garis tersebut (RFC 7946).",
+    "GEOMETRY_OUT_OF_BOUNDS": "Koordinat [{{lon}}, {{lat}}] di luar WGS84 (bujur −180…180, lintang −90…90)."
+  },
+  "problems": {
+    "typeNotAllowed": "Jenis geometri tidak diizinkan untuk jenis zona ini. {{detail}}",
+    "tooComplex": "Geometri terlalu rumit (maksimal 50.000 titik). {{detail}}",
+    "bufferRequired": "Zona titik membutuhkan buffer lebih dari 0 m.",
+    "antimeridian": "Geometri melintasi garis bujur 180°; pisahkan di garis tersebut. {{detail}}",
+    "invalid": "Geometri tidak valid menurut PostGIS: {{detail}}. Perbaiki bentuk (misalnya sisi yang saling memotong) lalu simpan lagi.",
+    "conflict": "Zona telah diubah orang lain sejak Anda membukanya.",
+    "quotaZones": "Kuota zona tercapai ({{used}} dari {{limit}} zona). Hapus zona yang tidak dipakai.",
+    "quotaVertices": "Kuota titik tercapai ({{used}} + {{requested}} dari {{limit}} titik). Sederhanakan atau hapus zona.",
+    "codeTaken": "Kode ini sudah dipakai zona lain pada cakupan yang sama.",
+    "snapshotTooLarge": "Zona terlalu besar untuk dikirim ke detektor ({{size}} KiB, maksimal {{max}} KiB). Sederhanakan geometri.",
+    "notFound": "Zona tidak ditemukan atau sudah dihapus.",
+    "globalForbidden": "Zona global hanya dapat diubah oleh super admin atau otoritas.",
+    "writeForbidden": "Zona ini milik organisasi lain.",
+    "organizationRequired": "Pilih organisasi aktif terlebih dahulu untuk membuat zona organisasi.",
+    "validation": "Data zona tidak valid: {{detail}}",
+    "forbidden": "Anda tidak memiliki izin untuk tindakan ini.",
+    "payloadTooLarge": "Geometri melebihi batas ukuran permintaan (4 MiB).",
+    "generic": "Terjadi kesalahan: {{detail}}"
+  },
+  "toast": {
+    "created": "Zona {{name}} dibuat",
+    "saved": "Perubahan zona {{name}} disimpan",
+    "deleted": "Zona {{name}} dihapus",
+    "saveFailed": "Zona gagal disimpan",
+    "deleteFailed": "Zona gagal dihapus",
+    "noChanges": "Tidak ada perubahan untuk disimpan.",
+    "fixGeometry": "Periksa geometri zona",
+    "reloaded": "Versi terbaru zona dimuat",
+    "exported": "GeoJSON diunduh: {{count}} zona",
+    "exportTruncated": "Dibatasi oleh batas layanan; persempit filter untuk ekspor lengkap.",
+    "exportFailed": "Ekspor GeoJSON gagal",
+    "csvExported": "CSV diunduh: {{count}} zona"
+  },
+  "import": {
+    "title": "Impor GeoJSON",
+    "description": "Geometri, Feature atau FeatureCollection dalam WGS84 [bujur, lintang]. Beberapa feature digabung menjadi satu zona.",
+    "drop": "Tarik file .geojson ke sini atau klik untuk memilih",
+    "dropNow": "Lepaskan file untuk memeriksa",
+    "dropLabel": "Area unggah file GeoJSON",
+    "chooseFile": "Pilih file GeoJSON",
+    "hint": "Maksimal {{size}} MiB · 50.000 titik",
+    "paste": "Atau tempel teks GeoJSON",
+    "check": "Periksa",
+    "pasted": "Teks tempelan",
+    "geometry": "Geometri",
+    "features": "Feature",
+    "vertices": "Titik",
+    "altitudeDropped": "Nilai ketinggian dihapus — zona bersifat 2-D.",
+    "merged": "Beberapa feature digabung menjadi satu geometri.",
+    "open": "Buka di editor",
+    "loaded": "GeoJSON dimuat ({{vertices}} titik). Periksa lalu simpan.",
+    "errors": {
+      "too_large": {
+        "title": "File terlalu besar",
+        "hint": "Maksimal 4 MiB. Sederhanakan geometri (misalnya di QGIS) lalu coba lagi."
+      },
+      "invalid_json": {
+        "title": "Bukan JSON yang valid",
+        "hint": "Periksa tanda kurung dan koma. {{detail}}"
+      },
+      "not_geojson": {
+        "title": "Bukan GeoJSON",
+        "hint": "File harus berupa Geometry, Feature atau FeatureCollection (RFC 7946)."
+      },
+      "empty": {
+        "title": "Tidak ada geometri",
+        "hint": "File tidak memuat feature dengan geometri."
+      },
+      "invalid_geometry": {
+        "title": "Struktur geometri tidak valid",
+        "hint": "{{detail}} — misalnya cincin poligon harus tertutup (titik pertama = titik terakhir)."
+      },
+      "out_of_bounds": {
+        "title": "Koordinat di luar WGS84",
+        "hint": "Posisi {{detail}} di luar bujur −180…180 / lintang −90…90."
+      },
+      "swapped_coordinates": {
+        "title": "Lintang dan bujur tertukar?",
+        "hint": "Posisi {{detail}} hanya valid bila ditukar. GeoJSON memakai urutan [bujur, lintang]."
+      },
+      "nested_collection": {
+        "title": "GeometryCollection bersarang",
+        "hint": "GeometryCollection di dalam GeometryCollection tidak didukung."
+      }
+    }
+  },
+  "form": {
+    "label": "Properti zona",
+    "readOnlyTitle": "Hanya baca",
+    "name": "Nama",
+    "code": "Kode",
+    "codeHint": "Slug unik (huruf kecil, angka, . _ -); dibuat dari nama dan tidak dapat diubah setelah disimpan.",
+    "codeImmutable": "Kode zona tidak dapat diubah.",
+    "kind": "Jenis zona",
+    "kindHint": "Geometri: {{types}}.",
+    "kindUse": {
+      "pipeline": "Dipakai EWS (jarak ke pipa).",
+      "transhipment_area": "Dipakai detektor transhipment.",
+      "fishing_ground": "Dipakai detektor penangkapan ikan.",
+      "mpa": "Dipakai detektor geofence.",
+      "shallow_water": "Untuk detektor kandas (mendatang).",
+      "restricted": "Dipakai detektor geofence dan penangkapan ikan.",
+      "anchorage": "Dipakai aturan pelabuhan detektor kapal gelap.",
+      "port": "Dipakai aturan pelabuhan detektor kapal gelap.",
+      "tss_lane": "Untuk detektor TSS (mendatang).",
+      "custom": "Dipakai detektor geofence."
+    },
+    "bufferM": "Buffer",
+    "bufferHint": "Area efek di sekitar geometri (0–100.000 m); zona titik adalah lingkaran seluas buffer.",
+    "active": "Aktif",
+    "activeHint": "Zona nonaktif disimpan tetapi diabaikan detektor dan peta tile.",
+    "alertOnEnter": "Alert saat dimasuki",
+    "alertHint": "Detektor geofence memicu alert saat kapal memasuki zona ini.",
+    "alertHintUnused": "Detektor geofence hanya memantau zona terlarang, konservasi dan khusus.",
+    "global": "Zona global",
+    "globalHint": "Dipakai semua organisasi. Hanya super admin dan otoritas yang dapat mengubahnya.",
+    "propertiesTitle": "Properti jenis zona",
+    "properties": {
+      "operator": "Operator",
+      "authority": "Otoritas",
+      "legalBasis": "Dasar hukum",
+      "unlocode": "UN/LOCODE",
+      "maxDraughtM": "Draft maksimum (m)",
+      "directionDeg": "Arah alur (°)",
+      "maxSpeedKn": "Kecepatan maksimum (kn)",
+      "depthM": "Kedalaman (m)",
+      "note": "Catatan"
+    },
+    "otherProperties": "Properti lain tetap disimpan: {{keys}}.",
+    "source": "Sumber geometri (provenans)",
+    "sourcePlaceholder": "Dataset, survei atau peraturan asal geometri",
+    "sourceHint": "Wajib dikutip untuk zona resmi (metodologi §17); kosong berarti tidak diketahui.",
+    "createdBy": "Dibuat oleh",
+    "createdByUser": "Pengguna",
+    "createdBySeed": "Data awal (seed)",
+    "createdAt": "Dibuat",
+    "updatedAt": "Diperbarui",
+    "version": "Versi (ETag)",
+    "create": "Buat zona",
+    "save": "Simpan perubahan",
+    "errors": {
+      "required": "Wajib diisi.",
+      "tooLong": "Terlalu panjang.",
+      "codePattern": "Gunakan huruf kecil, angka, titik, garis bawah atau tanda hubung (maks. 64, diawali huruf/angka).",
+      "number": "Masukkan angka.",
+      "bufferRange": "Buffer antara 0 dan 100.000 m.",
+      "unlocode": "UN/LOCODE terdiri dari 5 karakter, misalnya IDBTM.",
+      "direction": "Arah antara 0 dan 359°."
+    }
   }
 }

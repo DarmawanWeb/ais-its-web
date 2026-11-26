@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Notification Service
  * Alert inbox, alert rules and deliveries (e-mail, Telegram, webhook), transactional e-mail and the realtime WebSocket gateway. Realtime: socket.io at path /ws on the same origin (handshake auth { token }, events of @darmawanweb/ais-its-contracts/realtime).
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import { useMutation, useQuery } from '@tanstack/react-query';
 import type {
@@ -23,7 +23,9 @@ import type {
 
 import type {
   DeliveryPageDto,
+  DeliverySummaryDto,
   NotificationsControllerDeliveriesParams,
+  NotificationsControllerDeliverySummaryParams,
   ProblemDetails,
   TestNotificationDto,
   TestNotificationResultDto,
@@ -142,6 +144,173 @@ export const useNotificationsControllerTest = <
 > => {
   return useMutation(getNotificationsControllerTestMutationOptions(options), queryClient);
 };
+/**
+ * Deliveries planned within [from, to] (default: the last 30 days) by status, the latest sent delivery and the success rate sent / (sent + failed); `ruleId` narrows it to one rule.
+ * @summary Delivery counts of the alert rules of the organization
+ */
+export const notificationsControllerDeliverySummary = (
+  params?: NotificationsControllerDeliverySummaryParams,
+  options?: SecondParameter<typeof apiClient>,
+  signal?: AbortSignal,
+) => {
+  return apiClient<DeliverySummaryDto>(
+    { url: `/api/v2/notifications/deliveries/summary`, method: 'GET', params, signal },
+    options,
+  );
+};
+
+export const getNotificationsControllerDeliverySummaryQueryKey = (
+  params?: NotificationsControllerDeliverySummaryParams,
+) => {
+  return [`/api/v2/notifications/deliveries/summary`, ...(params ? [params] : [])] as const;
+};
+
+export const getNotificationsControllerDeliverySummaryQueryOptions = <
+  TData = Awaited<ReturnType<typeof notificationsControllerDeliverySummary>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: NotificationsControllerDeliverySummaryParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof notificationsControllerDeliverySummary>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getNotificationsControllerDeliverySummaryQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof notificationsControllerDeliverySummary>>
+  > = ({ signal }) => notificationsControllerDeliverySummary(params, requestOptions, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof notificationsControllerDeliverySummary>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type NotificationsControllerDeliverySummaryQueryResult = NonNullable<
+  Awaited<ReturnType<typeof notificationsControllerDeliverySummary>>
+>;
+export type NotificationsControllerDeliverySummaryQueryError = ErrorType<ProblemDetails>;
+
+/**
+ * Deliveries planned within [from, to] (default: the last 30 days) by status, the latest sent delivery and the success rate sent / (sent + failed); `ruleId` narrows it to one rule.
+ * @summary Delivery counts of the alert rules of the organization
+ */
+export function useNotificationsControllerDeliverySummary<
+  TData = Awaited<ReturnType<typeof notificationsControllerDeliverySummary>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params: undefined | NotificationsControllerDeliverySummaryParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof notificationsControllerDeliverySummary>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof notificationsControllerDeliverySummary>>,
+          TError,
+          Awaited<ReturnType<typeof notificationsControllerDeliverySummary>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Deliveries planned within [from, to] (default: the last 30 days) by status, the latest sent delivery and the success rate sent / (sent + failed); `ruleId` narrows it to one rule.
+ * @summary Delivery counts of the alert rules of the organization
+ */
+export function useNotificationsControllerDeliverySummary<
+  TData = Awaited<ReturnType<typeof notificationsControllerDeliverySummary>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: NotificationsControllerDeliverySummaryParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof notificationsControllerDeliverySummary>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof notificationsControllerDeliverySummary>>,
+          TError,
+          Awaited<ReturnType<typeof notificationsControllerDeliverySummary>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Deliveries planned within [from, to] (default: the last 30 days) by status, the latest sent delivery and the success rate sent / (sent + failed); `ruleId` narrows it to one rule.
+ * @summary Delivery counts of the alert rules of the organization
+ */
+export function useNotificationsControllerDeliverySummary<
+  TData = Awaited<ReturnType<typeof notificationsControllerDeliverySummary>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: NotificationsControllerDeliverySummaryParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof notificationsControllerDeliverySummary>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Deliveries planned within [from, to] (default: the last 30 days) by status, the latest sent delivery and the success rate sent / (sent + failed); `ruleId` narrows it to one rule.
+ * @summary Delivery counts of the alert rules of the organization
+ */
+export function useNotificationsControllerDeliverySummary<
+  TData = Awaited<ReturnType<typeof notificationsControllerDeliverySummary>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: NotificationsControllerDeliverySummaryParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof notificationsControllerDeliverySummary>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getNotificationsControllerDeliverySummaryQueryOptions(params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
 /**
  * @summary Deliveries of the alert rules of the organization, newest first
  */

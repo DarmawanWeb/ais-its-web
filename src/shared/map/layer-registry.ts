@@ -43,6 +43,11 @@ export interface MapLibreLayerRegistration {
 export class MapLayerRegistry {
   private readonly deck = new Map<string, DeckLayerRegistration>();
   private readonly maplibre = new Map<string, MapLibreLayerRegistration>();
+  /** Registrations currently added to the style (what `maplibre` held when last applied). */
+  private readonly applied = new Map<string, MapLibreLayerRegistration>();
+  /** Ids changed while the style was busy; applied when the map is idle. */
+  private readonly pending = new Set<string>();
+  private waitingForIdle = false;
   private frame: number | null = null;
   private readonly map: MapLibreMap;
   private readonly overlay: MapboxOverlay;
@@ -55,9 +60,12 @@ export class MapLayerRegistry {
 
   dispose(): void {
     this.map.off('style.load', this.reapplyMapLibre);
+    this.map.off('idle', this.flushPending);
     if (this.frame !== null) cancelAnimationFrame(this.frame);
     this.deck.clear();
     this.maplibre.clear();
+    this.applied.clear();
+    this.pending.clear();
   }
 
   setDeckLayers(registration: DeckLayerRegistration): void {
@@ -106,33 +114,67 @@ export class MapLayerRegistry {
   }
 
   setMapLibreLayers(registration: MapLibreLayerRegistration): void {
-    const previous = this.maplibre.get(registration.id);
     this.maplibre.set(registration.id, registration);
-    if (!this.map.isStyleLoaded()) return; // added on style.load
-    const source = this.map.getSource(registration.id);
-    const sameLayers =
-      previous &&
-      previous.layers === registration.layers &&
-      previous.beforeId === registration.beforeId;
-    if (
-      source &&
-      sameLayers &&
-      registration.source.type === 'geojson' &&
-      previous?.source !== registration.source
-    ) {
-      // Data-only update: no flicker.
-      void (source as GeoJSONSource).setData(registration.source.data);
-      return;
-    }
-    if (previous) this.removeFromStyle(previous);
-    this.addToStyle(registration);
+    this.syncWhenReady(registration.id);
   }
 
   removeMapLibreLayers(id: string): void {
+    if (!this.maplibre.delete(id) && !this.applied.has(id)) return;
+    this.syncWhenReady(id);
+  }
+
+  /**
+   * `isStyleLoaded()` is false until the style is parsed and also while any source still loads
+   * tiles: a change made then is applied when the map is idle (or on the next `style.load`),
+   * never dropped.
+   */
+  private syncWhenReady(id: string): void {
+    if (this.map.isStyleLoaded()) {
+      this.pending.delete(id);
+      this.sync(id);
+      return;
+    }
+    this.pending.add(id);
+    if (this.waitingForIdle) return;
+    this.waitingForIdle = true;
+    this.map.once('idle', this.flushPending);
+  }
+
+  private readonly flushPending = (): void => {
+    this.waitingForIdle = false;
+    const ids = [...this.pending];
+    this.pending.clear();
+    for (const id of ids) this.syncWhenReady(id);
+  };
+
+  /** Brings the style in line with the registration of `id` (added, updated or removed). */
+  private sync(id: string): void {
     const registration = this.maplibre.get(id);
-    if (!registration) return;
-    this.maplibre.delete(id);
-    if (this.map.isStyleLoaded()) this.removeFromStyle(registration);
+    const previous = this.applied.get(id);
+    try {
+      if (!registration) {
+        if (previous) this.removeFromStyle(previous);
+        this.applied.delete(id);
+        return;
+      }
+      const source = this.map.getSource(id);
+      const sameLayers =
+        previous &&
+        previous.layers === registration.layers &&
+        previous.beforeId === registration.beforeId;
+      if (source && sameLayers && previous.source === registration.source) {
+        this.addToStyle(registration); // already applied; re-adds missing layers only
+      } else if (source && sameLayers && registration.source.type === 'geojson') {
+        // Data-only update: no flicker.
+        void (source as GeoJSONSource).setData(registration.source.data);
+      } else {
+        if (previous) this.removeFromStyle(previous);
+        this.addToStyle(registration);
+      }
+      this.applied.set(id, registration);
+    } catch (error) {
+      console.error(`[map] could not apply layers of "${id}"`, error);
+    }
   }
 
   private addToStyle(registration: MapLibreLayerRegistration): void {
@@ -155,10 +197,14 @@ export class MapLayerRegistry {
     if (this.map.getSource(registration.id)) this.map.removeSource(registration.id);
   }
 
+  /** A new basemap style has none of the registered sources: add every registration again. */
   private readonly reapplyMapLibre = (): void => {
+    this.applied.clear();
+    this.pending.clear();
     for (const registration of this.maplibre.values()) {
       try {
         this.addToStyle(registration);
+        this.applied.set(registration.id, registration);
       } catch (error) {
         console.error(`[map] could not add layers of "${registration.id}"`, error);
       }

@@ -3,17 +3,20 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Emission Service
  * Fuel and CO2 per voyage segment, IMO CII (daily/annual, rating A-E), reduction factors, SEEMP recommendations and what-if simulation, IMO DCS summary
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import type { CostRangeDto } from './costRangeDto';
 import type { FuelAfterDto } from './fuelAfterDto';
 import type { RatedCiiDto } from './ratedCiiDto';
 import type { SeempSimulationDtoBaselineSource } from './seempSimulationDtoBaselineSource';
 import type { SeempSimulationDtoCiiGradeBefore } from './seempSimulationDtoCiiGradeBefore';
+import type { VesselIdentityDto } from './vesselIdentityDto';
 
 export interface SeempSimulationDto {
   mmsi: number;
   vesselId: string;
+  /** Identity of the vessel (FLEET projection) */
+  vessel: VesselIdentityDto;
   /** Year of the baseline CII figures */
   baselineYear: number;
   baselineSource: SeempSimulationDtoBaselineSource;
@@ -27,6 +30,8 @@ export interface SeempSimulationDto {
   ciiRatingBefore: number | null;
   /** @nullable */
   ciiGradeBefore: SeempSimulationDtoCiiGradeBefore;
+  /** CO2 of the baseline year, t (a manual record without CO2: its fuel × C_F of the current fuel) */
+  baselineCo2Ton: number;
   /** Measures applied, in legacy order */
   measureCodes: string[];
   before: RatedCiiDto;
@@ -39,6 +44,13 @@ export interface SeempSimulationDto {
   costUsdPerYear: number;
   costRangeUsdPerYear: CostRangeDto;
   cost: string;
+  /** CO2 avoided per year at the baseline distance, t: baselineCo2Ton × reductionPercent / 100 (negative when the attained CII rises) */
+  co2AvoidedTon: number;
+  /**
+   * costUsdPerYear / co2AvoidedTon, USD per tonne of CO2 avoided; null when nothing is avoided
+   * @nullable
+   */
+  costPerTonneUsd: number | null;
   /** Methodology catalog ids behind the figure */
   methodIds: string[];
 }

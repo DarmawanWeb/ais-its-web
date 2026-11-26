@@ -1,15 +1,176 @@
 {
-  "alerts": {
-    "title": "Alert",
-    "description": "Kotak masuk alert keselamatan dan pengawasan secara realtime: konfirmasi, selesaikan dan telusuri kejadian.",
-    "capabilities": [
-      "Daftar alert dengan filter status, tipe, domain, tingkat dan kapal (cursor pagination)",
-      "Konfirmasi (ack) dan penyelesaian alert dengan izin alert:ack",
-      "Notifikasi realtime alert:raised / alert:updated pada lonceng di top bar (slot topbar.alerts)",
-      "Ringkasan alert terbuka per tingkat, tipe dan domain"
-    ]
-  },
   "nav": {
     "alerts": "Alert"
+  },
+  "alerts": {
+    "title": "Alert",
+    "description": "Kotak masuk alert keselamatan dan pengawasan secara realtime. Terima, selesaikan dan telusuri setiap kejadian beserta sumber metodenya."
+  },
+  "page": {
+    "inbox": "Kotak masuk alert",
+    "live": "Realtime",
+    "offline": "Tidak realtime",
+    "missed": "{{count}} alert baru masuk di halaman pertama.",
+    "backToFirst": "Ke halaman pertama"
+  },
+  "summary": {
+    "open": "Alert terbuka",
+    "byDomain": "Keselamatan {{safety}} · Pengawasan {{surveillance}}",
+    "unavailable": "Ringkasan belum tersedia",
+    "critical": "Kritis",
+    "criticalHint": "Perlu tindakan segera",
+    "warning": "Peringatan",
+    "warningHint": "Info terbuka: {{count}}"
+  },
+  "filters": {
+    "label": "Filter alert",
+    "status": "Status",
+    "statuses": {
+      "open": "Terbuka",
+      "acknowledged": "Diterima",
+      "resolved": "Selesai",
+      "all": "Semua"
+    },
+    "reset": "Atur ulang filter",
+    "severity": "Tingkat",
+    "allSeverities": "Semua tingkat",
+    "domain": "Domain",
+    "allDomains": "Semua domain",
+    "type": "Tipe alert",
+    "allTypes": "Semua tipe",
+    "mmsi": "MMSI kapal",
+    "mmsiPlaceholder": "MMSI kapal…",
+    "range": "Rentang waktu kejadian"
+  },
+  "table": {
+    "severity": "Tingkat",
+    "new": "Baru",
+    "alert": "Alert",
+    "vessel": "Kapal (MMSI)",
+    "status": "Status",
+    "occurrences": "Kejadian",
+    "occurrencesHint": "Jumlah kejadian yang digabung (kunci dedup yang sama selama belum selesai)",
+    "lastOccurred": "Terakhir",
+    "actions": "Aksi"
+  },
+  "status": {
+    "open": "Terbuka",
+    "acknowledged": "Diterima",
+    "resolved": "Selesai"
+  },
+  "empty": {
+    "title": "Tidak ada alert terbuka",
+    "description": "Semua kondisi terpantau aman. Alert baru akan muncul di sini secara realtime.",
+    "filteredTitle": "Tidak ada alert yang cocok",
+    "filteredDescription": "Ubah atau atur ulang filter untuk melihat alert lainnya."
+  },
+  "actions": {
+    "acknowledge": "Terima",
+    "resolve": "Selesaikan",
+    "acknowledged": "Alert diterima",
+    "resolved": "Alert diselesaikan",
+    "failed": "Aksi alert gagal",
+    "resolveConfirmTitle": "Selesaikan alert ini?",
+    "resolveConfirmDescription": "\"{{title}}\" akan ditandai selesai untuk semua pengguna organisasi Anda. Kejadian baru dengan kondisi yang sama akan membuka alert baru."
+  },
+  "errors": {
+    "alreadyResolved": "Alert ini sudah diselesaikan sehingga tidak dapat diterima lagi.",
+    "notFound": "Alert tidak ditemukan atau tidak termasuk cakupan organisasi Anda.",
+    "forbidden": "Anda tidak memiliki izin untuk mengubah status alert.",
+    "rateLimited": "Terlalu banyak permintaan. Coba lagi sebentar lagi.",
+    "network": "Server tidak dapat dihubungi. Periksa koneksi lalu coba lagi.",
+    "generic": "Terjadi kesalahan. Coba lagi."
+  },
+  "export": {
+    "empty": "Tidak ada alert untuk diekspor dengan filter ini.",
+    "done": "{{count}} alert diekspor ke CSV",
+    "truncated": "Hanya {{count}} alert pertama yang diekspor. Persempit filter untuk mengekspor sisanya.",
+    "failed": "Ekspor CSV gagal. Coba lagi."
+  },
+  "detail": {
+    "title": "Detail alert",
+    "loading": "Memuat detail alert…",
+    "facts": "Ringkasan",
+    "vessel": "Kapal",
+    "openVessel": "Buka kapal",
+    "relatedVessel": "Kapal terkait",
+    "type": "Tipe",
+    "method": "Metode",
+    "position": "Lokasi",
+    "occurrences": "Jumlah kejadian",
+    "source": "Sumber layanan",
+    "location": "Lokasi kejadian",
+    "locationMap": "Peta lokasi alert {{title}}",
+    "openMap": "Buka di peta live",
+    "data": "Data detektor",
+    "you": "Anda",
+    "by": "oleh {{who}}",
+    "yes": "Ya",
+    "no": "Tidak",
+    "dataKeys": {
+      "ewsStatus": "Status EWS",
+      "pipelineDistanceM": "Jarak ke pipa",
+      "distanceM": "Jarak",
+      "risk": "Pita risiko",
+      "cpaNm": "CPA",
+      "tcpaMin": "TCPA",
+      "rangeNm": "Jarak antarkapal",
+      "sog": "Kecepatan (SOG)",
+      "sogKn": "Kecepatan (SOG)",
+      "relatedMmsi": "MMSI terkait",
+      "otherMmsi": "Kapal lain",
+      "gapMinutes": "Lama tanpa sinyal",
+      "accuracy": "Akurasi",
+      "thresholds": "Ambang aktif"
+    },
+    "timeline": {
+      "title": "Linimasa kejadian",
+      "raised": "Alert muncul",
+      "recurred": "Kejadian terakhir ({{count}}×)",
+      "acknowledged": "Diterima",
+      "resolved": "Diselesaikan"
+    },
+    "deliveries": {
+      "title": "Pengiriman notifikasi",
+      "rules": "Aturan alert",
+      "empty": "Belum ada pengiriman",
+      "emptyHint": "Tidak ada aturan alert organisasi Anda yang cocok dengan alert ini.",
+      "attempts": "{{count}} percobaan",
+      "channels": {
+        "email": "E-mail",
+        "telegram": "Telegram",
+        "webhook": "Webhook"
+      },
+      "status": {
+        "pending": "Menunggu",
+        "sending": "Mengirim",
+        "queued": "Diantrekan",
+        "sent": "Terkirim",
+        "failed": "Gagal"
+      }
+    }
+  },
+  "bell": {
+    "label": "Alert",
+    "labelCount": "Alert, {{count}} terbuka",
+    "title": "Alert terbaru",
+    "openSummary": "{{count}} alert terbuka",
+    "summaryUnavailable": "Jumlah alert belum tersedia",
+    "critical": "kritis",
+    "warning": "peringatan",
+    "latest": "Alert terbaru",
+    "listUnavailable": "Daftar alert belum dapat dimuat.",
+    "empty": "Belum ada alert",
+    "emptyHint": "Alert realtime dari detektor keselamatan dan pengawasan akan tampil di sini.",
+    "view": "Lihat"
+  },
+  "commands": {
+    "openCritical": "Buka alert kritis"
+  },
+  "problems": {
+    "validation": "Filter tidak dapat diproses",
+    "validationDetail": "Periksa rentang waktu dan MMSI pada filter, lalu coba lagi.",
+    "notFound": "Alert tidak ditemukan",
+    "notFoundDetail": "Alert ini tidak ada atau tidak termasuk cakupan organisasi Anda."
   }
 }

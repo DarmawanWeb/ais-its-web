@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Fleet Service
  * Vessel master data and reference data (vessel types, fuels, engines, fuel formulas, ports, registry); publishes VesselSnapshotV1 to the FLEET stream
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import type { CreateEngineDtoCode } from './createEngineDtoCode';
 import type { CreateEngineDtoKind } from './createEngineDtoKind';
@@ -31,4 +31,9 @@ export interface CreateEngineDto {
    * @nullable
    */
   source?: CreateEngineDtoSource;
+  /**
+   * Ids of the methodology catalog's references (docs/references/references.json, contracts REFERENCES) behind the values, next to the free-text `source`; unique, at most 20, each a reference of the catalog this service ships (else 400 VALIDATION_FAILED). [] clears them, null is refused.
+   * @maxItems 20
+   */
+  referenceIds?: string[];
 }

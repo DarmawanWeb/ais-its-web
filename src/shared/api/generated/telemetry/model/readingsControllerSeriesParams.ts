@@ -3,9 +3,10 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Telemetry Service
  * Fuel consumption telemetry: readings ingest over REST and MQTT, device registry, queries and status; publishes fuel.reading.recorded.v1
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import type { ReadingsControllerSeriesBucket } from './readingsControllerSeriesBucket';
+import type { ReadingsControllerSeriesOrder } from './readingsControllerSeriesOrder';
 
 export type ReadingsControllerSeriesParams = {
   /**
@@ -24,4 +25,6 @@ export type ReadingsControllerSeriesParams = {
   to?: string;
   /** `raw` readings (default range 24 h, at most 31 d), `1h` hourly sums (7 d, ≤ 366 d) or `1d` daily sums (365 d, ≤ 5 y); buckets are UTC and come from the continuous aggregates fuel_hourly / fuel_daily */
   bucket?: ReadingsControllerSeriesBucket;
+  /** `asc` oldest first (default) or `desc` newest first, e.g. the newest readings with `order=desc&limit=20`; the cursor continues in its own order (a cursor of the other order is a 400) */
+  order?: ReadingsControllerSeriesOrder;
 };

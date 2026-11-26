@@ -3,15 +3,17 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Safety Service
  * Navigational safety analytics (pipeline Early Warning System, collision risk CPA/TCPA) built on the Detector SDK
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 
 export * from './closestEncounterDto';
+export * from './cpaPositionsDto';
 export * from './cursorPageInfoDto';
 export * from './detectorDescriptionDto';
 export * from './detectorDescriptionDtoConfig';
 export * from './detectorDescriptionDtoDomain';
 export * from './encounterDto';
+export * from './encounterDtoMessageParams';
 export * from './encounterDtoPeakRisk';
 export * from './encounterPositionsDto';
 export * from './encounterSampleDto';
@@ -23,12 +25,14 @@ export * from './eventsControllerList200';
 export * from './eventsControllerListParams';
 export * from './eventsControllerListSeverity';
 export * from './eventsControllerListStatus';
+export * from './latLonDto';
 export * from './localizedTextDto';
 export * from './methodologyDto';
 export * from './methodReferenceDto';
 export * from './methodSummaryDto';
 export * from './methodSummaryDtoDomain';
 export * from './methodSummaryDtoStatus';
+export * from './pipelineIdentityDto';
 export * from './problemDetails';
 export * from './problemDetailsErrorsItem';
 export * from './safetyEventDto';

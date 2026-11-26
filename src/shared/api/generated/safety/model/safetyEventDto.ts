@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Safety Service
  * Navigational safety analytics (pipeline Early Warning System, collision risk CPA/TCPA) built on the Detector SDK
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import type { SafetyEventDtoCurrentSeverity } from './safetyEventDtoCurrentSeverity';
 import type { SafetyEventDtoData } from './safetyEventDtoData';
@@ -11,6 +11,7 @@ import type { SafetyEventDtoDomain } from './safetyEventDtoDomain';
 import type { SafetyEventDtoResolution } from './safetyEventDtoResolution';
 import type { SafetyEventDtoSeverity } from './safetyEventDtoSeverity';
 import type { SafetyEventDtoStatus } from './safetyEventDtoStatus';
+import type { SafetyVesselIdentityDto } from './safetyVesselIdentityDto';
 
 export interface SafetyEventDto {
   /** Event id = alert id */
@@ -34,6 +35,16 @@ export interface SafetyEventDto {
    */
   relatedMmsi: number | null;
   /**
+   * Fleet identity of `mmsi` (shared across tenants, spec §8.5); `null` for an unregistered MMSI
+   * @nullable
+   */
+  vessel: SafetyVesselIdentityDto | null;
+  /**
+   * Fleet identity of `relatedMmsi`; `null` without a related vessel or for an unregistered MMSI
+   * @nullable
+   */
+  relatedVessel: SafetyVesselIdentityDto | null;
+  /**
    * Zone (EWS: the pipeline)
    * @nullable
    */
@@ -47,7 +58,7 @@ export interface SafetyEventDto {
   /** Methodology catalog id of the rule (spec §17) */
   methodId: string;
   dedupKey: string;
-  /** Detector specific details (distances, thresholds, CPA/TCPA, …) */
+  /** Detector specific details (distances, thresholds, CPA/TCPA, …) and the localizable text of the alert: `messageKey` (stable key, README "Localizable texts") with `messageParams` (absent on events stored before 0.2.0) */
   data: SafetyEventDtoData;
   /** When the occurrence opened (event time; an escalation keeps the opening of the alert it supersedes) */
   openedAt: string;
@@ -59,7 +70,7 @@ export interface SafetyEventDto {
    */
   resolvedAt: string | null;
   /**
-   * Why and how it ended (`reason`, last measurements)
+   * Why and how it ended: `reason` (English), the last measurements and the localizable text `messageKey` / `messageParams` (absent on events resolved before 0.2.0)
    * @nullable
    */
   resolution: SafetyEventDtoResolution;

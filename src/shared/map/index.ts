@@ -7,7 +7,7 @@ export {
   OSM_ATTRIBUTION,
   resolveBasemap,
 } from './basemaps';
-export { DEFAULT_CENTER, DEFAULT_ZOOM, INDONESIA_BOUNDS } from './constants';
+export { DEFAULT_CENTER, DEFAULT_ZOOM, INDONESIA_BOUNDS, MAP_FONT } from './constants';
 export { useMapContext, useOptionalMapContext, type MapContextValue } from './context';
 export {
   useDeckLayers,

@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Fleet Service
  * Vessel master data and reference data (vessel types, fuels, engines, fuel formulas, ports, registry); publishes VesselSnapshotV1 to the FLEET stream
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 
 /**
@@ -15,5 +15,6 @@ export type MethodSummaryDtoStatus =
 export const MethodSummaryDtoStatus = {
   implemented: 'implemented',
   planned: 'planned',
+  not_implemented: 'not_implemented',
   deprecated: 'deprecated',
 } as const;

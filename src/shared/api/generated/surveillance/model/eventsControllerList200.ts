@@ -3,12 +3,18 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Surveillance Service
  * Illegal-activity analytics on the Detector SDK: illegal transhipment, navstatus anomaly, dark vessels, geofence violations and fishing loitering
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
+import type { AnomalyEventDto } from './anomalyEventDto';
 import type { CursorPageInfoDto } from './cursorPageInfoDto';
-import type { SurveillanceEventDto } from './surveillanceEventDto';
+import type { DarkEventDto } from './darkEventDto';
+import type { FishingEventDto } from './fishingEventDto';
+import type { GeofenceEventDto } from './geofenceEventDto';
+import type { TranshipmentEventDto } from './transhipmentEventDto';
 
 export type EventsControllerList200 = {
-  data: SurveillanceEventDto[];
+  data: (
+    TranshipmentEventDto | AnomalyEventDto | DarkEventDto | GeofenceEventDto | FishingEventDto
+  )[];
   page: CursorPageInfoDto;
 };

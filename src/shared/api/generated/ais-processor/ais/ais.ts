@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Pipeline: processor
  * AIS processing and query API (spec §13.2): latest positions, tracks (raw / 1-minute), pair tracks and live statistics. AIS data is shared across tenants (`ais:read`; API keys with `ais:read`).
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import { useQuery } from '@tanstack/react-query';
 import type {
@@ -25,7 +25,9 @@ import type {
   PositionsControllerPairTrackParams,
   PositionsControllerTrackParams,
   ProblemDetails,
+  StatsControllerSeriesParams,
   TrackDto,
+  TrafficSeriesDto,
   VesselLatestDto,
 } from '../model';
 
@@ -50,7 +52,7 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
 };
 
 /**
- * Newest first. When more vessels match than `limit`, the least recently seen are left out and the response carries `X-Truncated: true`: raise `limit` (≤ 50 000), narrow `bbox` or `since`.
+ * Newest first. When more vessels match than `limit`, the least recently seen are left out and the response carries `X-Truncated: true`: raise `limit` (≤ 50 000), narrow `bbox` or `since`. With `mmsi` (up to 100 MMSIs) it is a batch lookup of those vessels: the latest position of each one ever recorded (vessels without a position are omitted; `since` and `bbox` still filter when given).
  * @summary Latest position of every vessel (map initial state)
  */
 export const positionsControllerLatest = (
@@ -101,7 +103,7 @@ export type PositionsControllerLatestQueryResult = NonNullable<
 export type PositionsControllerLatestQueryError = ErrorType<ProblemDetails>;
 
 /**
- * Newest first. When more vessels match than `limit`, the least recently seen are left out and the response carries `X-Truncated: true`: raise `limit` (≤ 50 000), narrow `bbox` or `since`.
+ * Newest first. When more vessels match than `limit`, the least recently seen are left out and the response carries `X-Truncated: true`: raise `limit` (≤ 50 000), narrow `bbox` or `since`. With `mmsi` (up to 100 MMSIs) it is a batch lookup of those vessels: the latest position of each one ever recorded (vessels without a position are omitted; `since` and `bbox` still filter when given).
  * @summary Latest position of every vessel (map initial state)
  */
 export function usePositionsControllerLatest<
@@ -126,7 +128,7 @@ export function usePositionsControllerLatest<
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
- * Newest first. When more vessels match than `limit`, the least recently seen are left out and the response carries `X-Truncated: true`: raise `limit` (≤ 50 000), narrow `bbox` or `since`.
+ * Newest first. When more vessels match than `limit`, the least recently seen are left out and the response carries `X-Truncated: true`: raise `limit` (≤ 50 000), narrow `bbox` or `since`. With `mmsi` (up to 100 MMSIs) it is a batch lookup of those vessels: the latest position of each one ever recorded (vessels without a position are omitted; `since` and `bbox` still filter when given).
  * @summary Latest position of every vessel (map initial state)
  */
 export function usePositionsControllerLatest<
@@ -151,7 +153,7 @@ export function usePositionsControllerLatest<
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
- * Newest first. When more vessels match than `limit`, the least recently seen are left out and the response carries `X-Truncated: true`: raise `limit` (≤ 50 000), narrow `bbox` or `since`.
+ * Newest first. When more vessels match than `limit`, the least recently seen are left out and the response carries `X-Truncated: true`: raise `limit` (≤ 50 000), narrow `bbox` or `since`. With `mmsi` (up to 100 MMSIs) it is a batch lookup of those vessels: the latest position of each one ever recorded (vessels without a position are omitted; `since` and `bbox` still filter when given).
  * @summary Latest position of every vessel (map initial state)
  */
 export function usePositionsControllerLatest<
@@ -168,7 +170,7 @@ export function usePositionsControllerLatest<
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
- * Newest first. When more vessels match than `limit`, the least recently seen are left out and the response carries `X-Truncated: true`: raise `limit` (≤ 50 000), narrow `bbox` or `since`.
+ * Newest first. When more vessels match than `limit`, the least recently seen are left out and the response carries `X-Truncated: true`: raise `limit` (≤ 50 000), narrow `bbox` or `since`. With `mmsi` (up to 100 MMSIs) it is a batch lookup of those vessels: the latest position of each one ever recorded (vessels without a position are omitted; `since` and `bbox` still filter when given).
  * @summary Latest position of every vessel (map initial state)
  */
 export function usePositionsControllerLatest<
@@ -197,7 +199,7 @@ export function usePositionsControllerLatest<
  * @summary Latest position of a vessel
  */
 export const positionsControllerVesselLatest = (
-  mmsi: number,
+  mmsi: string,
   options?: SecondParameter<typeof apiClient>,
   signal?: AbortSignal,
 ) => {
@@ -207,7 +209,7 @@ export const positionsControllerVesselLatest = (
   );
 };
 
-export const getPositionsControllerVesselLatestQueryKey = (mmsi: number) => {
+export const getPositionsControllerVesselLatestQueryKey = (mmsi: string) => {
   return [`/api/v2/ais/vessels/${mmsi}/latest`] as const;
 };
 
@@ -215,7 +217,7 @@ export const getPositionsControllerVesselLatestQueryOptions = <
   TData = Awaited<ReturnType<typeof positionsControllerVesselLatest>>,
   TError = ErrorType<void | ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof positionsControllerVesselLatest>>, TError, TData>
@@ -253,7 +255,7 @@ export function usePositionsControllerVesselLatest<
   TData = Awaited<ReturnType<typeof positionsControllerVesselLatest>>,
   TError = ErrorType<void | ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   options: {
     query: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof positionsControllerVesselLatest>>, TError, TData>
@@ -275,7 +277,7 @@ export function usePositionsControllerVesselLatest<
   TData = Awaited<ReturnType<typeof positionsControllerVesselLatest>>,
   TError = ErrorType<void | ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof positionsControllerVesselLatest>>, TError, TData>
@@ -297,7 +299,7 @@ export function usePositionsControllerVesselLatest<
   TData = Awaited<ReturnType<typeof positionsControllerVesselLatest>>,
   TError = ErrorType<void | ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof positionsControllerVesselLatest>>, TError, TData>
@@ -311,7 +313,7 @@ export function usePositionsControllerVesselLatest<
   TData = Awaited<ReturnType<typeof positionsControllerVesselLatest>>,
   TError = ErrorType<void | ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof positionsControllerVesselLatest>>, TError, TData>
@@ -333,7 +335,7 @@ export function usePositionsControllerVesselLatest<
  * @summary Track of a vessel (raw ≤ 7 days, 1m ≤ 90 days; default the last 24 h)
  */
 export const positionsControllerTrack = (
-  mmsi: number,
+  mmsi: string,
   params?: PositionsControllerTrackParams,
   options?: SecondParameter<typeof apiClient>,
   signal?: AbortSignal,
@@ -345,7 +347,7 @@ export const positionsControllerTrack = (
 };
 
 export const getPositionsControllerTrackQueryKey = (
-  mmsi: number,
+  mmsi: string,
   params?: PositionsControllerTrackParams,
 ) => {
   return [`/api/v2/ais/vessels/${mmsi}/track`, ...(params ? [params] : [])] as const;
@@ -355,7 +357,7 @@ export const getPositionsControllerTrackQueryOptions = <
   TData = Awaited<ReturnType<typeof positionsControllerTrack>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   params?: PositionsControllerTrackParams,
   options?: {
     query?: Partial<
@@ -392,7 +394,7 @@ export function usePositionsControllerTrack<
   TData = Awaited<ReturnType<typeof positionsControllerTrack>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   params: undefined | PositionsControllerTrackParams,
   options: {
     query: Partial<
@@ -415,7 +417,7 @@ export function usePositionsControllerTrack<
   TData = Awaited<ReturnType<typeof positionsControllerTrack>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   params?: PositionsControllerTrackParams,
   options?: {
     query?: Partial<
@@ -438,7 +440,7 @@ export function usePositionsControllerTrack<
   TData = Awaited<ReturnType<typeof positionsControllerTrack>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   params?: PositionsControllerTrackParams,
   options?: {
     query?: Partial<
@@ -453,7 +455,7 @@ export function usePositionsControllerTrack<
   TData = Awaited<ReturnType<typeof positionsControllerTrack>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   params?: PositionsControllerTrackParams,
   options?: {
     query?: Partial<
@@ -473,7 +475,8 @@ export function usePositionsControllerTrack<
 }
 
 /**
- * @summary Raw tracks of two vessels over the same range (legacy /ais/routes/:mmsi1/:mmsi2)
+ * Both tracks use the same `resolution` and `simplify` as `GET /ais/vessels/{mmsi}/track` (e.g. `resolution=1m&simplify=25` for long encounters) and are each limited to 100 000 points (`truncated`, `remainingTo`).
+ * @summary Tracks of two vessels over the same range (legacy /ais/routes/:mmsi1/:mmsi2; raw ≤ 7 days, 1m ≤ 90 days; default the last 24 h)
  */
 export const positionsControllerPairTrack = (
   params: PositionsControllerPairTrackParams,
@@ -524,7 +527,10 @@ export type PositionsControllerPairTrackQueryResult = NonNullable<
 >;
 export type PositionsControllerPairTrackQueryError = ErrorType<ProblemDetails>;
 
-/** @summary Raw tracks of two vessels over the same range (legacy /ais/routes/:mmsi1/:mmsi2) */
+/**
+ * Both tracks use the same `resolution` and `simplify` as `GET /ais/vessels/{mmsi}/track` (e.g. `resolution=1m&simplify=25` for long encounters) and are each limited to 100 000 points (`truncated`, `remainingTo`).
+ * @summary Tracks of two vessels over the same range (legacy /ais/routes/:mmsi1/:mmsi2; raw ≤ 7 days, 1m ≤ 90 days; default the last 24 h)
+ */
 export function usePositionsControllerPairTrack<
   TData = Awaited<ReturnType<typeof positionsControllerPairTrack>>,
   TError = ErrorType<ProblemDetails>,
@@ -546,7 +552,10 @@ export function usePositionsControllerPairTrack<
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-/** @summary Raw tracks of two vessels over the same range (legacy /ais/routes/:mmsi1/:mmsi2) */
+/**
+ * Both tracks use the same `resolution` and `simplify` as `GET /ais/vessels/{mmsi}/track` (e.g. `resolution=1m&simplify=25` for long encounters) and are each limited to 100 000 points (`truncated`, `remainingTo`).
+ * @summary Tracks of two vessels over the same range (legacy /ais/routes/:mmsi1/:mmsi2; raw ≤ 7 days, 1m ≤ 90 days; default the last 24 h)
+ */
 export function usePositionsControllerPairTrack<
   TData = Awaited<ReturnType<typeof positionsControllerPairTrack>>,
   TError = ErrorType<ProblemDetails>,
@@ -568,7 +577,10 @@ export function usePositionsControllerPairTrack<
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-/** @summary Raw tracks of two vessels over the same range (legacy /ais/routes/:mmsi1/:mmsi2) */
+/**
+ * Both tracks use the same `resolution` and `simplify` as `GET /ais/vessels/{mmsi}/track` (e.g. `resolution=1m&simplify=25` for long encounters) and are each limited to 100 000 points (`truncated`, `remainingTo`).
+ * @summary Tracks of two vessels over the same range (legacy /ais/routes/:mmsi1/:mmsi2; raw ≤ 7 days, 1m ≤ 90 days; default the last 24 h)
+ */
 export function usePositionsControllerPairTrack<
   TData = Awaited<ReturnType<typeof positionsControllerPairTrack>>,
   TError = ErrorType<ProblemDetails>,
@@ -582,7 +594,10 @@ export function usePositionsControllerPairTrack<
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-/** @summary Raw tracks of two vessels over the same range (legacy /ais/routes/:mmsi1/:mmsi2) */
+/**
+ * Both tracks use the same `resolution` and `simplify` as `GET /ais/vessels/{mmsi}/track` (e.g. `resolution=1m&simplify=25` for long encounters) and are each limited to 100 000 points (`truncated`, `remainingTo`).
+ * @summary Tracks of two vessels over the same range (legacy /ais/routes/:mmsi1/:mmsi2; raw ≤ 7 days, 1m ≤ 90 days; default the last 24 h)
+ */
 export function usePositionsControllerPairTrack<
   TData = Awaited<ReturnType<typeof positionsControllerPairTrack>>,
   TError = ErrorType<ProblemDetails>,
@@ -717,6 +732,149 @@ export function useStatsControllerDescribe<
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
   const queryOptions = getStatsControllerDescribeQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+/**
+ * The processor samples the counters of GET /ais/stats at the end of every minute; buckets of 5 minutes and 1 hour add up the positions of their minutes and report the active vessels of their last sampled minute. Buckets are UTC-aligned and labelled with their start; `from` is floored to the bucket. A bucket without any sampled minute is left out (a gap), and the bucket still running has `samples` < `bucketMinutes`.
+ * @summary History of the statistics: recorded positions and active vessels per bucket, by feed
+ */
+export const statsControllerSeries = (
+  params?: StatsControllerSeriesParams,
+  options?: SecondParameter<typeof apiClient>,
+  signal?: AbortSignal,
+) => {
+  return apiClient<TrafficSeriesDto>(
+    { url: `/api/v2/ais/stats/series`, method: 'GET', params, signal },
+    options,
+  );
+};
+
+export const getStatsControllerSeriesQueryKey = (params?: StatsControllerSeriesParams) => {
+  return [`/api/v2/ais/stats/series`, ...(params ? [params] : [])] as const;
+};
+
+export const getStatsControllerSeriesQueryOptions = <
+  TData = Awaited<ReturnType<typeof statsControllerSeries>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: StatsControllerSeriesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof statsControllerSeries>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getStatsControllerSeriesQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof statsControllerSeries>>> = ({ signal }) =>
+    statsControllerSeries(params, requestOptions, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof statsControllerSeries>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type StatsControllerSeriesQueryResult = NonNullable<
+  Awaited<ReturnType<typeof statsControllerSeries>>
+>;
+export type StatsControllerSeriesQueryError = ErrorType<ProblemDetails>;
+
+/**
+ * The processor samples the counters of GET /ais/stats at the end of every minute; buckets of 5 minutes and 1 hour add up the positions of their minutes and report the active vessels of their last sampled minute. Buckets are UTC-aligned and labelled with their start; `from` is floored to the bucket. A bucket without any sampled minute is left out (a gap), and the bucket still running has `samples` < `bucketMinutes`.
+ * @summary History of the statistics: recorded positions and active vessels per bucket, by feed
+ */
+export function useStatsControllerSeries<
+  TData = Awaited<ReturnType<typeof statsControllerSeries>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params: undefined | StatsControllerSeriesParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof statsControllerSeries>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof statsControllerSeries>>,
+          TError,
+          Awaited<ReturnType<typeof statsControllerSeries>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * The processor samples the counters of GET /ais/stats at the end of every minute; buckets of 5 minutes and 1 hour add up the positions of their minutes and report the active vessels of their last sampled minute. Buckets are UTC-aligned and labelled with their start; `from` is floored to the bucket. A bucket without any sampled minute is left out (a gap), and the bucket still running has `samples` < `bucketMinutes`.
+ * @summary History of the statistics: recorded positions and active vessels per bucket, by feed
+ */
+export function useStatsControllerSeries<
+  TData = Awaited<ReturnType<typeof statsControllerSeries>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: StatsControllerSeriesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof statsControllerSeries>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof statsControllerSeries>>,
+          TError,
+          Awaited<ReturnType<typeof statsControllerSeries>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * The processor samples the counters of GET /ais/stats at the end of every minute; buckets of 5 minutes and 1 hour add up the positions of their minutes and report the active vessels of their last sampled minute. Buckets are UTC-aligned and labelled with their start; `from` is floored to the bucket. A bucket without any sampled minute is left out (a gap), and the bucket still running has `samples` < `bucketMinutes`.
+ * @summary History of the statistics: recorded positions and active vessels per bucket, by feed
+ */
+export function useStatsControllerSeries<
+  TData = Awaited<ReturnType<typeof statsControllerSeries>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: StatsControllerSeriesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof statsControllerSeries>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * The processor samples the counters of GET /ais/stats at the end of every minute; buckets of 5 minutes and 1 hour add up the positions of their minutes and report the active vessels of their last sampled minute. Buckets are UTC-aligned and labelled with their start; `from` is floored to the bucket. A bucket without any sampled minute is left out (a gap), and the bucket still running has `samples` < `bucketMinutes`.
+ * @summary History of the statistics: recorded positions and active vessels per bucket, by feed
+ */
+export function useStatsControllerSeries<
+  TData = Awaited<ReturnType<typeof statsControllerSeries>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: StatsControllerSeriesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof statsControllerSeries>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getStatsControllerSeriesQueryOptions(params, options);
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
     queryKey: DataTag<QueryKey, TData, TError>;

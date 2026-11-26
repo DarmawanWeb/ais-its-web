@@ -1,15 +1,186 @@
 {
+  "nav": { "telemetry": "Telemetri" },
   "telemetry": {
     "title": "Telemetri Bahan Bakar",
-    "description": "Pembacaan konsumsi bahan bakar mesin utama dan bantu dari perangkat, API dan input manual.",
-    "capabilities": [
-      "Grafik pembacaan per jam / hari",
-      "Status aktif perangkat per kapal",
-      "Input manual pembacaan (telemetry:write)",
-      "Ekspor CSV"
-    ]
+    "description": "Pembacaan konsumsi bahan bakar mesin utama dan bantu dari perangkat MQTT/HTTP, API dan input manual."
   },
-  "nav": {
-    "telemetry": "Telemetri"
+  "vessels": {
+    "title": "Kapal armada",
+    "activeCount": "{{active}} dari {{total}} aktif",
+    "search": "Cari kapal atau MMSI",
+    "noMatch": "Tidak ada kapal yang cocok",
+    "empty": "Belum ada kapal di armada",
+    "emptyHint": "Telemetri tersedia untuk kapal organisasi Anda. Tambahkan kapal terlebih dahulu.",
+    "noReading": "belum ada pembacaan",
+    "devices_one": "{{count}} perangkat terdaftar",
+    "devices_other": "{{count}} perangkat terdaftar",
+    "devicesShort_one": "{{count}} alat",
+    "devicesShort_other": "{{count}} alat",
+    "choose": "Pilih kapal",
+    "loading": "Memuat kapal…",
+    "openFleet": "Buka daftar kapal",
+    "detail": "Detail kapal"
+  },
+  "status": {
+    "active": "Aktif",
+    "inactive": "Tidak aktif",
+    "lastReading": "Pembacaan terakhir {{time}}",
+    "noReading": "Belum ada pembacaan"
+  },
+  "series": {
+    "title": "Konsumsi bahan bakar",
+    "description": "Mesin utama (ME) dan mesin bantu (AE) per pembacaan, per jam atau per hari (UTC).",
+    "me": "Mesin utama (ME)",
+    "ae": "Mesin bantu (AE)",
+    "total": "Total",
+    "readingsInBucket_one": "{{count}} pembacaan",
+    "readingsInBucket_other": "{{count}} pembacaan",
+    "caption": "Grafik konsumsi bahan bakar, {{bucket}}",
+    "legend": "Keterangan grafik",
+    "empty": "Belum ada pembacaan pada rentang ini",
+    "emptyHint": "Pilih rentang lain, periksa perangkat kapal, atau masukkan pembacaan manual.",
+    "truncated": "Grafik dan tabel menampilkan {{count}} titik pertama; persempit rentang atau pilih resolusi yang lebih kasar. Ekspor CSV memuat semua titik."
+  },
+  "buckets": {
+    "label": "Resolusi",
+    "raw": "Mentah",
+    "1h": "Per jam",
+    "1d": "Per hari",
+    "tooLong": "Rentang terlalu panjang untuk resolusi ini"
+  },
+  "range": {
+    "label": "Rentang waktu",
+    "last24h": "24 jam",
+    "last7d": "7 hari",
+    "last30d": "30 hari",
+    "thisYear": "Tahun ini"
+  },
+  "summary": {
+    "total": "Total BBM",
+    "readings_one": "{{count}} pembacaan",
+    "readings_other": "{{count}} pembacaan",
+    "me": "Mesin utama",
+    "ae": "Mesin bantu",
+    "last": "Pembacaan terakhir",
+    "first": "Pertama {{time}}"
+  },
+  "table": {
+    "title": "Data pembacaan",
+    "description": "Terbaru di atas. Satuan ton metrik.",
+    "time": "Waktu",
+    "bucket": "Awal periode",
+    "me": "ME (t)",
+    "ae": "AE (t)",
+    "total": "Total (t)",
+    "period": "Periode",
+    "source": "Sumber",
+    "device": "Perangkat",
+    "readings": "Pembacaan"
+  },
+  "sources": {
+    "device": "Perangkat HTTP",
+    "mqtt": "MQTT",
+    "api": "API",
+    "manual": "Manual",
+    "import": "Impor"
+  },
+  "manual": {
+    "open": "Input manual",
+    "title": "Input pembacaan manual",
+    "description": "Catat konsumsi bahan bakar dari log mesin. Satu pembacaan per kapal dan waktu; pembacaan berbeda pada waktu yang sama ditolak.",
+    "vessel": "Kapal",
+    "chooseVessel": "Pilih kapal",
+    "time": "Waktu pembacaan",
+    "timeHint": "Akhir periode yang diukur (waktu lokal).",
+    "periodStart": "Awal periode (opsional)",
+    "periodHint": "Sebelum waktu pembacaan, maksimal {{hours}} jam.",
+    "fuelMe": "Bahan bakar mesin utama",
+    "fuelAe": "Bahan bakar mesin bantu",
+    "maxHint": "0 – {{max}} t (batas bawaan layanan)",
+    "save": "Simpan pembacaan",
+    "saved": "Pembacaan disimpan",
+    "savedHint": "Grafik dan ringkasan diperbarui; layanan emisi menerima pembacaan ini.",
+    "duplicate": "Pembacaan yang sama sudah tersimpan (tidak ada perubahan)",
+    "errors": {
+      "required": "Wajib diisi",
+      "number": "Masukkan angka",
+      "negative": "Tidak boleh negatif",
+      "max": "Maksimal {{max}} t",
+      "vessel": "Pilih kapal",
+      "date": "Tanggal tidak valid",
+      "future": "Waktu tidak boleh lebih dari 5 menit ke depan",
+      "tooOld": "Pembacaan lebih lama dari 5 tahun",
+      "periodOrder": "Awal periode harus sebelum waktu pembacaan",
+      "periodLength": "Periode maksimal {{hours}} jam",
+      "conflict": "Sudah ada pembacaan berbeda pada waktu ini. Ubah waktunya atau periksa data yang tersimpan."
+    }
+  },
+  "devices": {
+    "title": "Perangkat",
+    "description_one": "{{count}} perangkat terdaftar pada kapal ini.",
+    "description_other": "{{count}} perangkat terdaftar pada kapal ini.",
+    "manage": "Kelola perangkat",
+    "noPermission": "Pendaftaran dan pengaturan perangkat dilakukan admin organisasi di halaman Perangkat.",
+    "empty": "Belum ada perangkat",
+    "emptyHint": "Daftarkan alat ukur MQTT atau HTTP agar telemetri mengalir otomatis.",
+    "register": "Daftarkan perangkat",
+    "lastSeen": "Terakhir mengirim {{time}}",
+    "neverSeen": "Belum pernah mengirim data",
+    "serial": "No. seri {{serial}}",
+    "topic": "Topik MQTT perangkat"
+  },
+  "copy": {
+    "copied": "Disalin",
+    "copy": "Salin {{label}}"
+  },
+  "mqtt": {
+    "title": "Cara perangkat mengirim data",
+    "description": "Alat ukur bahan bakar mengirim JSON ke topik MQTT miliknya, atau melalui HTTP dengan API key perangkat.",
+    "channels": "Kanal pengiriman",
+    "topic": "Topik MQTT",
+    "topicHint": "Ganti <deviceId> dengan ID perangkat dari halaman Perangkat. Gateway MQTT NATS meneruskannya ke layanan telemetri.",
+    "example": "Contoh pesan",
+    "schema": "Skema payload (kontrak)",
+    "rules": [
+      "Satu objek atau array hingga 1000 pembacaan; MMSI diambil dari perangkat.",
+      "Nilai ≥ 0 dalam ton metrik; waktu ISO-8601 UTC, maksimal 5 menit ke depan.",
+      "Pembacaan identik diabaikan (idempoten); pembacaan berbeda pada waktu yang sama ditolak sebagai konflik.",
+      "Hanya perangkat aktif bertipe mqtt yang diterima."
+    ],
+    "httpHint": "Perangkat HTTP mengirim dengan API key ber-scope telemetry:ingest yang terhubung ke perangkat.",
+    "httpExample": "Contoh permintaan HTTP"
+  },
+  "export": {
+    "running": "Mengekspor…",
+    "done_one": "{{count}} baris diekspor",
+    "done_other": "{{count}} baris diekspor",
+    "truncated": "Ekspor dibatasi {{count}} baris; persempit rentang untuk sisanya.",
+    "failed": "Ekspor gagal"
+  },
+  "problems": {
+    "VALIDATION_FAILED": {
+      "title": "Pembacaan belum valid",
+      "detail": "Periksa kolom yang ditandai."
+    },
+    "FORBIDDEN": {
+      "title": "Kapal bukan milik organisasi Anda",
+      "detail": "Telemetri hanya dapat dicatat untuk kapal organisasi aktif."
+    },
+    "ORGANIZATION_REQUIRED": {
+      "title": "Pilih organisasi aktif",
+      "detail": "Telemetri bersifat privat per organisasi."
+    },
+    "VESSEL_NOT_FOUND": {
+      "title": "Kapal tidak dikenal layanan telemetri",
+      "detail": "Kapal mungkin baru dibuat atau sudah dihapus; coba lagi sebentar lagi."
+    },
+    "DEVICE_NOT_FOUND": {
+      "title": "Perangkat tidak ditemukan",
+      "detail": "Perangkat mungkin sudah dihapus."
+    },
+    "READING_CONFLICT": {
+      "title": "Konflik pembacaan",
+      "detail": "Sudah ada pembacaan berbeda pada waktu tersebut; tidak ada data yang disimpan."
+    }
   }
 }

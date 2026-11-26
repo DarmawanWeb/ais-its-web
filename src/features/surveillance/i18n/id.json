@@ -1,44 +1,404 @@
 {
-  "transhipment": {
-    "title": "Transhipment Ilegal",
-    "description": "Deteksi pasangan kapal yang berdampingan di laut dalam waktu lama — indikasi transhipment ilegal.",
-    "capabilities": [
-      "Daftar kejadian transhipment beserta skor dan akurasi",
-      "Rute kedua kapal (GET /api/v2/ais/pairs/track)",
-      "Review kejadian oleh otoritas (surveillance:review)"
-    ]
-  },
   "nav": {
+    "section": "Navigasi pengawasan",
+    "overview": "Ringkasan",
     "transhipment": "Transhipment",
     "fishing": "Illegal Fishing",
     "dark": "Dark Vessel",
     "anomaly": "Anomali Navstatus"
   },
+  "live": {
+    "connected": "Pembaruan langsung aktif",
+    "disconnected": "Pembaruan langsung terputus"
+  },
+  "common": {
+    "unknownVessel": "Kapal tanpa nama",
+    "unknownZone": "Zona tanpa nama"
+  },
+  "duration": {
+    "days": "{{count}} hr",
+    "hours": "{{count}} j",
+    "minutes": "{{count}} mnt"
+  },
+  "filters": {
+    "label": "Filter kejadian",
+    "range": "Rentang waktu",
+    "ranges": {
+      "24h": "24 jam",
+      "7d": "7 hari",
+      "30d": "30 hari",
+      "90d": "90 hari"
+    },
+    "severity": "Tingkat",
+    "status": "Status tinjauan",
+    "all": "Semua",
+    "allYears": "Semua tahun",
+    "mmsi": "Kapal (MMSI)",
+    "mmsiPlaceholder": "9 digit MMSI",
+    "mmsiInvalid": "MMSI terdiri dari 9 digit angka.",
+    "reset": "Atur ulang ({{count}})",
+    "resetAll": "Atur ulang filter"
+  },
+  "fields": {
+    "time": "Waktu",
+    "vessel": "Kapal",
+    "relatedVessel": "Kapal pasangan",
+    "pair": "Pasangan kapal",
+    "severity": "Tingkat",
+    "status": "Status",
+    "review": "Tinjauan",
+    "state": "Keadaan",
+    "position": "Posisi",
+    "method": "Metode",
+    "zone": "Zona",
+    "zoneKind": "Jenis zona",
+    "accuracy": "Skor (akurasi)",
+    "averagePriority": "Prioritas rata-rata",
+    "accumulatedPriority": "Prioritas terakumulasi",
+    "distribution": "Distribusi prioritas",
+    "observations": "Pengamatan",
+    "lastDistance": "Jarak terakhir",
+    "routePoints": "Titik rute (kapal 1/2)",
+    "window": "Jendela analisis",
+    "duration": "Durasi",
+    "detectedAt": "Terdeteksi",
+    "lastSeenAt": "Terakhir terlihat",
+    "gapDuration": "Lama terputus",
+    "gapGrowing": "masih berlangsung",
+    "lastSog": "SOG terakhir",
+    "lastCog": "COG terakhir",
+    "nearestHarbour": "Pelabuhan terdekat",
+    "noHarbour": "Tidak ada zona pelabuhan",
+    "reappearedAt": "Muncul kembali",
+    "reportedNavstatus": "Status dilaporkan",
+    "predictedNavstatus": "Status prediksi",
+    "streak": "Posisi berturut-turut",
+    "streakValue": "{{streak}} dari minimal {{min}} posisi",
+    "sog": "SOG",
+    "sogAtEntry": "SOG saat masuk",
+    "loiterDuration": "Durasi loitering",
+    "positions": "Jumlah posisi",
+    "meanSog": "SOG rata-rata",
+    "courseChangeRate": "Laju perubahan haluan",
+    "degPerMin": "{{value}} °/mnt",
+    "totalCourseChange": "Total perubahan haluan",
+    "vesselName": "Nama kapal",
+    "flag": "Bendera",
+    "year": "Tahun",
+    "violation": "Pelanggaran",
+    "action": "Tindakan",
+    "source": "Sumber"
+  },
+  "rule": {
+    "title": "Yang dicari detektor",
+    "methods": "Metode",
+    "disabled": "Detektor tidak aktif",
+    "transhipment": "Pasangan kapal dari sumber AIS {{sources}} atau di dalam {{zoneKinds}} yang berjarak ≤ {{radius}} m dalam {{window}} menit dinilai dengan prioritas kecepatan × lokasi × haluan. Pasangan dengan prioritas terakumulasi dianalisis ulang dengan interpolasi rute dan jendela geser 30 menit; transhipment dinyatakan bila skor ≥ {{threshold}} % (kritis ≥ {{critical}} %).",
+    "fishing": "Pola loitering khas penangkapan ikan: minimal {{minDuration}} menit dan {{minPositions}} posisi pada kecepatan {{minSog}}–{{maxSog}} kn dengan perubahan haluan rata-rata ≥ {{rate}} °/menit, di dalam {{kinds}}.",
+    "dark": "Kapal berhenti mengirim AIS lebih dari {{gap}} menit, padahal terakhir berlayar di atas {{sog}} kn dan berada lebih dari {{distance}} km dari zona global {{kinds}}. Kejadian berakhir saat kapal muncul kembali; celah lebih dari {{maxGap}} jam tidak dilaporkan.",
+    "anomaly": "Status navigasi yang dilaporkan bertentangan dengan status prediksi dari pergerakan kapal, selama {{minPositions}} posisi berturut-turut. Kejadian berakhir pada posisi pertama yang konsisten.",
+    "geofence": "Kapal memasuki zona aktif {{kinds}} yang memicu alert saat dimasuki (buffer zona termasuk)."
+  },
+  "empty": {
+    "filteredTitle": "Tidak ada kejadian yang cocok dengan filter",
+    "filteredHint": "Perluas rentang waktu atau atur ulang filter untuk melihat kejadian lain.",
+    "hint": "Belum ada kejadian pada rentang ini. Data muncul otomatis saat detektor menemukan pola tersebut.",
+    "transhipment": {
+      "title": "Belum ada dugaan transhipment"
+    },
+    "fishing": {
+      "title": "Belum ada dugaan penangkapan ikan ilegal"
+    },
+    "dark": {
+      "title": "Belum ada kapal gelap"
+    },
+    "anomaly": {
+      "title": "Belum ada anomali status navigasi"
+    },
+    "geofence": {
+      "title": "Belum ada kapal yang memasuki zona"
+    }
+  },
+  "map": {
+    "noPositions": "Tidak ada posisi untuk ditampilkan di halaman ini",
+    "legend": {
+      "title": "Legenda",
+      "critical": "Kritis (penanda besar)",
+      "warning": "Peringatan",
+      "info": "Informasi (penanda kecil)",
+      "ended": "Diakhiri detektor (cincin)",
+      "reappeared": "Posisi muncul kembali",
+      "harbourBand": "Radius {{value}} km zona pelabuhan (perkiraan)",
+      "heatLow": "Kepadatan rendah",
+      "heatHigh": "tinggi",
+      "violation": "Lokasi penangkapan",
+      "density": "Kepadatan"
+    }
+  },
+  "export": {
+    "done": "CSV diunduh: {{count}} baris",
+    "empty": "Tidak ada data untuk diekspor dengan filter ini.",
+    "truncated": "Dibatasi {{count}} baris pertama; persempit filter untuk ekspor lengkap.",
+    "failed": "Ekspor CSV gagal"
+  },
+  "csv": {
+    "eventId": "id_kejadian",
+    "resultId": "id_hasil",
+    "time": "waktu",
+    "vesselName": "nama_kapal",
+    "relatedMmsi": "mmsi_pasangan",
+    "relatedVesselName": "nama_kapal_pasangan",
+    "ship1Name": "nama_kapal_1",
+    "ship2Name": "nama_kapal_2",
+    "accuracy": "akurasi_persen",
+    "averagePriority": "prioritas_rata_rata",
+    "low": "distribusi_rendah_persen",
+    "medium": "distribusi_sedang_persen",
+    "high": "distribusi_tinggi_persen",
+    "severity": "tingkat",
+    "status": "status_tinjauan",
+    "note": "catatan",
+    "detectedAt": "terdeteksi",
+    "lat": "lintang",
+    "lon": "bujur",
+    "methodId": "id_metode",
+    "zone": "zona",
+    "zoneKind": "jenis_zona",
+    "durationMin": "durasi_menit",
+    "meanSogKn": "sog_rata_rata_kn",
+    "courseChangeRate": "laju_perubahan_haluan_deg_per_menit",
+    "lastSeenAt": "terakhir_terlihat",
+    "gapMin": "lama_terputus_menit",
+    "lastSogKn": "sog_terakhir_kn",
+    "nearestHarbourM": "jarak_pelabuhan_terdekat_m",
+    "reappearedAt": "muncul_kembali",
+    "navstatus": "navstatus_dilaporkan",
+    "predictedNavstatus": "navstatus_prediksi",
+    "streak": "posisi_berturut_turut",
+    "sogKn": "sog_kn",
+    "endedAt": "berakhir",
+    "flag": "bendera",
+    "year": "tahun",
+    "violation": "pelanggaran",
+    "action": "tindakan",
+    "source": "sumber",
+    "sourceNote": "catatan_sumber",
+    "from": "periode_mulai",
+    "to": "periode_selesai",
+    "total": "jumlah"
+  },
+  "review": {
+    "title": "Tinjauan",
+    "verdict": "Keputusan tinjauan",
+    "options": {
+      "open": "Belum diputuskan",
+      "openHint": "Kembalikan ke antrean tinjauan (menarik keputusan sebelumnya).",
+      "confirmed": "Konfirmasi",
+      "confirmedHint": "Dugaan terverifikasi sebagai pelanggaran.",
+      "dismissed": "Abaikan",
+      "dismissedHint": "Bukan pelanggaran (misalnya bunkering resmi atau data AIS keliru)."
+    },
+    "note": "Catatan peninjau",
+    "notePlaceholder": "Dasar keputusan, nomor laporan, tindak lanjut…",
+    "noteHint": "Catatan bersifat opsional dan tercatat di log audit.",
+    "noteKept": "Catatan yang tidak diubah tetap tersimpan; kosongkan untuk menghapus.",
+    "submit": "Simpan tinjauan",
+    "saved": "Tinjauan disimpan",
+    "failed": "Tinjauan gagal disimpan",
+    "notFound": "Kejadian tidak lagi tersedia.",
+    "forbidden": "Anda tidak memiliki izin meninjau kejadian (surveillance:review).",
+    "readOnly": "Hanya otoritas yang dapat meninjau kejadian.",
+    "notReviewed": "Belum ditinjau",
+    "reviewedBy": "Ditinjau oleh {{who}} · {{at}}",
+    "you": "Anda",
+    "reviewer": "peninjau"
+  },
+  "timeline": {
+    "title": "Linimasa",
+    "occurred": "Kejadian dimulai",
+    "opened": "Terdeteksi oleh detektor",
+    "analysis": "Analisis positif",
+    "analysisScore": "Analisis positif · skor {{accuracy}} %",
+    "lastSeen": "Terakhir teramati",
+    "resolved": "Diakhiri detektor",
+    "reviewed": "Ditinjau",
+    "reviewedAs": "Ditinjau: {{status}}",
+    "reason": "Alasan: {{reason}}"
+  },
+  "overview": {
+    "title": "Ringkasan Pengawasan",
+    "description": "Gambaran aktivitas ilegal yang terdeteksi: transhipment, penangkapan ikan ilegal, kapal gelap, anomali status navigasi dan pelanggaran zona.",
+    "stats": {
+      "total": "Kejadian",
+      "totalHint": "Semua detektor, {{range}} terakhir",
+      "active": "Masih berlangsung",
+      "activeHint": "Belum diakhiri detektor",
+      "toReview": "Menunggu tinjauan",
+      "toReviewHint": "Status tinjauan terbuka",
+      "critical": "Kritis",
+      "criticalHint": "Tingkat kritis pada rentang ini"
+    },
+    "trendTitle": "Kejadian per jenis dari waktu ke waktu",
+    "trendDescription": "Jumlah kejadian per periode ({{count}} periode), ditumpuk per detektor.",
+    "chartCaption": "Jumlah kejadian per jenis detektor per periode",
+    "legend": "Jenis kejadian",
+    "view": "Tampilan",
+    "chartView": "Grafik",
+    "tableView": "Tabel",
+    "period": "Periode",
+    "total": "Total",
+    "breakdownTitle": "Tingkat & tinjauan",
+    "breakdownDescription": "Sebaran kejadian pada rentang yang dipilih.",
+    "typesTitle": "Per detektor",
+    "typesDescription": "Jumlah kejadian dan tren tiap detektor; buka halaman detektor untuk detail.",
+    "recentTitle": "Kejadian terbaru",
+    "recentDescription": "Klik untuk melihat detail dan meninjau.",
+    "recentEmpty": "Belum ada kejadian",
+    "recentEmptyHint": "Detektor berjalan terus; kejadian baru muncul di sini secara langsung.",
+    "detectorsTitle": "Detektor",
+    "detectorsDescription": "Detektor aktif, ambang batas yang berlaku dan metodenya.",
+    "enabled": "Aktif",
+    "disabled": "Nonaktif",
+    "queueTitle": "Antrean kandidat transhipment",
+    "queueDescription": "Pasangan kapal yang menunggu analisis rute (khusus otoritas).",
+    "queue": {
+      "pending": "Menunggu",
+      "inProgress": "Dianalisis",
+      "completed": "Selesai",
+      "failed": "Gagal"
+    },
+    "violationsNote": "{{count}} catatan penangkapan ikan ilegal historis tersedia.",
+    "violationsLink": "Lihat dataset",
+    "config": {
+      "ACCURACY_THRESHOLD": "Ambang skor",
+      "NEIGHBOUR_RADIUS_M": "Radius pasangan",
+      "GAP_MIN": "Jeda AIS",
+      "HARBOUR_DISTANCE_KM": "Jarak pelabuhan",
+      "MIN_POSITIONS": "Posisi berturut-turut",
+      "MIN_DURATION_MIN": "Durasi minimum",
+      "MAX_SOG_KN": "SOG maksimum",
+      "KINDS": "Zona dipantau"
+    }
+  },
+  "transhipment": {
+    "title": "Transhipment Ilegal",
+    "detailTitle": "Detail Transhipment",
+    "description": "Pasangan kapal yang berdampingan dengan kecepatan rendah di laut — indikasi pemindahan muatan antarkapal (ship-to-ship) ilegal.",
+    "tabs": "Tampilan transhipment",
+    "tabEvents": "Kejadian",
+    "tabResults": "Hasil analisis",
+    "tableLabel": "Kejadian transhipment",
+    "resultsLabel": "Hasil analisis transhipment",
+    "mapLabel": "Peta lokasi transhipment",
+    "openReplay": "Buka replay rute pasangan",
+    "back": "Kembali ke daftar transhipment",
+    "pairTitle": "{{a}} ↔ {{b}}",
+    "notFound": "Kejadian transhipment tidak ditemukan",
+    "notFoundHint": "Kejadian mungkin sudah kedaluwarsa atau bukan milik kapal organisasi Anda.",
+    "scoreTitle": "Skor transhipment",
+    "scoreHint": "Ambang deteksi {{threshold}} % (garis putih), tingkat kritis mulai {{critical}} % (garis merah).",
+    "threshold": "Ambang deteksi {{value}} %",
+    "critical": "Kritis mulai {{value}} %",
+    "levels": {
+      "low": "Rendah",
+      "medium": "Sedang",
+      "high": "Tinggi"
+    },
+    "vesselsTitle": "Kapal",
+    "midpoint": "Titik tengah:",
+    "inZone": "Di dalam zona {{zone}}",
+    "analysesTitle": "Analisis positif kejadian ini",
+    "analysesDescription": "Setiap analisis rute yang menyatakan transhipment untuk pasangan ini. Pilih baris untuk memutar replay pada jendela analisisnya."
+  },
+  "replay": {
+    "title": "Replay rute pasangan",
+    "window": "{{from}} – {{to}}",
+    "mapLabel": "Peta replay rute kedua kapal",
+    "distance": "Jarak antarkapal",
+    "legend": "Rute",
+    "gapLine": "Garis jarak",
+    "play": "Putar replay",
+    "pause": "Jeda replay",
+    "restart": "Ulang dari awal",
+    "closest": "Jarak terdekat",
+    "scrubber": "Waktu replay",
+    "speed": "Kecepatan replay",
+    "speedValue": "×{{value}}",
+    "analysedWindow": "Jendela analisis",
+    "emptyTitle": "Rute tidak tersedia",
+    "emptyDescription": "Tidak ada posisi AIS untuk kedua kapal pada jendela ini (data mentah mungkin sudah melewati masa simpan).",
+    "noPair": "Kejadian ini tidak memiliki kapal pasangan untuk direplay."
+  },
   "fishing": {
     "title": "Penangkapan Ikan Ilegal",
-    "description": "Peta panas aktivitas penangkapan ikan mencurigakan dan pelanggaran historis.",
-    "capabilities": [
-      "Heatmap grid (GET /api/v2/surveillance/heatmap)",
-      "Lapisan pelanggaran historis per tahun",
-      "Deteksi loitering di daerah penangkapan ikan"
-    ]
+    "description": "Deteksi pola loitering di daerah penangkapan ikan dan area terlarang, beserta catatan historis penangkapan kapal ikan ilegal.",
+    "tabs": "Tampilan illegal fishing",
+    "tabEvents": "Deteksi loitering",
+    "tabHistory": "Pelanggaran historis",
+    "tableLabel": "Kejadian dugaan penangkapan ikan ilegal",
+    "mapLabel": "Peta panas dugaan penangkapan ikan ilegal",
+    "heatmapNote": "Peta panas {{total}} kejadian, sel {{cell}} km.",
+    "heatmapLoading": "Memuat peta panas…",
+    "historyTitle": "Dataset penangkapan kapal ikan ilegal",
+    "historyDescription": "Catatan historis penangkapan kapal ikan ilegal (bendera, pelanggaran, tindakan, lokasi). Asal data masih perlu dikutip — lihat sumber setiap baris.",
+    "historyLabel": "Pelanggaran penangkapan ikan historis",
+    "historyMapLabel": "Peta lokasi penangkapan historis",
+    "historyMapNote": "{{count}} lokasi penangkapan pada peta panas.",
+    "historyEmpty": "Tidak ada catatan untuk tahun ini",
+    "historyEmptyHint": "Pilih tahun lain atau tampilkan semua tahun."
   },
   "dark": {
     "title": "Kapal Gelap (AIS Terputus)",
-    "description": "Kapal yang berhenti memancarkan AIS di area pengawasan.",
-    "capabilities": [
-      "Daftar celah AIS dengan durasi dan posisi terakhir",
-      "Peta posisi hilang dan posisi muncul kembali",
-      "Alert bertipe dark"
-    ]
+    "description": "Kapal yang berhenti memancarkan AIS saat berlayar jauh dari pelabuhan dan area labuh jangkar.",
+    "tableLabel": "Kejadian kapal gelap",
+    "mapLabel": "Peta posisi terakhir kapal gelap",
+    "stillDark": "Masih gelap",
+    "reappeared": "Muncul {{at}}",
+    "ruleGap": "Senyap lebih dari {{value}} menit",
+    "ruleSog": "SOG terakhir di atas {{value}} kn",
+    "ruleHarbour": "Lebih dari {{value}} km dari pelabuhan/labuh jangkar",
+    "ruleTenancy": "Aturan pelabuhan hanya memakai zona global yang dikurasi; zona milik organisasi tidak pernah membungkam deteksi."
   },
   "anomaly": {
     "title": "Anomali Status Navigasi",
-    "description": "Kapal yang status navigasi AIS-nya tidak sesuai dengan prediksi dari pergerakannya.",
-    "capabilities": [
-      "Daftar anomali: status dilaporkan vs status prediksi",
-      "Riwayat posisi untuk verifikasi",
-      "Review oleh otoritas"
-    ]
+    "description": "Kapal yang status navigasi AIS-nya bertentangan dengan status yang diprediksi dari pergerakannya.",
+    "tableLabel": "Kejadian anomali status navigasi",
+    "mapLabel": "Peta posisi anomali status navigasi",
+    "mismatch": "Tidak sesuai",
+    "formula": "anomali ⇔ (prediksi = 0 ∧ navstatus = 1) ∨ (prediksi = 1 ∧ navstatus ≠ 1)"
+  },
+  "resolution": {
+    "escalated": "tingkatnya dinaikkan, diteruskan sebagai kejadian baru",
+    "aisResumed": "laporan AIS kembali diterima",
+    "navstatusConsistent": "status navigasi kembali sesuai dengan gerak kapal",
+    "leftZone": "kapal keluar dari zona",
+    "loiteringEnded": "pola loitering berakhir",
+    "analysisNegative": "analisis berikutnya tidak lagi positif",
+    "pairSeparated": "pasangan tidak lagi teramati berdampingan",
+    "zoneDeleted": "zona dihapus",
+    "zoneNoLongerAlerts": "zona tidak lagi memicu alert saat dimasuki",
+    "openSuccessor": "Buka kejadian lanjutan"
+  },
+  "text": {
+    "transhipment": {
+      "title": "Transhipment {{a}} ↔ {{b}}",
+      "description": "{{a}} dan {{b}} berdampingan dengan kecepatan rendah di laut (skor {{score}} %)."
+    },
+    "fishing": {
+      "title": "Dugaan penangkapan ikan oleh {{vessel}} di {{zone}}",
+      "description": "Loitering {{sog}} kn dengan perubahan haluan rata-rata {{rate}} °/mnt selama {{duration}} di {{zone}}."
+    },
+    "dark": {
+      "title": "AIS {{vessel}} terputus",
+      "description": "Berhenti mengirim posisi AIS sejak {{at}} saat melaju {{sog}} kn, jauh dari pelabuhan."
+    },
+    "anomaly": {
+      "title": "Anomali status navigasi {{vessel}}",
+      "description": "Melaporkan \"{{reported}}\", sedangkan gerak kapal menunjukkan {{predicted}} selama {{streak}} posisi berturut-turut."
+    },
+    "geofence": {
+      "title": "{{vessel}} memasuki {{zone}}",
+      "description": "Kapal berada di dalam {{zone}} ({{kind}}), zona yang memicu alert saat dimasuki."
+    }
   }
 }

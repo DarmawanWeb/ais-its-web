@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Emission Service
  * Fuel and CO2 per voyage segment, IMO CII (daily/annual, rating A-E), reduction factors, SEEMP recommendations and what-if simulation, IMO DCS summary
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import type { CostRangeDto } from './costRangeDto';
 import type { SeempRecommendationDtoCiiGradeAfter } from './seempRecommendationDtoCiiGradeAfter';
@@ -31,6 +31,8 @@ export interface SeempRecommendationDto {
   ciiAttainedAfter: number;
   /** Years until grade D/E used to spread the investment */
   yearsUntilInferior: number;
+  /** Grade after is A–C (the legacy recommendation); false only with includeAll=true */
+  recommended: boolean;
   /** Methodology catalog ids behind the figure */
   methodIds: string[];
 }

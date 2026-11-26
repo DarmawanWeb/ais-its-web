@@ -1,14 +1,309 @@
 {
-  "rules": {
-    "title": "Alert Rules",
-    "description": "Configure who is notified, for which alerts and through which channel (e-mail, Telegram, webhook).",
-    "capabilities": [
-      "Rules by type, domain, minimum severity, vessel and zone",
-      "E-mail, Telegram and signed webhook channels",
-      "Send a test notification (POST /api/v2/notifications/test)"
-    ]
-  },
   "nav": {
     "rules": "Alert Rules"
+  },
+  "rules": {
+    "title": "Alert Rules",
+    "description": "Decide which alerts are forwarded, to whom and through which channel: e-mail, Telegram or signed webhooks.",
+    "create": "New rule",
+    "createFirst": "Create the first rule",
+    "listTitle": "Rules",
+    "search": "Search rules",
+    "searchPlaceholder": "Search rule names…",
+    "statusFilter": "Rule status filter",
+    "status": {
+      "all": "All",
+      "enabled": "Enabled",
+      "disabled": "Disabled"
+    },
+    "orgFilter": "Organization filter",
+    "allOrganizations": "All organizations",
+    "noMatches": "No rules match",
+    "noMatchesHint": "Change the search or the status filter to see other rules.",
+    "empty": "No alert rules yet",
+    "emptyHint": "Create a rule to forward EWS, collision risk, transhipment, dark vessel and other alerts to e-mail, Telegram groups or your systems through webhooks."
+  },
+  "stats": {
+    "label": "Rules and deliveries overview",
+    "active": "Enabled rules",
+    "ofTotal": "of {{total}}",
+    "channels": "Notification channels",
+    "channelsBreakdown": "{{email}} e-mail · {{telegram}} Telegram · {{webhook}} webhook",
+    "successRate": "Delivery success",
+    "successSample": "Last {{count}} deliveries · {{failed}} failed",
+    "noDeliveries": "No deliveries yet",
+    "lastDelivery": "Last delivery",
+    "lastDeliveryHint": "Updated in real time"
+  },
+  "toasts": {
+    "enabled": "Rule \"{{name}}\" enabled",
+    "disabled": "Rule \"{{name}}\" disabled",
+    "toggleFailed": "The rule status could not be changed",
+    "deleted": "Rule \"{{name}}\" deleted",
+    "deleteFailed": "The rule could not be deleted",
+    "secretRotated": "Webhook secret of rule \"{{name}}\" rotated",
+    "rotateFailed": "The secret could not be rotated"
+  },
+  "delete": {
+    "title": "Delete the rule \"{{name}}\"?",
+    "description": "The rule stops forwarding alerts and its whole delivery history is deleted with it. This cannot be undone.",
+    "confirm": "Delete rule"
+  },
+  "rotate": {
+    "title": "Rotate the secret of {{target}}?",
+    "description": "Deliveries from now on, pending retries included, are signed with the new secret at once. Store the new secret at the receiver; receivers can hold the old and the new secret by X-AIS-ITS-Key-Id while they switch.",
+    "confirm": "Rotate secret"
+  },
+  "secret": {
+    "title": "Store the webhook signing secret",
+    "description": "New secret for rule \"{{name}}\". The webhook receiver verifies every delivery with it.",
+    "onceTitle": "Shown only once",
+    "onceText": "Copy the secret now and store it at the webhook receiver. It cannot be shown again; if you lose it, rotate the channel's secret.",
+    "secret": "Signing secret",
+    "copy": "Copy the signing secret",
+    "keyId": "Key id (X-AIS-ITS-Key-Id):",
+    "copyKeyId": "Copy the key id",
+    "usage": "Receivers pick the secret by the X-AIS-ITS-Key-Id header and compute HMAC-SHA256 over \"<timestamp>.<raw body>\" (see the webhook guide).",
+    "stored_one": "I have stored this secret in a safe place",
+    "stored_other": "I have stored these secrets in a safe place",
+    "done": "Done"
+  },
+  "scope": {
+    "org": "Organization fleet",
+    "all": "Every vessel"
+  },
+  "locales": {
+    "id": "Bahasa Indonesia",
+    "en": "English"
+  },
+  "card": {
+    "minSeverity": "Minimum severity",
+    "allAlerts": "Every alert",
+    "allTypes": "all types",
+    "anyVessel": "Every vessel in scope",
+    "anyZone": "Any location",
+    "disabled": "Disabled",
+    "enable": "Enable rule",
+    "disable": "Disable rule",
+    "lockedHint": "Cross-tenant rules can only be changed by this organization's authority members",
+    "toggleLabel": "Enable rule {{name}}",
+    "actions": "Actions of rule {{name}}",
+    "edit": "Edit rule",
+    "deliveries": "Delivery history",
+    "test": "Send a test notification",
+    "conditions": "Conditions",
+    "vessels": "Vessels",
+    "zones": "Zones",
+    "channels": "Channels",
+    "quiet": "Quiet {{minutes}} min",
+    "noQuiet": "No quiet period",
+    "updated": "Updated {{time}}",
+    "locked": "Authority only",
+    "rotateSecret": "Rotate webhook secret",
+    "rotateSecretOf": "Rotate the secret of {{target}}",
+    "keyId": "(key {{keyId}})",
+    "deploymentKey": "(signed with the deployment secret)",
+    "deploymentKeyHint": "This webhook is still signed with the old deployment secret. Rotate its secret to give the channel its own key."
+  },
+  "channels": {
+    "types": {
+      "email": "E-mail",
+      "telegram": "Telegram",
+      "webhook": "Webhook"
+    },
+    "type": "Channel {{index}} type",
+    "target": "Channel {{index}} target",
+    "placeholders": {
+      "email": "ops@company.com",
+      "telegram": "-1001234567890 or @your_channel",
+      "webhook": "https://your-system.example/hooks/ais"
+    },
+    "hints": {
+      "email": "One address per channel; add another e-mail channel for each further recipient.",
+      "telegram": "A chat id (groups and channels start with -100) or @channelname. The platform bot must be a member.",
+      "webhook": "Receives signed JSON POSTs. Private and local network addresses are refused."
+    },
+    "insecureWebhook": "An http:// webhook sends alerts unencrypted. Prefer https://.",
+    "test": {
+      "action": "Test",
+      "sending": "Sending a test notification…",
+      "sent": "Test notification sent",
+      "queued": "Queued — check the inbox in a few minutes",
+      "failed": "Test notification failed"
+    },
+    "remove": "Remove channel {{index}}",
+    "add": {
+      "email": "E-mail",
+      "telegram": "Telegram",
+      "webhook": "Webhook"
+    },
+    "count": "{{count}} of {{max}} channels",
+    "errors": {
+      "required": "Enter a target",
+      "tooLong": "The target is too long",
+      "email": "Invalid e-mail address",
+      "telegram": "Use a numeric chat id or @channelname",
+      "webhookUrl": "Use a complete http(s) URL",
+      "webhookCredentials": "Do not put a user name or password in the URL",
+      "duplicate": "This channel is already on the rule",
+      "none": "Add at least one channel",
+      "tooMany": "At most {{max}} channels per rule"
+    }
+  },
+  "editor": {
+    "createTitle": "New alert rule",
+    "editTitle": "Edit alert rule",
+    "description": "A rule matches when every condition holds; empty lists do not restrict.",
+    "identity": "Identity",
+    "name": "Rule name",
+    "namePlaceholder": "e.g. Critical EWS Singapore Strait",
+    "locale": "Notification language",
+    "enabled": "Rule enabled",
+    "enabledHint": "Disabled rules are kept but forward no alerts.",
+    "owner": "Owner organization",
+    "ownerPlaceholder": "Choose an organization",
+    "ownerHint": "Only super admins create rules for other organizations. The owner cannot change afterwards.",
+    "scopeTitle": "Vessel scope",
+    "scopeDescription": "As an authority member you may watch every vessel of the platform.",
+    "scopeHints": {
+      "all": "Alerts of any vessel (cross-tenant), including vessels outside your organization.",
+      "org": "Only alerts of this organization's vessels."
+    },
+    "scopeKeptAll": "This rule watches every vessel. Only authority members of its organization can change the scope.",
+    "scopeFixedOrg": "The rule watches this organization's vessels (alerts of the vessel or a related vessel).",
+    "conditionsTitle": "Alert conditions",
+    "conditionsDescription": "Choose alert domains or types and a minimum severity, and limit vessels and zones when needed.",
+    "conditions": {
+      "everything": "Nothing selected: every domain and alert type matches.",
+      "wholeDomains": "Every type of the selected domains matches, including future types.",
+      "someTypes": "Only the checked types match.",
+      "clear": "Clear",
+      "allTypes": "All types",
+      "otherTypes": "Other types still watched:"
+    },
+    "severity": {
+      "label": "Minimum severity",
+      "hints": {
+        "info": "Every alert, information included",
+        "warning": "Warnings and critical alerts",
+        "critical": "Critical alerts only"
+      }
+    },
+    "vessels": {
+      "label": "Vessels",
+      "none": "Every vessel in scope",
+      "add": "Add vessel",
+      "search": "Search vessels",
+      "searchPlaceholder": "Vessel name, IMO or MMSI…",
+      "noResults": "No vessel matches",
+      "results": "Search results",
+      "addMmsi": "Add MMSI {{mmsi}}",
+      "unknown": "Vessel",
+      "remove": "Remove {{name}} from the filter"
+    },
+    "zones": {
+      "label": "Zones",
+      "none": "Any location",
+      "add": "Add zone",
+      "search": "Search zones",
+      "searchPlaceholder": "Zone name or code…",
+      "noResults": "No zone matches",
+      "remove": "Remove zone {{name}} from the filter"
+    },
+    "channelsTitle": "Notification channels",
+    "channelsDescription": "Where matching alerts are sent. Use Test to make sure each target receives messages.",
+    "quietTitle": "Quiet period",
+    "quietDescription": "Once the rule notified an alert, later occurrences of the same alert are not notified again within this period — unless its severity rises.",
+    "quietLabel": "Quiet period in minutes",
+    "minutes": "minutes",
+    "quietPresets": {
+      "0": "None",
+      "15": "15 min",
+      "60": "1 hour",
+      "240": "4 hours",
+      "1440": "1 day"
+    },
+    "errors": {
+      "nameRequired": "Enter a rule name",
+      "nameTooLong": "At most {{max}} characters",
+      "quietInvalid": "Enter a whole number of 0–{{max}} minutes"
+    },
+    "create": "Create rule",
+    "created": "Rule \"{{name}}\" created",
+    "saved": "Rule \"{{name}}\" saved",
+    "saveFailed": "The rule could not be saved"
+  },
+  "webhook": {
+    "open": "Webhook guide",
+    "toggle": "How to verify webhook signatures",
+    "dialogTitle": "Verifying AIS Maritime Intelligence webhooks",
+    "dialogDescription": "Every webhook delivery is signed so receivers can make sure it is genuine and unaltered.",
+    "title": "HMAC-SHA256 signature",
+    "intro": "The platform POSTs application/json to your URL with the headers below. Refuse requests whose signature does not match or whose timestamp is stale.",
+    "headers": {
+      "timestamp": "Signing time (Unix seconds).",
+      "signature": "sha256=<hex HMAC-SHA256(secret of the key, \"<timestamp>.<raw body>\")>.",
+      "delivery": "Delivery id — use it to ignore retries of the same delivery.",
+      "keyId": "The key that signed: the channel's keyId (UUID), deployment (a channel from before version 0.2.0) or test (a test notification to another target)."
+    },
+    "steps": {
+      "raw": "Read the raw body exactly as received, before parsing JSON.",
+      "hmac": "Pick the secret by X-AIS-ITS-Key-Id, then compute HMAC-SHA256 over \"<timestamp>.<raw body>\".",
+      "compare": "Compare it with X-AIS-ITS-Signature in constant time.",
+      "fresh": "Refuse timestamps more than 5 minutes away from your server clock.",
+      "dedupe": "Answer 2xx quickly; 408, 429, 5xx and timeouts are retried, any other status fails for good."
+    },
+    "body": "Body:",
+    "sample": "{{language}} verification sample",
+    "copyCode": "Copy the code sample",
+    "secretTitle": "Signing secret",
+    "secretText": "Every webhook channel has its own secret (whsec_…), shown only once: when the channel is created or when its secret is rotated (the rule's actions menu). Channels from before version 0.2.0 are signed with the deployment secret (key id deployment) until their secret is rotated."
+  },
+  "deliveries": {
+    "title": "Delivery history",
+    "description": "Notifications planned and sent by the rule \"{{name}}\", newest first.",
+    "filter": "Delivery status filter",
+    "filters": {
+      "all": "All",
+      "sent": "Sent",
+      "queued": "Queued",
+      "pending": "Pending",
+      "failed": "Failed"
+    },
+    "status": {
+      "pending": "Waiting for an attempt",
+      "sending": "Sending",
+      "queued": "Queued",
+      "sent": "Sent",
+      "failed": "Failed"
+    },
+    "attempts_one": "{{count}} attempt",
+    "attempts_other": "{{count}} attempts",
+    "nextAttempt": "Next attempt {{time}}",
+    "openAlert": "Open alert",
+    "retryHint": "Retries with exponential backoff",
+    "listLabel": "Deliveries",
+    "empty": "No deliveries yet",
+    "emptyFiltered": "No deliveries with this status",
+    "emptyHint": "Deliveries appear here when an alert matching this rule occurs."
+  },
+  "test": {
+    "title": "Send a test notification",
+    "description": "A test message goes to every channel of the rule \"{{name}}\" without raising an alert.",
+    "listLabel": "Rule channels",
+    "notSent": "Not sent yet",
+    "hint": "Limit: 10 test notifications per user every 10 minutes. E-mails are queued for delivery.",
+    "sendAll": "Send to every channel"
+  },
+  "problems": {
+    "ALERT_RULE_NOT_FOUND": "The rule was not found or has been deleted.",
+    "RULE_SCOPE_FORBIDDEN": "Rules watching every vessel can only be created or changed by authority members of their organization.",
+    "ORGANIZATION_REQUIRED": "Choose an active organization first.",
+    "CHANNEL_NOT_CONFIGURED": "This channel is not configured on the server (Telegram bot token or webhook secret). Contact the platform administrator.",
+    "RATE_LIMITED": "Too many test notifications. Try again in {{seconds}} seconds.",
+    "VALIDATION_FAILED": "Check the rule fields.",
+    "CONFLICT": "Someone else changed the rule. Reload and try again.",
+    "RULE_CHANNEL_NOT_FOUND": "This channel no longer exists. Reload the rule and try again.",
+    "RULE_CHANNEL_NOT_WEBHOOK": "Only webhook channels have a signing secret."
   }
 }

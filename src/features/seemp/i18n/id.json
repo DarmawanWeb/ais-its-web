@@ -1,14 +1,287 @@
 {
-  "seemp": {
-    "title": "SEEMP",
-    "description": "Ship Energy Efficiency Management Plan: rekomendasi langkah efisiensi energi dan simulasi dampaknya terhadap CII.",
-    "capabilities": [
-      "Rekomendasi langkah SEEMP per kapal",
-      "Simulasi faktor reduksi (seemp:simulate)",
-      "Grafik proyeksi CII per tahun"
-    ]
-  },
   "nav": {
     "seemp": "SEEMP"
+  },
+  "seemp": {
+    "title": "SEEMP",
+    "description": "Ship Energy Efficiency Management Plan: rekomendasi langkah efisiensi energi per kapal, simulasi dampaknya terhadap CII serta biaya dan manfaatnya.",
+    "tabs": "Bagian SEEMP",
+    "tab": {
+      "vessels": "Kapal",
+      "measures": "Katalog langkah",
+      "scenarios": "Skenario tersimpan"
+    }
+  },
+  "units": {
+    "cii": "g CO₂/kap·nm"
+  },
+  "grade": {
+    "none": "Belum ada peringkat",
+    "aria": "Peringkat CII {{grade}} ({{label}})",
+    "to": "menjadi",
+    "up": "naik {{count}} peringkat",
+    "down": "turun {{count}} peringkat"
+  },
+  "categories": {
+    "technical": "Teknis",
+    "operational": "Operasional",
+    "fuel": "Bahan bakar",
+    "energy": "Sumber energi"
+  },
+  "measureNames": {
+    "air_lubrication": {
+      "name": "Pelumasan rongga udara lambung",
+      "description": "Lapisan udara di bawah lambung mengurangi hambatan gesek air."
+    },
+    "resistance_reduction_devices": {
+      "name": "Perangkat pengurang hambatan",
+      "description": "Modifikasi dan pemasangan perangkat pengurang hambatan pada lambung kapal."
+    },
+    "hull_coating": {
+      "name": "Pemeliharaan pelapis lambung",
+      "description": "Pengecatan ulang dan pembersihan lambung agar permukaan tetap licin."
+    },
+    "power_system_machinery": {
+      "name": "Pembangkit listrik kecepatan variabel",
+      "description": "Putaran mesin pembangkit menyesuaikan beban listrik kapal."
+    },
+    "propulsion_efficiency_devices": {
+      "name": "Perangkat efisiensi propulsi",
+      "description": "Perangkat di sekitar baling-baling (mis. pre-swirl stator) untuk menaikkan efisiensi dorong."
+    },
+    "waste_heat_recovery": {
+      "name": "Pemanfaatan panas buang",
+      "description": "Panas buang mesin diubah menjadi energi yang berguna di kapal."
+    },
+    "lng": {
+      "name": "LNG untuk mesin induk dan bantu",
+      "description": "Konversi bahan bakar ke LNG dengan faktor konversi CO₂ yang lebih rendah."
+    },
+    "biofuel": {
+      "name": "Biofuel untuk mesin induk dan bantu",
+      "description": "Penggunaan biofuel sebagai pengganti bahan bakar fosil."
+    },
+    "solar": {
+      "name": "Panel surya",
+      "description": "Energi surya memasok sebagian kebutuhan listrik kapal."
+    },
+    "wind": {
+      "name": "Tenaga angin",
+      "description": "Energi angin memasok sebagian kebutuhan listrik kapal."
+    },
+    "cold_ironing": {
+      "name": "Cold ironing (listrik darat)",
+      "description": "Listrik dari darat saat sandar menggantikan mesin bantu di pelabuhan."
+    },
+    "fuel_cells": {
+      "name": "Sel bahan bakar",
+      "description": "Sel bahan bakar memasok kebutuhan listrik kapal."
+    }
+  },
+  "methodsUsed": "Metode:",
+  "problems": {
+    "notAvailable": {
+      "title": "Belum ada CII dasar untuk kapal ini",
+      "description": "Rekomendasi SEEMP memerlukan CII tahun dasar (dari segmen pelayaran atau catatan manual). Periksa riwayat CII kapal atau isi catatan manual tahun sebelumnya."
+    },
+    "vesselNotFound": {
+      "title": "Kapal tidak ditemukan",
+      "description": "Tidak ada kapal dengan MMSI ini di layanan emisi. Periksa MMSI kapal."
+    },
+    "forbidden": {
+      "title": "Data kapal ini milik organisasi lain",
+      "description": "SEEMP bersifat privat per organisasi. Beralihlah ke organisasi pemilik kapal untuk melihatnya."
+    },
+    "reductionFactorMissing": {
+      "title": "Faktor reduksi Z belum tersedia",
+      "description": "CII yang disyaratkan untuk tahun target tidak dapat dihitung. Pilih tahun target lain atau minta administrator platform menambahkan faktor Z."
+    },
+    "measureUnknown": {
+      "title": "Langkah tidak dikenal",
+      "description": "Salah satu langkah yang dipilih tidak ada di katalog layanan. Muat ulang halaman lalu pilih kembali."
+    },
+    "incompatible": {
+      "title": "Kombinasi langkah tidak valid",
+      "description": "Hanya satu penggantian bahan bakar (LNG atau biofuel) yang dapat disimulasikan sekaligus."
+    },
+    "scenarioNotFound": {
+      "title": "Skenario tidak ditemukan",
+      "description": "Skenario ini sudah dihapus atau milik organisasi lain."
+    },
+    "validation": {
+      "title": "Data tidak valid",
+      "description": "Periksa kembali isian lalu coba lagi."
+    }
+  },
+  "reduction": {
+    "operational": "Reduksi CII hingga {{p}}%, sebanding dengan porsi waktu berlayar",
+    "fuelSwitch": "Ganti bahan bakar: C_F {{cf}} t CO₂/t bahan bakar",
+    "coldIroning": "Listrik darat saat sandar: BBM mesin bantu berkurang selama di pelabuhan ({{share}}% potensi)",
+    "auxiliary": "Menggantikan {{share}}% BBM mesin bantu"
+  },
+  "cost": {
+    "loaUpTo": "LOA ≤ {{m}} m",
+    "loaAbove": "LOA > {{m}} m",
+    "wettedSurface": "{{usd}} per m² permukaan basah",
+    "powerBoth": "{{usd}} per kW daya mesin induk + bantu",
+    "powerMain": "{{usd}} per kW daya mesin induk",
+    "powerAux": "{{usd}} per kW daya mesin bantu"
+  },
+  "catalog": {
+    "title": "Katalog 12 langkah SEEMP",
+    "description": "Langkah efisiensi energi beserta model reduksi, biaya investasi dan sumbernya. Biaya tahunan per kapal = investasi dibagi tahun hingga peringkat jatuh ke D/E.",
+    "legacyOrder": "Langkah {{order}}",
+    "savings": "Penghematan",
+    "investment": "Investasi",
+    "source": "Sumber",
+    "note": "Nilai potensi dan biaya berasal dari model MVP (tesis) dan ditandai perlu sitasi di katalog metodologi.",
+    "emptyTitle": "Katalog langkah kosong",
+    "emptyDescription": "Layanan emisi belum memiliki langkah SEEMP. Hubungi administrator platform."
+  },
+  "recommendations": {
+    "title": "Rekomendasi langkah",
+    "description": "Langkah yang mempertahankan kapal pada peringkat A–C di {{year}}, diurutkan dari biaya tahunan termurah.",
+    "rank": "Peringkat rekomendasi {{rank}}",
+    "reduction": "Perubahan CII",
+    "ratingAfter": "Rasio setelah",
+    "costPerYear": "Biaya/tahun",
+    "amortization": "Amortisasi",
+    "years": "{{count}} tahun",
+    "select": "Simulasikan",
+    "emptyTitle": "Tidak ada langkah yang mencapai peringkat A–C",
+    "emptyDescription": "Tidak satu pun langkah tunggal membuat kapal berperingkat A–C. Coba kombinasi beberapa langkah di panel simulasi."
+  },
+  "simulation": {
+    "title": "Simulasi langkah",
+    "description": "Pilih langkah lalu jalankan simulasi untuk melihat CII, peringkat, biaya dan manfaat gabungannya.",
+    "choose": "Langkah yang disimulasikan",
+    "clear": "Kosongkan",
+    "incompatible": "LNG dan biofuel sama-sama mengganti bahan bakar: pilih salah satu saja.",
+    "run": "Simulasikan {{count}} langkah",
+    "result": "Hasil simulasi",
+    "stale": "Pilihan berubah; jalankan ulang simulasi",
+    "before": "Sebelum ({{year}})",
+    "after": "Sesudah ({{year}})",
+    "ratingShort": "rasio",
+    "reduction": "Reduksi CII",
+    "costPerYear": "Biaya per tahun",
+    "amortization": "Amortisasi",
+    "costPerPercent": "Biaya per 1% reduksi",
+    "co2Avoided": "CO₂ dihindari/tahun",
+    "co2Unknown": "CO₂ tahun dasar tidak diketahui",
+    "costPerTonne": "Biaya per t CO₂",
+    "fuelAfter": "Bahan bakar setelah langkah",
+    "readOnlyTitle": "Simulasi tidak tersedia untuk peran Anda",
+    "readOnlyDescription": "Menjalankan dan menyimpan simulasi memerlukan izin seemp:simulate (pengelola armada atau admin organisasi)."
+  },
+  "scenarios": {
+    "title": "Skenario tersimpan",
+    "description": "Semua skenario simulasi organisasi, terbaru lebih dulu. Pilih hingga tiga skenario untuk dibandingkan.",
+    "vesselTitle": "Skenario kapal ini",
+    "vesselDescription": "Simulasi yang disimpan untuk kapal ini. Pilih hingga tiga skenario untuk dibandingkan.",
+    "tableLabel": "Skenario SEEMP tersimpan",
+    "name": "Nama skenario",
+    "namePlaceholder": "Misalnya: Paket teknis 2026",
+    "save": "Simpan skenario",
+    "saved": "Skenario \"{{name}}\" disimpan",
+    "saveFailed": "Skenario gagal disimpan",
+    "measures": "Langkah",
+    "vessel": "Kapal",
+    "grade": "Peringkat",
+    "reduction": "Reduksi",
+    "costPerYear": "Biaya/tahun",
+    "years": "Dasar → target",
+    "created": "Dibuat",
+    "actions": "Tindakan",
+    "view": "Lihat skenario {{name}}",
+    "viewDescription": "Tahun dasar {{baseline}} → tahun target {{target}} · disimpan {{time}}. Hasil adalah simulasi saat disimpan.",
+    "delete": "Hapus skenario {{name}}",
+    "deleteTitle": "Hapus skenario?",
+    "deleteDescription": "Skenario \"{{name}}\" akan dihapus permanen. Tindakan ini dicatat di log audit.",
+    "deleteConfirm": "Hapus",
+    "deleted": "Skenario \"{{name}}\" dihapus",
+    "deleteFailed": "Skenario gagal dihapus",
+    "emptyTitle": "Belum ada skenario tersimpan",
+    "emptyDescription": "Jalankan simulasi di halaman kapal lalu simpan hasilnya sebagai skenario.",
+    "emptyReadOnly": "Skenario dibuat oleh pengelola armada dari halaman simulasi kapal."
+  },
+  "compare": {
+    "title": "Perbandingan skenario",
+    "description": "Skenario berdampingan; hasil adalah simulasi saat masing-masing disimpan.",
+    "metric": "Metrik",
+    "select": "Pilih untuk dibandingkan",
+    "selectScenario": "Bandingkan {{name}}",
+    "button": "Bandingkan ({{count}})",
+    "hint": "Pilih 2–{{max}} skenario",
+    "selected": "{{count}} skenario dipilih",
+    "grade": "Peringkat",
+    "ratingAfter": "Rasio setelah",
+    "reduction": "Reduksi CII",
+    "best": "terbesar",
+    "costPerYear": "Biaya per tahun",
+    "cheapest": "termurah",
+    "costPerPercent": "Biaya per 1% reduksi",
+    "amortization": "Amortisasi",
+    "fuelAfter": "Bahan bakar setelah",
+    "years": "Dasar → target"
+  },
+  "vessels": {
+    "title": "Kapal armada ({{year}})",
+    "description": "Pilih kapal untuk melihat rekomendasi langkah dan menjalankan simulasi. Peringkat adalah CII tahun berjalan.",
+    "tableLabel": "Kapal untuk SEEMP",
+    "openByMmsi": "Buka kapal berdasarkan MMSI",
+    "open": "Buka",
+    "vessel": "Kapal",
+    "grade": "Peringkat",
+    "rating": "Rasio",
+    "action": "Tindakan",
+    "recommendations": "Rekomendasi",
+    "emptyTitle": "Belum ada kapal di armada ini",
+    "emptyDescription": "Tambahkan kapal di modul Kapal; rekomendasi tersedia setelah CII-nya dihitung.",
+    "noFleetTitle": "Daftar armada tidak tersedia",
+    "noFleetDescription": "Daftar memerlukan izin cii:read. Buka kapal langsung dengan MMSI-nya.",
+    "attained": "CII tercapai",
+    "priority": "Prioritas"
+  },
+  "vessel": {
+    "title": "SEEMP kapal",
+    "fallbackTitle": "Kapal MMSI {{mmsi}}",
+    "back": "Kembali ke SEEMP",
+    "invalidTitle": "MMSI tidak valid",
+    "invalidDescription": "MMSI harus terdiri dari 9 digit.",
+    "baselineYear": "Tahun dasar",
+    "targetYear": "Tahun target",
+    "auto": "Otomatis",
+    "cii": "CII kapal",
+    "openCii": "Buka CII kapal"
+  },
+  "baseline": {
+    "attained": "CII dasar ({{year}})",
+    "manual": "Catatan manual",
+    "required": "CII disyaratkan {{year}}",
+    "rating": "Rasio sebelum",
+    "ratingDescription": "Catatan tahun {{year}}",
+    "grade": "Peringkat sebelum",
+    "gradeDescription": "Peringkat tahun {{year}}, titik awal rekomendasi"
+  },
+  "kpi": {
+    "needAction": "Perlu rencana korektif",
+    "needActionDescription": "Kapal berperingkat D atau E pada {{year}}",
+    "measures": "Langkah efisiensi",
+    "measuresDescription": "Langkah teknis, operasional, bahan bakar dan energi bantu",
+    "scenarios": "Skenario tersimpan",
+    "scenariosDescription": "Simulasi yang disimpan organisasi",
+    "rated": "Kapal berperingkat",
+    "ratedDescription": "Memiliki peringkat CII {{year}}"
+  },
+  "priority": {
+    "corrective": "Rencana korektif",
+    "monitor": "Pantau",
+    "compliant": "Sesuai target",
+    "noData": "Belum ada data CII",
+    "correctiveHint": "Peringkat D atau E: wajib rencana tindakan korektif di SEEMP Bagian III.",
+    "monitorHint": "Peringkat C: memenuhi CII yang disyaratkan tanpa margin; CII yang disyaratkan makin ketat tiap tahun.",
+    "compliantHint": "Peringkat A atau B: lebih baik dari yang disyaratkan.",
+    "noDataHint": "Belum ada segmen terhitung maupun catatan manual untuk tahun ini."
   }
 }

@@ -3,20 +3,27 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Emission Service
  * Fuel and CO2 per voyage segment, IMO CII (daily/annual, rating A-E), reduction factors, SEEMP recommendations and what-if simulation, IMO DCS summary
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
-import type { SeempSimulationDto } from './seempSimulationDto';
+import type { SeempScenarioResultDto } from './seempScenarioResultDto';
 
 export interface SeempScenarioDto {
   id: string;
   mmsi: number;
   vesselId: string;
+  /**
+   * Current name of the vessel (FLEET projection); null once the vessel is no longer known
+   * @nullable
+   */
+  vesselName: string | null;
   name: string;
   measureCodes: string[];
   baselineYear: number;
   targetYear: number;
-  /** Simulation result at creation time */
-  result: SeempSimulationDto;
+  /** The simulation response at creation time, stored as it was (not recomputed): scenarios saved before 0.2.0 lack vessel, baselineCo2Ton, co2AvoidedTon and costPerTonneUsd */
+  result: SeempScenarioResultDto;
   createdBy: string;
   createdAt: string;
+  /** Last change (creation or rename) */
+  updatedAt: string;
 }

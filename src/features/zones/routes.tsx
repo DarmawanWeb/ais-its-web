@@ -15,6 +15,16 @@ export const feature = defineFeature({
       handle: { titleKey: 'zones:zones.title', permission: 'zone:read' },
       lazy: lazyPage(() => import('./pages/zones-page'), 'ZonesPage'),
     },
+    {
+      path: 'zones/new',
+      handle: { titleKey: 'zones:editor.newTitle', permission: 'zone:write', layout: 'full-bleed' },
+      lazy: lazyPage(() => import('./pages/zone-editor-page'), 'ZoneEditorPage'),
+    },
+    {
+      path: 'zones/:id',
+      handle: { titleKey: 'zones:editor.title', permission: 'zone:read', layout: 'full-bleed' },
+      lazy: lazyPage(() => import('./pages/zone-editor-page'), 'ZoneEditorPage'),
+    },
   ],
   nav: [
     {
@@ -25,7 +35,7 @@ export const feature = defineFeature({
       labelKey: 'zones:nav.zones',
       icon: Hexagon,
       permission: 'zone:read',
-      keywords: ['zona', 'zone', 'geofence', 'pipa'],
+      keywords: ['zona', 'zone', 'geofence', 'pipa', 'labuh', 'pelabuhan', 'geojson'],
     },
   ],
 });

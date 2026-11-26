@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Telemetry Service
  * Fuel consumption telemetry: readings ingest over REST and MQTT, device registry, queries and status; publishes fuel.reading.recorded.v1
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import { useMutation, useQuery } from '@tanstack/react-query';
 import type {
@@ -28,6 +28,8 @@ import type {
   DevicesControllerListParams,
   ProblemDetails,
   UpdateDeviceDto,
+  VesselDevicesControllerList200,
+  VesselDevicesControllerListParams,
 } from '../model';
 
 import { apiClient } from '../../../mutator';
@@ -570,3 +572,158 @@ export const useDevicesControllerRemove = <TError = ErrorType<ProblemDetails>, T
 > => {
   return useMutation(getDevicesControllerRemoveMutationOptions(options), queryClient);
 };
+/**
+ * The devices the vessel’s organization registered on it, by name: id, name, kind, status and lastSeenAt, never credentials. The vessel must belong to the caller’s organization (platform administrators: any); the devices are those counted by GET /telemetry/vessels.
+ * @summary Devices of a vessel (read-only)
+ */
+export const vesselDevicesControllerList = (
+  mmsi: string,
+  params?: VesselDevicesControllerListParams,
+  options?: SecondParameter<typeof apiClient>,
+  signal?: AbortSignal,
+) => {
+  return apiClient<VesselDevicesControllerList200>(
+    { url: `/api/v2/telemetry/vessels/${mmsi}/devices`, method: 'GET', params, signal },
+    options,
+  );
+};
+
+export const getVesselDevicesControllerListQueryKey = (
+  mmsi: string,
+  params?: VesselDevicesControllerListParams,
+) => {
+  return [`/api/v2/telemetry/vessels/${mmsi}/devices`, ...(params ? [params] : [])] as const;
+};
+
+export const getVesselDevicesControllerListQueryOptions = <
+  TData = Awaited<ReturnType<typeof vesselDevicesControllerList>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  mmsi: string,
+  params?: VesselDevicesControllerListParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof vesselDevicesControllerList>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getVesselDevicesControllerListQueryKey(mmsi, params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof vesselDevicesControllerList>>> = ({
+    signal,
+  }) => vesselDevicesControllerList(mmsi, params, requestOptions, signal);
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: mmsi !== null && mmsi !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<Awaited<ReturnType<typeof vesselDevicesControllerList>>, TError, TData> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+};
+
+export type VesselDevicesControllerListQueryResult = NonNullable<
+  Awaited<ReturnType<typeof vesselDevicesControllerList>>
+>;
+export type VesselDevicesControllerListQueryError = ErrorType<ProblemDetails>;
+
+/**
+ * The devices the vessel’s organization registered on it, by name: id, name, kind, status and lastSeenAt, never credentials. The vessel must belong to the caller’s organization (platform administrators: any); the devices are those counted by GET /telemetry/vessels.
+ * @summary Devices of a vessel (read-only)
+ */
+export function useVesselDevicesControllerList<
+  TData = Awaited<ReturnType<typeof vesselDevicesControllerList>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  mmsi: string,
+  params: undefined | VesselDevicesControllerListParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof vesselDevicesControllerList>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof vesselDevicesControllerList>>,
+          TError,
+          Awaited<ReturnType<typeof vesselDevicesControllerList>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * The devices the vessel’s organization registered on it, by name: id, name, kind, status and lastSeenAt, never credentials. The vessel must belong to the caller’s organization (platform administrators: any); the devices are those counted by GET /telemetry/vessels.
+ * @summary Devices of a vessel (read-only)
+ */
+export function useVesselDevicesControllerList<
+  TData = Awaited<ReturnType<typeof vesselDevicesControllerList>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  mmsi: string,
+  params?: VesselDevicesControllerListParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof vesselDevicesControllerList>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof vesselDevicesControllerList>>,
+          TError,
+          Awaited<ReturnType<typeof vesselDevicesControllerList>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * The devices the vessel’s organization registered on it, by name: id, name, kind, status and lastSeenAt, never credentials. The vessel must belong to the caller’s organization (platform administrators: any); the devices are those counted by GET /telemetry/vessels.
+ * @summary Devices of a vessel (read-only)
+ */
+export function useVesselDevicesControllerList<
+  TData = Awaited<ReturnType<typeof vesselDevicesControllerList>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  mmsi: string,
+  params?: VesselDevicesControllerListParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof vesselDevicesControllerList>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * The devices the vessel’s organization registered on it, by name: id, name, kind, status and lastSeenAt, never credentials. The vessel must belong to the caller’s organization (platform administrators: any); the devices are those counted by GET /telemetry/vessels.
+ * @summary Devices of a vessel (read-only)
+ */
+export function useVesselDevicesControllerList<
+  TData = Awaited<ReturnType<typeof vesselDevicesControllerList>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  mmsi: string,
+  params?: VesselDevicesControllerListParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof vesselDevicesControllerList>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getVesselDevicesControllerListQueryOptions(mmsi, params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}

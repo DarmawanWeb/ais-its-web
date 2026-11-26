@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Emission Service
  * Fuel and CO2 per voyage segment, IMO CII (daily/annual, rating A-E), reduction factors, SEEMP recommendations and what-if simulation, IMO DCS summary
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import { useMutation, useQuery } from '@tanstack/react-query';
 import type {
@@ -256,4 +256,91 @@ export const useReductionFactorsControllerPut = <
   TContext
 > => {
   return useMutation(getReductionFactorsControllerPutMutationOptions(options), queryClient);
+};
+/**
+ * Only the first or the last year of the table can be removed (409 REDUCTION_FACTOR_TABLE_GAP otherwise: the SEEMP cost model needs Z for every year up to the last one), and only while no vessel has CII data (segments or a manual record) for the year (409 REDUCTION_FACTOR_IN_USE: correct the value with PUT instead). Audited as reduction_factor.delete.
+ * @summary Remove the reduction factor of a year that no CII figure uses
+ */
+export const reductionFactorsControllerRemove = (
+  year: number,
+  options?: SecondParameter<typeof apiClient>,
+  signal?: AbortSignal,
+) => {
+  return apiClient<void>(
+    { url: `/api/v2/reduction-factors/${year}`, method: 'DELETE', signal },
+    options,
+  );
+};
+
+export const getReductionFactorsControllerRemoveMutationKey = () =>
+  ['reductionFactorsControllerRemove'] as const;
+
+export const getReductionFactorsControllerRemoveMutationOptions = <
+  TError = ErrorType<void | ProblemDetails>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof reductionFactorsControllerRemove>>,
+    TError,
+    ReductionFactorsControllerRemoveMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof apiClient>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof reductionFactorsControllerRemove>>,
+  TError,
+  ReductionFactorsControllerRemoveMutationVariables,
+  TContext
+> => {
+  const mutationKey = getReductionFactorsControllerRemoveMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof reductionFactorsControllerRemove>>,
+    ReductionFactorsControllerRemoveMutationVariables
+  > = (props) => {
+    const { year } = props ?? {};
+
+    return reductionFactorsControllerRemove(year, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ReductionFactorsControllerRemoveMutationResult = NonNullable<
+  Awaited<ReturnType<typeof reductionFactorsControllerRemove>>
+>;
+
+export type ReductionFactorsControllerRemoveMutationError = ErrorType<void | ProblemDetails>;
+export type ReductionFactorsControllerRemoveMutationVariables = { year: number };
+
+/**
+ * Only the first or the last year of the table can be removed (409 REDUCTION_FACTOR_TABLE_GAP otherwise: the SEEMP cost model needs Z for every year up to the last one), and only while no vessel has CII data (segments or a manual record) for the year (409 REDUCTION_FACTOR_IN_USE: correct the value with PUT instead). Audited as reduction_factor.delete.
+ * @summary Remove the reduction factor of a year that no CII figure uses
+ */
+export const useReductionFactorsControllerRemove = <
+  TError = ErrorType<void | ProblemDetails>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof reductionFactorsControllerRemove>>,
+      TError,
+      ReductionFactorsControllerRemoveMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof reductionFactorsControllerRemove>>,
+  TError,
+  ReductionFactorsControllerRemoveMutationVariables,
+  TContext
+> => {
+  return useMutation(getReductionFactorsControllerRemoveMutationOptions(options), queryClient);
 };

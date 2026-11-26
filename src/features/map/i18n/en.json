@@ -3,29 +3,181 @@
     "live": "Live Map"
   },
   "title": "Live Map",
-  "panel": {
-    "title": "Live Map",
-    "subtitle": "Realtime AIS positions in the current view",
+  "mapLabel": "Live map of vessel positions",
+  "status": {
+    "connected": "Live",
+    "connecting": "Connecting…",
+    "reconnecting": "Reconnecting…",
+    "disconnected": "Disconnected",
+    "idle": "Inactive",
+    "error": "Connection failed",
+    "vessels_one": "vessel",
+    "vessels_other": "vessels",
+    "vesselsOf_one": "of {{total}} vessel in view",
+    "vesselsOf_other": "of {{total}} vessels in view",
+    "lod": {
+      "cluster": "Clusters",
+      "dot": "Dots"
+    }
+  },
+  "search": {
+    "label": "Search vessels by name or MMSI",
+    "placeholder": "Search vessel name or MMSI…",
+    "results": "Vessel search results",
+    "searching": "Searching…",
+    "empty": "No matching vessels.",
+    "onMap": "On the map",
+    "fleet": "Fleet registry",
+    "noPosition": "There is no recent AIS position for MMSI {{mmsi}}.",
+    "locateFailed": "The vessel position could not be loaded. Try again."
+  },
+  "controls": {
+    "title": "Layers & filters",
+    "activeFilters_one": "{{count}} filter",
+    "activeFilters_other": "{{count}} filters",
+    "layers": "Layers",
+    "filters": "Filters"
+  },
+  "layers": {
     "vessels": "Vessels",
-    "zoom": "Zoom",
-    "connection": "Link",
-    "hint": "Click a vessel to see its details."
+    "vesselsHint": "Realtime AIS positions by data source",
+    "sources": "AIS sources",
+    "zones": "Zones",
+    "zonesHint": "Global zones and your organization's zones",
+    "pipelines": "Subsea pipelines",
+    "pipelinesHint": "Pipeline corridors emphasised",
+    "zonesTruncated": "Organization zones were cut by the service budgets. Zoom in to see all of them.",
+    "encounters": "Risky encounters",
+    "encountersHint": "Pair lines and CPA points (medium/high risk)",
+    "events": "Surveillance events",
+    "eventsHint": "Events of the last 24 hours by type",
+    "eventTypes": "Event types",
+    "heatmap": "Fishing heatmap",
+    "heatmapHint": "Density of fishing events over 30 days"
+  },
+  "sources": {
+    "primary": "Primary",
+    "batam": "Batam",
+    "pusher": "Pusher"
+  },
+  "filters": {
+    "safety": "Safety state",
+    "types": "Vessel type",
+    "navstatus": "Navigational status",
+    "reset": "Reset filters"
+  },
+  "safety": {
+    "ewsDanger": "EWS danger",
+    "ewsWarning": "EWS warning",
+    "collisionHigh": "High collision risk",
+    "collisionMedium": "Medium collision risk",
+    "normal": "Normal"
+  },
+  "categories": {
+    "bulkca": "Bulk carrier",
+    "combin": "Combination carrier",
+    "contai": "Container ship",
+    "cruise": "Cruise ship",
+    "gascar": "Gas carrier",
+    "genera": "General cargo",
+    "lngcar": "LNG carrier",
+    "refrig": "Refrigerated cargo",
+    "ro-roc": "Ro-ro cargo",
+    "ro-rop": "Ro-ro passenger",
+    "ro-rov": "Vehicle carrier",
+    "tanker": "Tanker",
+    "unknown": "Unknown"
+  },
+  "legend": {
+    "title": "Legend",
+    "normal": "Vessel (heading)",
+    "selected": "Selected vessel",
+    "pipeline": "Subsea pipeline",
+    "restricted": "Restricted zone",
+    "anchorage": "Anchorage",
+    "transhipment": "Transhipment area",
+    "encounter": "Encounter & CPA point",
+    "events": "Surveillance event (letter = type)",
+    "heatmap": "Fishing density",
+    "methods": "Methods",
+    "fishingGround": "Fishing ground"
+  },
+  "tooltip": {
+    "lastSeen": "Last seen {{time}}",
+    "globalZone": "global zone",
+    "orgZone": "organization zone"
+  },
+  "encounters": {
+    "tooltip": "Encounter {{a}} ↔ {{b}}"
+  },
+  "alertStatus": {
+    "open": "Open",
+    "acknowledged": "Acknowledged",
+    "resolved": "Resolved"
   },
   "vessel": {
     "title": "Vessel details",
     "unknownName": "Unnamed vessel",
+    "flag": "Flag {{flag}}",
+    "ownFleet": "Your fleet",
+    "notInFleet": "Not in the fleet registry",
+    "kinematics": "Live kinematics",
     "position": "Position",
     "sog": "Speed (SOG)",
     "cog": "Course (COG)",
     "heading": "Heading",
+    "updated": "Latest data",
     "navstatus": "Navigational status",
-    "ews": "EWS status",
-    "collision": "Collision risk",
-    "cpa": "CPA",
-    "tcpa": "TCPA",
-    "source": "Source",
-    "updated": "Updated",
     "noData": "Waiting for this vessel's position…",
-    "openVessel": "Open vessel page"
+    "safety": "Safety",
+    "ews": "EWS status",
+    "pipelineDistance": "Distance to pipeline",
+    "nearestPipeline": "Nearest pipeline",
+    "pipelineHidden": "Pipeline zone not visible",
+    "noPipeline": "No pipeline",
+    "collision": "Collision risk",
+    "closestEncounter": "Closest encounter",
+    "noEncounter": "None",
+    "openEws": "Show in EWS",
+    "openCollision": "Collision history",
+    "alerts": "Recent alerts",
+    "alertsUnavailable": "Alerts could not be loaded.",
+    "noAlerts": "No alerts for this vessel.",
+    "links": "Vessel links",
+    "openVessel": "Vessel page",
+    "openCii": "Emissions & CII",
+    "openAlerts": "All vessel alerts"
+  },
+  "track": {
+    "title": "Track history",
+    "show": "Show",
+    "range": "Track range",
+    "speed": "Playback speed",
+    "empty": "No positions in this range.",
+    "restart": "Back to the start",
+    "play": "Play the track",
+    "pause": "Pause",
+    "position": "Track playback time",
+    "time": "Time",
+    "distance": "Length",
+    "points_one": "{{count}} point",
+    "points_other": "{{count}} points",
+    "resolutionRaw": "raw positions",
+    "resolution1m": "1-minute aggregate",
+    "simplified": "simplified {{meters}} m",
+    "truncated": "Track truncated: only the newest points are shown.",
+    "ranges": {
+      "1h": "Last hour",
+      "6h": "Last 6 hours",
+      "24h": "Last 24 hours",
+      "3d": "Last 3 days",
+      "7d": "Last 7 days"
+    }
+  },
+  "problems": {
+    "trackRange": "The track range could not be processed",
+    "trackRangeDetail": "Raw positions cover up to 7 days and the 1-minute aggregate up to 90 days. Choose a shorter range.",
+    "noPosition": "No position of this vessel yet",
+    "noPositionDetail": "This vessel has not sent a recorded AIS position."
   }
 }

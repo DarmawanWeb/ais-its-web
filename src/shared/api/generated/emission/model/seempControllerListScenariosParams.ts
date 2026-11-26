@@ -3,11 +3,15 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Emission Service
  * Fuel and CO2 per voyage segment, IMO CII (daily/annual, rating A-E), reduction factors, SEEMP recommendations and what-if simulation, IMO DCS summary
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
+import type { SeempControllerListScenariosSort } from './seempControllerListScenariosSort';
 
 export type SeempControllerListScenariosParams = {
-  /** @minimum 1 */
+  /**
+   * @minimum 1
+   * @maximum 1000000
+   */
   page?: number;
   /**
    * @minimum 1
@@ -15,4 +19,11 @@ export type SeempControllerListScenariosParams = {
    */
   pageSize?: number;
   mmsi?: number;
+  /**
+   * Scenario or vessel name (case-insensitive substring), or MMSI (prefix of digits)
+   * @maxLength 120
+   */
+  search?: string;
+  /** Order; a leading `-` sorts descending (default newest first); ties newest first. Scenarios of vessels no longer known come last by vesselName */
+  sort?: SeempControllerListScenariosSort;
 };

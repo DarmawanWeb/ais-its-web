@@ -6,7 +6,88 @@ All notable changes to this project are documented in this file. The format foll
 
 ## [Unreleased]
 
+### Added
+
+- Every feature module of the first release (see the README feature table): live map, alerts
+  and the top bar bell, pipeline EWS, collision risk, surveillance overview / transhipment /
+  fishing / dark vessels / navstatus anomalies, zones and the zone editor, dashboard, vessels,
+  CII, SEEMP, telemetry, alert rules, administration (organizations, members, API keys,
+  reference data, devices, audit log), profile and methodology — with component tests, e2e
+  specs and mock gateway modules per feature.
+- Role walkthrough `e2e/roles.spec.ts`: super_admin, org_admin, fleet_manager, authority and
+  viewer open every sidebar entry and the command palette; no 403, no action the role cannot
+  perform, no console error, failed API call or missing translation. Mock accounts
+  `orgadmin@pelni.test`, `petugas@ksop-batam.test`, `viewer@pelni.test` (`ROLE_USERS`).
+- Quality gates: `pnpm i18n:check` (also in `pnpm test`), `pnpm bundle:report`,
+  `pnpm perf:map` (10 000 vessels); development and e2e builds warn on i18n keys that exist in
+  no language.
+- Shared building blocks promoted from the features: `@/shared/api/problem-copy`
+  (`localizeProblem`, `problemSummary`, `problemMessage`, `applyFieldErrors`),
+  `useAppLanguage`, `CopyButton`, `MethodChips`, `useMethodName`, `gradeClassName`, `useNow`,
+  `nowMs` / `currentYear`, `MAP_FONT`, and `NavItem.end` for section overviews.
+- `docs/SCREENSHOTS.md`: gallery of every page by menu section (dark, light, phone).
+
+### Added (foundation, before the features)
+
+- E2E mock gateway for parallel feature work: modules `routes/<feature>.mjs` (named after the
+  feature, checked at start-up) export `routes` (paths with `:param` segments, literal segments
+  win, optional `permission`), `realtime` hooks and `reset`; foundation defaults moved to
+  `e2e/mock-server/base/*.mjs` (incl. `GET /me` and `/organizations`), which a feature route
+  with the same method and path replaces. Helpers `pageOf` / `cursorPageOf` (spec §5), `can`
+  (contracts role matrix), `MockHttpError`.
+- Mock realtime server (`e2e/mock-server/realtime.mjs`, socket.io dev dependency): the spec §9
+  handshake, rooms, `viewport:set` / `vessel:subscribe` acknowledgements and latest-state
+  snapshots, with a validated push API (`positions`, `safety:states`, alerts, `cii:updated`).
+  Test controls `/__mock/realtime` and `/__mock/reset` behind `pushRealtime`,
+  `waitForRealtimeRoom`, `realtimeConnections`, `expectRealtimeConnected` and
+  `resetMockGateway` (`e2e/fixtures.ts`); `e2e/realtime.spec.ts` covers the protocol and the
+  live map; `MOCK_REALTIME_SIMULATE=true` moves the demo vessels for development.
+- Base mock data follows the DTOs (`VesselSummaryDto`, `SafetyVesselStateDto`) and adds
+  `GET /ais/vessels/:mmsi/latest` and `GET /safety/vessels/:mmsi` (the realtime vessel seed).
+
+### Changed
+
+- API clients regenerated from the services' upgraded documents (geo, safety, surveillance,
+  emission, telemetry, ais-pipeline, fleet, notification 0.2): MMSI path parameters are strings,
+  surveillance events are a union typed by `type` (the nullable-field casts are gone), and the
+  UI uses the new fields where they replace workarounds — vessel identities on encounters and
+  safety events, the nearest pipeline's name on safety states, `required` / `previousYear` on
+  the CII fleet summary (no second page request against emission 0.2).
+- The surveillance overview lives at `/surveillance` (`NavItem.end`); `/surveillance/overview`
+  redirects there.
+- `DateRangePicker label` prefixes the trigger's accessible name as hidden text, so the name
+  contains the visible range (WCAG 2.5.3) without wrappers in the features.
+- The map layer registry applies MapLibre registrations made while the style is busy (tiles
+  loading) when the map becomes idle; the live map's workaround hook is gone.
+- Code splitting: the vendor groups no longer capture their dependencies, so Vite's preload
+  helper left `vendor-deckgl` and deck.gl is no longer part of the initial load (2.2 MB →
+  1.24 MB raw, 657 → 388 kB gzip); MapLibre and deck.gl load with map pages only.
+- `findBy*` queries of the unit tests wait up to 4 s (lazy pages under a parallel run).
+- `e2e/screenshots.spec.ts` captures the shell (login); the pages come from the features'
+  screenshot specs.
+
+### Removed
+
+- `PlaceholderPage`, `UnderConstruction` and the placeholder alerts bell (every module is
+  built; the `topbar.alerts` slot renders nothing without an owner), and the feature copies of
+  the shared helpers above (five `localizeProblem`, three `problemMessage`, six contracts
+  locale hooks, six copy buttons, three method chip lists, two grade styles, two map fonts,
+  three clocks, the map's `useNow` and layer workaround, three date-range name workarounds).
+
 ### Fixed
+
+- A full page load no longer restores the scroll position of a different page
+  (`ScrollRestoration getKey`).
+- CII grade badges use near-black text on B, C and D (white failed WCAG AA on those colours).
+- The smoke test's methodology selector matched every "N metode" text.
+
+### Changed (foundation, before the features)
+
+- Playwright: each run builds into `node_modules/.e2e/web-<port>` and writes
+  `test-results/<port>`; ports in use are an error unless `E2E_REUSE_SERVERS=true`, so runs
+  with their own `E2E_WEB_PORT` / `E2E_MOCK_PORT` can proceed in parallel in one checkout.
+
+### Fixed (foundation, before the features)
 
 - Map: MapLibre's web worker is registered (`setWorkerUrl` + `?url` import) before any map is
   created; GeoJSON sources (`useMapLibreLayers`), vector basemaps and `/tiles` render again.
@@ -35,7 +116,7 @@ All notable changes to this project are documented in this file. The format foll
 - nginx: `/assets/` is a `^~` location (hashed fonts get the immutable cache) and missing assets
   answer 404 with `no-store`.
 
-### Changed
+### Changed (foundation review)
 
 - Shell slots `topbar.actions` and `sidebar.footer` take any number of contributions
   (`{ component, order }`); `topbar.alerts` has a single owner and a second claim fails at

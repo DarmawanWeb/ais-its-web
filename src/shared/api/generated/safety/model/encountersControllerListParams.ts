@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Safety Service
  * Navigational safety analytics (pipeline Early Warning System, collision risk CPA/TCPA) built on the Detector SDK
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 
 export type EncountersControllerListParams = {
@@ -21,10 +21,14 @@ export type EncountersControllerListParams = {
   from?: string;
   /** End (ISO-8601); default: now */
   to?: string;
+  /** minLon,minLat,maxLon,maxLat (WGS 84 degrees) */
+  bbox?: string;
   /** Encounters whose highest band in the range is one of these, comma separated (none, low, medium, high) */
   risk?: string;
   /** Either vessel of the pair */
   mmsi?: number;
   /** One encounter */
   encounterId?: string;
+  /** `true`: only active encounters — the newest encounter of its pair, whose latest sample has a band above `none` and is at most `COLLISION_MAX_AGE_S` + `COLLISION_SAMPLE_INTERVAL_S` + 30 s (180 s with the defaults) older than the collision detector’s event clock: the AIS time of its newest evaluation (positions lag the wall clock), never later than the request time. `false`: only ended ones, including an encounter followed by a newer one of the same pair (a takeover or restart starts a pair over with a new `encounterId`). The cursor keeps the first page’s cut-off. */
+  active?: boolean;
 };

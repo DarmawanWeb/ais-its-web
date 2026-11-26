@@ -3,8 +3,10 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Fleet Service
  * Vessel master data and reference data (vessel types, fuels, engines, fuel formulas, ports, registry); publishes VesselSnapshotV1 to the FLEET stream
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
+import type { VesselsControllerListOrder } from './vesselsControllerListOrder';
+import type { VesselsControllerListSort } from './vesselsControllerListSort';
 import type { VesselsControllerListStatus } from './vesselsControllerListStatus';
 
 export type VesselsControllerListParams = {
@@ -28,4 +30,13 @@ export type VesselsControllerListParams = {
   /** Owning organization (platform administrators: any; others: their own) */
   orgId?: string;
   status?: VesselsControllerListStatus;
+  /**
+   * Batch identity lookup: only the vessels with these MMSIs (comma-separated, 1–100; unknown ones are simply absent). Pass a pageSize of at least their number to get all of them in one page.
+   * @pattern ^[0-9]{9}(,[0-9]{9}){0,99}$
+   */
+  mmsi?: string;
+  /** Sort key (ties by name, then id). gt, dwt and builtYear are technical data (spec §8.5): their values order only the vessels whose detail view you receive (your organization; every vessel for platform administrators); the others follow by name, in either order. */
+  sort?: VesselsControllerListSort;
+  /** Direction of `sort`; vessels without a value come last */
+  order?: VesselsControllerListOrder;
 };

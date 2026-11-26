@@ -3,12 +3,13 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Pipeline: processor
  * AIS processing and query API (spec §13.2): latest positions, tracks (raw / 1-minute), pair tracks and live statistics. AIS data is shared across tenants (`ais:read`; API keys with `ais:read`).
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 
 export * from './aisStatsDto';
 export * from './bySourceDto';
 export * from './feedStatsDto';
+export * from './feedTrafficDto';
 export * from './localizedTextDto';
 export * from './methodologyDto';
 export * from './methodReferenceDto';
@@ -18,15 +19,22 @@ export * from './methodSummaryDtoStatus';
 export * from './pairTrackDto';
 export * from './positionsControllerLatestParams';
 export * from './positionsControllerPairTrackParams';
+export * from './positionsControllerPairTrackResolution';
 export * from './positionsControllerTrackParams';
 export * from './positionsControllerTrackResolution';
 export * from './problemDetails';
 export * from './problemDetailsErrorsItem';
+export * from './statsControllerSeriesBucket';
+export * from './statsControllerSeriesParams';
 export * from './trackDto';
 export * from './trackDtoResolution';
 export * from './trackPointDto';
 export * from './trackPointDtoPredictedNavstatus';
 export * from './trackPointDtoSource';
+export * from './trafficBySourceDto';
+export * from './trafficPointDto';
+export * from './trafficSeriesDto';
+export * from './trafficSeriesDtoBucket';
 export * from './vesselLatestDto';
 export * from './vesselLatestDtoPredictedNavstatus';
 export * from './vesselLatestDtoSource';

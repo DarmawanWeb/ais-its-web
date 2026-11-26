@@ -43,7 +43,7 @@ test.describe('smoke', () => {
     await expect(
       page.getByRole('heading', { level: 1, name: 'Metodologi & Referensi' }),
     ).toBeVisible();
-    await expect(page.getByText(/\d+ metode/)).toBeVisible();
+    await expect(page.getByText(/^\d+ dari \d+ metode$/).first()).toBeVisible();
 
     await nav.getByRole('link', { name: 'EWS Pipa' }).click();
     await expect(

@@ -1,13 +1,4 @@
-import {
-  CircleAlert,
-  Construction,
-  Inbox,
-  type LucideIcon,
-  RefreshCw,
-  SearchX,
-  ShieldX,
-  WifiOff,
-} from 'lucide-react';
+import { CircleAlert, Inbox, type LucideIcon, RefreshCw, SearchX, ShieldX, WifiOff } from 'lucide-react';
 import type { TFunction } from 'i18next';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -219,28 +210,5 @@ export function ForbiddenState({ className }: { className?: string }) {
       description={t('errors.forbiddenDescription')}
       className={className}
     />
-  );
-}
-
-/** Placeholder of a page whose module is being built. */
-export function UnderConstruction({
-  module,
-  className,
-  children,
-}: {
-  module: string;
-  className?: string;
-  children?: ReactNode;
-}) {
-  const { t } = useTranslation();
-  return (
-    <div className={cn('rounded-xl border border-dashed bg-surface/40', className)}>
-      <EmptyState
-        icon={Construction}
-        title={t('status.underConstruction')}
-        description={t('status.underConstructionDescription', { module })}
-        action={children}
-      />
-    </div>
   );
 }

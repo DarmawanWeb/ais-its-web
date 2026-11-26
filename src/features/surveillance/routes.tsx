@@ -1,4 +1,5 @@
-import { Activity, ArrowLeftRight, EyeOff, Fish } from 'lucide-react';
+import { Activity, ArrowLeftRight, EyeOff, Fish, Radar } from 'lucide-react';
+import { Navigate } from 'react-router';
 
 import { defineFeature, lazyPage } from '@/shared/feature';
 
@@ -11,9 +12,30 @@ export const feature = defineFeature({
   i18n: { id, en },
   routes: [
     {
+      // The overview's nav entry matches exactly (`end`), so it is not active on every
+      // surveillance page.
+      path: 'surveillance',
+      handle: { titleKey: 'surveillance:overview.title', permission: 'surveillance:read' },
+      lazy: lazyPage(() => import('./pages/overview-page'), 'OverviewPage'),
+    },
+    {
+      // Earlier links (bookmarks) of the overview.
+      path: 'surveillance/overview',
+      handle: { titleKey: 'surveillance:overview.title', permission: 'surveillance:read' },
+      element: <Navigate to="/surveillance" replace />,
+    },
+    {
       path: 'surveillance/transhipment',
       handle: { titleKey: 'surveillance:transhipment.title', permission: 'surveillance:read' },
       lazy: lazyPage(() => import('./pages/transhipment-page'), 'TranshipmentPage'),
+    },
+    {
+      path: 'surveillance/transhipment/:eventId',
+      handle: {
+        titleKey: 'surveillance:transhipment.detailTitle',
+        permission: 'surveillance:read',
+      },
+      lazy: lazyPage(() => import('./pages/transhipment-detail-page'), 'TranshipmentDetailPage'),
     },
     {
       path: 'surveillance/fishing',
@@ -33,6 +55,17 @@ export const feature = defineFeature({
   ],
   nav: [
     {
+      id: 'surveillance.overview',
+      section: 'surveillance',
+      order: 5,
+      path: '/surveillance',
+      end: true,
+      labelKey: 'surveillance:nav.overview',
+      icon: Radar,
+      permission: 'surveillance:read',
+      keywords: ['pengawasan', 'surveillance', 'ringkasan', 'statistik', 'detektor'],
+    },
+    {
       id: 'surveillance.transhipment',
       section: 'surveillance',
       order: 10,
@@ -40,7 +73,7 @@ export const feature = defineFeature({
       labelKey: 'surveillance:nav.transhipment',
       icon: ArrowLeftRight,
       permission: 'surveillance:read',
-      keywords: ['transhipment', 'sts'],
+      keywords: ['transhipment', 'sts', 'ship-to-ship', 'alih muat'],
     },
     {
       id: 'surveillance.fishing',
@@ -50,7 +83,7 @@ export const feature = defineFeature({
       labelKey: 'surveillance:nav.fishing',
       icon: Fish,
       permission: 'surveillance:read',
-      keywords: ['fishing', 'ikan', 'heatmap'],
+      keywords: ['fishing', 'ikan', 'heatmap', 'loitering', 'iuu'],
     },
     {
       id: 'surveillance.dark',
@@ -60,7 +93,7 @@ export const feature = defineFeature({
       labelKey: 'surveillance:nav.dark',
       icon: EyeOff,
       permission: 'surveillance:read',
-      keywords: ['dark', 'gap', 'ais'],
+      keywords: ['dark', 'gap', 'ais', 'gelap', 'terputus'],
     },
     {
       id: 'surveillance.anomaly',
@@ -70,7 +103,7 @@ export const feature = defineFeature({
       labelKey: 'surveillance:nav.anomaly',
       icon: Activity,
       permission: 'surveillance:read',
-      keywords: ['navstatus', 'anomali', 'anomaly'],
+      keywords: ['navstatus', 'anomali', 'anomaly', 'status navigasi'],
     },
   ],
 });

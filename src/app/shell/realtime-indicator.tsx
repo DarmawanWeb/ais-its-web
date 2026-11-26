@@ -25,6 +25,7 @@ export function RealtimeIndicator() {
         role="status"
         aria-label={label}
         data-status={status}
+        data-testid="realtime-status"
       >
         <span className="relative flex size-2">
           {status === 'connected' && (

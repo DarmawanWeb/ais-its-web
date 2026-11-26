@@ -47,6 +47,7 @@ export function SidebarNav({
               <NavLink
                 key={item.id}
                 to={item.path}
+                end={item.end}
                 onClick={onNavigate}
                 aria-label={collapsed ? label : undefined}
                 className={({ isActive }) =>

@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Geo Service
  * Zones and geofences registry: validated GeoJSON zones, map layers and the GEO zone snapshot stream
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 
 /**
@@ -15,5 +15,6 @@ export type MethodSummaryDtoStatus =
 export const MethodSummaryDtoStatus = {
   implemented: 'implemented',
   planned: 'planned',
+  not_implemented: 'not_implemented',
   deprecated: 'deprecated',
 } as const;

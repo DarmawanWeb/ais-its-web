@@ -23,18 +23,19 @@ src/features/<id>/            id = folder name = i18n namespace (kebab-case)
   lib/                        pure helpers (formatters, mappers) — unit tested
   **/*.test.ts(x)             unit/component tests next to the code
 e2e/<id>.spec.ts              Playwright spec of the feature (picked up automatically)
-e2e/mock-server/routes/<id>.mjs   mock endpoints of the feature (loaded automatically)
+e2e/mock-server/routes/<id>.mjs   mock endpoints + realtime hooks of the feature (auto-loaded, §10)
 ```
 
 Adding a new feature module is exactly that: a new folder with a `routes.tsx` — no shell, router
 or navigation file changes. At start-up `src/app/features.ts` validates every module (folder =
 `id`, unique ids, single owner of single-owner slots) and fails loudly otherwise.
 
-The stubs already exist for every planned module: `dashboard`, `map`, `alerts`, `safety`
-(EWS, collision), `surveillance` (transhipment, fishing, dark, anomaly), `vessels`, `cii`,
+Every module of the first release is built: `dashboard`, `map`, `alerts`, `safety` (EWS,
+collision), `surveillance` (overview, transhipment, fishing, dark, anomaly), `vessels`, `cii`,
 `seemp`, `telemetry`, `zones`, `alert-rules`, `admin` (organizations, members, api-keys,
-reference-data, devices, audit-log), `profile`, `methodology`. `auth` is implemented by the
-foundation. Replace the placeholder pages (`PlaceholderPage`) with the real ones.
+reference-data, devices, audit-log), `profile`, `methodology`; `auth` is the foundation's. The
+README lists every page with the services it calls. A new module starts from a copy of the
+smallest one that looks like it (e.g. `methodology` for a read-only page).
 
 ### Suggested ownership (three engineers)
 
@@ -82,6 +83,8 @@ export const feature = defineFeature({
       icon: Leaf, // lucide-react icon
       permission: 'cii:read', // hidden when missing (array = any of)
       keywords: ['cii', 'emisi', 'co2'], // command palette search
+      // end: true — active only on exactly this path (a section overview such as
+      // /surveillance next to /surveillance/dark; NavLink matches by prefix otherwise)
     },
   ],
   commands: [], // optional extra command palette actions
@@ -111,7 +114,13 @@ export const feature = defineFeature({
   strings there.
 - Domain labels come from contracts, never hard-coded: `NAV_STATUS_LABELS`, `EWS_STATUS_LABELS`,
   `COLLISION_RISK_LABELS`, `ALERT_SEVERITY_LABELS`, `alertTypeLabel()`, `ZONE_KIND_LABELS`,
-  `ROLE_LABELS`, `CII_GRADE_LABELS` (or the domain components that wrap them).
+  `ROLE_LABELS`, `CII_GRADE_LABELS` (or the domain components that wrap them), indexed with
+  `useAppLanguage()` (`@/shared/i18n`, `'id' | 'en'` = the contracts `Locale`).
+- `pnpm i18n:check` (also part of `pnpm test`, `scripts/i18n-check.mjs`) fails when a key is in
+  one language only (plural forms count once: Indonesian has only `_other`), a value is empty,
+  the `{{placeholders}}` of a key differ between the languages, or a namespace is never used.
+  Development and e2e builds warn `[i18n] missing key <ns>:<key>` for keys that exist in no
+  language (optional lookups pass a `defaultValue`); the role walkthrough fails on them.
 - Numbers/dates: `formatNumber`, `formatDateTime`, `formatRelativeTime` (`@/shared/lib/format`),
   `<UnitValue unit="knots" />`, `<CoordinateText />`, `<MmsiText />`.
 
@@ -143,6 +152,29 @@ refetchInterval: 30_000 } })`, see `src/features/dashboard`). Every generated ca
    through the shared axios instance (`src/shared/api/mutator.ts`): bearer token,
    `X-Request-Id`, refresh-on-401 with one retry, and errors as `ApiProblem`.
 
+   Generated layout, per service folder `auth`, `fleet`, `ais-processor`, `ais-ingestor`,
+   `telemetry`, `emission`, `geo`, `safety`, `surveillance`, `notification`:
+   - `<service>/<tag>/<tag>.ts`, one file per OpenAPI tag in kebab-case
+     (`fleet/vessel-types/vessel-types.ts`, `notification/alert-rules/alert-rules.ts`): per
+     operation the fetcher (`vesselsControllerList`), the hook (`useVesselsControllerList`),
+     `get…QueryKey` and `get…QueryOptions`; mutation hooks take `{ data }` or `{ id, data }`.
+   - `<service>/model/` the DTO types (`@/shared/api/generated/<service>/model`);
+     `<service>/index.ts` re-exports every tag.
+   - Query keys are the request URL (`['/api/v2/zones', params]`): the key getter without
+     params invalidates every list of that endpoint.
+   - Names are unique **per service only**: `useEventsControllerList`, `useEventsControllerGet`
+     and `useDetectorsControllerList` exist in `safety` and `surveillance`,
+     `useMethodologyControllerDescribe` in nine services, and DTO names such as `PageMetaDto`
+     repeat. Import from the service's path and alias when a file needs two:
+
+     ```ts
+     import { useEventsControllerList as useSafetyEvents } from '@/shared/api/generated/safety/events/events';
+     ```
+
+   - Not for the UI: `auth/internal` (service-to-service, not routed by the gateway) and
+     `ais-ingestor` `POST /ingest/ais` (feed pushers); `GET /ingest/status` is `super_admin`
+     only (feed monitoring).
+
 3. Only for an endpoint that is missing from a document, call `http` (`@/shared/api/http`) from
    your `api/` folder with the spec's path (`/api/v2/...`) and validate the response with zod.
    Never call the session endpoints (`/auth/login|refresh|logout|switch-org`) yourself: use
@@ -152,7 +184,15 @@ refetchInterval: 30_000 } })`, see `src/features/dashboard`). Every generated ca
 5. Errors: `query.error` is an `ApiProblem` (RFC 9457: `status`, `code`, `title`, `detail`,
    `errors[]`, `traceId`, `retryAfterSeconds`). Render with `<ErrorState error={query.error}
 onRetry={query.refetch} />`; map form errors with `problem.fieldErrors()` →
-   `form.setError(field, { message })`. 4xx are never retried.
+   `form.setError(field, { message })`. 4xx are never retried. The services answer in English;
+   translate the codes your feature knows with `@/shared/api/problem-copy`:
+   - `localizeProblem(error, copies)` → an `ApiProblem` with your `{ CODE: { title, detail } }`
+     copy (status, code, field errors and trace id kept) for `<ErrorState>`;
+     `problemSummary(error, copies)` is the same as one line for a toast;
+   - `problemMessage(t, error)` reads `problems.<CODE>` of your namespace (`{{seconds}}` = the
+     Retry-After) and falls back to the shared network / 429 / 403 / 5xx messages;
+     `applyFieldErrors(t, error, form.setError, fields)` puts `VALIDATION_FAILED` field errors on
+     a form (`fieldErrors.<code>` of your namespace, else the server message).
 6. Lists: page-based (`{ data, meta }`) → `usePageState()`; cursor-based
    (`{ data, page: { nextCursor } }`) → `useCursorState()`; both plug into `<DataTable
 pagination={…} />` (see `src/shared/domain-ui/data-table`). CSV export: `downloadCsv()`
@@ -222,8 +262,11 @@ export function EwsPage() {
 
 - Layer order (`order`): heatmaps 5, zones 10, tracks/encounters 50, vessels 100 (higher on top).
 - Create deck layers in `useMemo`; pass a new `data` to update. Use deck `TextLayer` for labels
-  (raster basemaps have no glyphs). MapLibre GeoJSON: `useMapLibreLayers(id, source, layers)`
-  (the source id is the registration `id`).
+  (raster basemaps have no glyphs) with `fontFamily: MAP_FONT` (`@/shared/map`). MapLibre
+  GeoJSON: `useMapLibreLayers(id, source, layers)` (the source id is the registration `id`); a
+  registration made while the style is busy (`isStyleLoaded()` is also false while tiles load)
+  is applied when the map becomes idle, and every registration is re-added after a basemap
+  switch.
 - Components that need the map (`useMapViewport`, `useDeckLayers`, `useMapEvent`) must be
   children of `<MapView>`; floating panels outside it use `MapPageLayout` slots (`topLeft`,
   `topCenter`, `bottomLeft`, `sidePanel`) or `<MapPanel>`.
@@ -300,7 +343,16 @@ A slot component renders in every page of the shell: keep it light (no heavy que
   `DataTable` (+ `DataTableColumnHeader`, `usePageState`, `useCursorState`), `EmptyState`,
   `ErrorState`, `ForbiddenState`, `ConfirmDialog`, `CiiGradeBadge`, `EwsStatusBadge`,
   `CollisionRiskBadge`, `SeverityBadge`, `NavstatusLabel`, `MmsiText`, `CoordinateText`,
-  `UnitValue`, `MethodInfo`, `DataAttribution`, `PlaceholderPage`.
+  `UnitValue`, `MethodInfo`, `MethodChips` (named method chips with their popovers, `limit` for a
+  "+N" toggle, `label`, `nameOf` for names the catalog lacks), `DataAttribution`.
+- Small shared helpers: `CopyButton` (`@/shared/ui/copy-button`: icon button with tooltip, or
+  a text button with `children`; check icon and "Disalin" feedback, optional `successMessage`
+  toast, failure toast), `DateRangePicker label` (prefixes the trigger's name as hidden text, so
+  the name contains the visible range — no `aria-label` wrappers), `gradeClassName(grade)`
+  (`@/shared/theme/grade`: grade background with the text colour that passes AA), `useNow(ms)`
+  (`@/shared/hooks/use-now`: a "now" that advances per interval, for stable time-window query
+  keys), `nowMs()` / `currentYear()` (`@/shared/lib/clock`, keeps components pure),
+  `useMethodName(serviceMethods?)` (`@/shared/methodology`).
 - **Methodology (spec §17)**: put `<MethodInfo methodId="cii.attained_accumulation" />` next to every
   computed figure (CII attained/required/rating/grade, SEEMP recommendation, EWS status,
   CPA/TCPA, transhipment score, fuel method). Ids come from `docs/references/methods.json`;
@@ -335,18 +387,93 @@ A slot component renders in every page of the shell: keep it light (no heavy que
   (`satisfies VesselDetailDto`) so contract changes fail the typecheck.
 - Do not render `<MapView>` in jsdom (no WebGL): test layer factories (`createVesselLayers`
   style) and hooks' pure logic, and cover map pages in Playwright.
-- **E2E** (`pnpm test:e2e`; CI runs it): every `e2e/**/*.spec.ts` except
-  `screenshots.spec.ts`, against the production build (`vite preview`) and the mock gateway.
+- Testing Library's `findBy*` wait up to 4 s (`src/test/setup.ts`): page tests render the real
+  router with lazy pages, which is slower under a parallel full run.
+- **E2E** (`pnpm test:e2e`; CI runs it): every `e2e/**/*.spec.ts` except the
+  `*screenshots.spec.ts`, against the production build (`vite preview`) and the mock gateway.
+  `e2e/roles.spec.ts` walks every role of spec §8.4 (super_admin, org_admin, fleet_manager,
+  authority, viewer — `USERS` in `e2e/fixtures.ts`) through every sidebar entry and the palette:
+  no 403, no action the role lacks (`GATED_ACTIONS`), no console error, failed API call or
+  missing translation. Add a row to `NAV` / `GATED_ACTIONS` there with a new entry or action.
   - Add `e2e/<feature>.spec.ts`; use `login(page, USERS.manager)`, `axeViolations(page)` and
     `navigationPaths(page)` from `e2e/fixtures.ts`.
-  - Mock endpoints go in **`e2e/mock-server/routes/<feature>.mjs`** (one file per feature,
-    loaded automatically — see `e2e/mock-server/routes/README.md`); shapes follow the
+  - Mock endpoints and realtime events go in **`e2e/mock-server/routes/<feature>.mjs`** (one
+    module per feature, named after the feature id, loaded automatically; reference:
+    `e2e/mock-server/routes/README.md`, template `routes/_example.mjs`). Shapes follow the
     service's `openapi.json`. Use `page.route()` for failures and delays of a single test.
   - Automatic checks of every sidebar page: axe WCAG 2.1 A/AA in the dark and the light theme
     (`e2e/a11y.spec.ts`), exactly one h1 and no horizontal page scroll at 1280 and 390 px
     (`e2e/layout.spec.ts`). A page is covered as soon as it has a nav entry; pages without one
     (details, dialogs) need a check in your spec.
-- Screenshots (`pnpm screenshots`, foundation-owned) refresh `docs/screenshots/*.png`.
+- Screenshots (`pnpm screenshots`) run every `e2e/*screenshots.spec.ts` and refresh
+  `docs/screenshots/*.png`; add yours to `docs/SCREENSHOTS.md` (gallery by menu section).
+- Quality gates: `pnpm bundle:report` after `pnpm build` (initial load and per-page sizes; fails
+  when MapLibre/deck.gl reach the initial load or a page without a map), `pnpm perf:map` (live
+  map with 10 000 vessels: frame times while panning and heap, against a running build).
+
+### Mock gateway modules (`e2e/mock-server/routes/<feature>.mjs`)
+
+The mock gateway layers its routes: the **core** session endpoints (reserved), your
+**feature** module, and the foundation **base** modules (`e2e/mock-server/base/*.mjs`: `GET /me`,
+`/organizations`, `/vessels`, `/ais/latest`, `/ais/vessels/:mmsi/latest`, `/ais/stats`,
+`/safety/vessels[/:mmsi]`, `/alerts/summary`). Declaring a base route's method and path in your
+module **replaces** it (logged at start-up) — never edit `base/`. The same route in two feature
+modules fails at start-up. A module exports any of `routes`, `realtime` (hooks on the mock
+socket.io server at `/ws`, spec §9) and `reset`:
+
+```js
+// e2e/mock-server/routes/zones.mjs
+import { MockHttpError, pageOf } from '../lib.mjs';
+
+let zones = structuredClone(ZONES);
+
+/** @type {import('../lib.mjs').MockRoute[]} */
+export const routes = [
+  {
+    method: 'GET',
+    path: '/api/v2/zones', // exact, `:param` segments (literals win) or a RegExp
+    permission: 'zone:read', // 403 problem details without it
+    handler: ({ url, send }) => send(200, pageOf(zones, url)), // { data, meta }
+  },
+  {
+    method: 'DELETE',
+    path: '/api/v2/zones/:id',
+    permission: 'zone:write',
+    handler: ({ params, send }) => {
+      if (!zones.some((z) => z.id === params.id))
+        throw new MockHttpError(404, 'ZONE_NOT_FOUND', 'Zone not found');
+      zones = zones.filter((z) => z.id !== params.id);
+      send(204);
+    },
+  },
+];
+
+/** @type {import('../lib.mjs').MockRealtimeHooks} */
+export const realtime = {
+  // rt.positions / rt.safetyStates / rt.alert / rt.cii / rt.emit (validated with contracts)
+  subscribe: ({ mmsi, rt }) => rt.safetyStates([stateOf(mmsi)]), // after vessel:subscribe
+};
+
+export function reset() {
+  zones = structuredClone(ZONES);
+}
+```
+
+Handlers get `{ url, params, claims, user, body(), send, problem, realtime }` (push
+`alert:updated` from an acknowledge handler with `realtime.alert(alert, { kind: 'updated' })`).
+In specs, `e2e/fixtures.ts` drives the mock: `resetMockGateway()` (in `beforeEach` when you
+change mock data — one gateway serves the whole run), `waitForRealtimeRoom(/^tile:/)`,
+`pushRealtime({ kind: 'positions' | 'safety:states' | 'alert' | 'cii:updated' | 'emit', … })`,
+`realtimeConnections()`, `expectRealtimeConnected(page)`. Nothing streams on a timer in e2e
+unless a module does it: push from the test for deterministic maps
+(`MOCK_REALTIME_SIMULATE=true pnpm e2e:mock` moves the demo vessels for development).
+The foundation specs rely on the base data and on the live map's `map-canvas` and
+`vessel-count` test ids: keep them working when you override or rebuild those parts.
+
+**Parallel runs** in one checkout: give each run its own ports, e.g.
+`E2E_WEB_PORT=4273 E2E_MOCK_PORT=8887 pnpm test:e2e` (builds into `node_modules/.e2e/web-<port>`,
+results in `test-results/<port>`). Ports already in use are an error, never silently reused
+(`E2E_REUSE_SERVERS=true` to reuse on purpose).
 
 ## 11. Files you must NOT touch
 
@@ -356,7 +483,9 @@ A slot component renders in every page of the shell: keep it light (no heavy que
 `vite.config.ts`, `tsconfig*.json`, `eslint.config.js`, `.prettierrc`, `orval.config.ts`,
 `scripts/**`, `playwright.config.ts`, `e2e/fixtures.ts`, `e2e/smoke.spec.ts`,
 `e2e/a11y.spec.ts`, `e2e/layout.spec.ts`, `e2e/map.spec.ts`, `e2e/session.spec.ts`,
-`e2e/screenshots.spec.ts`, `e2e/mock-server/server.mjs`, `e2e/mock-server/lib.mjs`,
+`e2e/screenshots.spec.ts`, `e2e/realtime.spec.ts`, `e2e/mock-server/server.mjs`,
+`e2e/mock-server/lib.mjs`, `e2e/mock-server/realtime.mjs`, `e2e/mock-server/base/**`,
+`e2e/mock-server/routes/README.md`, `e2e/mock-server/routes/_example.mjs`,
 `Dockerfile`, `docker/**`, `.github/**`. Every dependency you plausibly need is installed
 (deck.gl incl. aggregation/geo layers, terra-draw, recharts, react-table, react-virtual,
 papaparse, react-dropzone, qrcode, katex, turf, date-fns, cmdk, vaul…).
@@ -373,7 +502,7 @@ alike — and shared code never imports features or the app shell.
 - [ ] id + en translations, contracts labels for domain values, units via `UnitValue`.
 - [ ] `MethodInfo` next to computed figures; `DataAttribution` for weather data.
 - [ ] Works in dark and light themes, at 390 px width (no page scroll), with keyboard only; one h1.
-- [ ] Tests for lib/hooks/components; `e2e/<feature>.spec.ts` for the key flow, mock routes in
-      `e2e/mock-server/routes/<feature>.mjs`.
+- [ ] Tests for lib/hooks/components; `e2e/<feature>.spec.ts` for the key flow, mock routes and
+      realtime hooks in `e2e/mock-server/routes/<feature>.mjs`.
 - [ ] `pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm test:e2e` pass
       (incl. axe in both themes).

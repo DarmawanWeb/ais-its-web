@@ -1,20 +1,169 @@
 {
   "title": "Profil & Keamanan",
-  "description": "Informasi akun, kata sandi, autentikasi dua langkah (MFA) dan sesi aktif.",
+  "eyebrow": "Akun",
+  "description": "Kelola identitas akun, preferensi tampilan, kata sandi, autentikasi dua langkah, sesi aktif dan keanggotaan organisasi Anda.",
+  "hero": {
+    "label": "Ringkasan akun",
+    "mfaOn": "MFA aktif",
+    "mfaOff": "MFA belum aktif",
+    "activeOrg": "Organisasi aktif",
+    "lastLogin": "Masuk terakhir",
+    "never": "Belum pernah",
+    "memberSince": "Terdaftar sejak"
+  },
+  "status": {
+    "active": "Aktif",
+    "invited": "Diundang",
+    "disabled": "Dinonaktifkan"
+  },
   "account": {
-    "title": "Akun",
-    "name": "Nama",
+    "title": "Informasi akun",
+    "description": "Nama tampil digunakan di konsol, jejak audit dan notifikasi.",
+    "editName": "Ubah nama",
+    "name": "Nama tampil",
     "email": "Email",
     "userId": "ID pengguna",
-    "organization": "Organisasi aktif",
-    "roles": "Peran",
-    "permissions": "Jumlah izin",
-    "sessionExpires": "Token akses berakhir"
+    "copyId": "Salin ID pengguna",
+    "status": "Status akun",
+    "createdAt": "Dibuat",
+    "updatedAt": "Terakhir diperbarui",
+    "emailHint": "Alamat email tidak dapat diubah sendiri. Hubungi administrator organisasi bila alamat perlu diganti.",
+    "nameRequired": "Nama wajib diisi",
+    "nameTooLong": "Nama maksimal {{max}} karakter",
+    "saved": "Nama berhasil diperbarui",
+    "saveFailed": "Nama gagal disimpan"
   },
-  "capabilities": [
-    "Ubah nama (PATCH /api/v2/me)",
-    "Ganti kata sandi (POST /api/v2/auth/password/change) — sesi lain dicabut",
-    "Aktifkan / nonaktifkan MFA dengan kode QR (authApi.mfaSetup, qrcode)",
-    "Daftar dan cabut sesi aktif (GET/DELETE /api/v2/auth/sessions)"
-  ]
+  "preferences": {
+    "title": "Preferensi",
+    "description": "Bahasa dan tema tampilan konsol.",
+    "language": "Bahasa antarmuka",
+    "theme": "Tema",
+    "localHint": "Preferensi disimpan di peramban ini dan berlaku seketika."
+  },
+  "password": {
+    "title": "Kata sandi",
+    "description": "Gunakan kata sandi panjang yang unik untuk akun ini. Setelah diganti, semua sesi lain akan dicabut.",
+    "current": "Kata sandi saat ini",
+    "new": "Kata sandi baru",
+    "confirm": "Ulangi kata sandi baru",
+    "currentRequired": "Masukkan kata sandi saat ini",
+    "policyNotMet": "Kata sandi belum memenuhi semua ketentuan",
+    "mismatch": "Konfirmasi tidak sama dengan kata sandi baru",
+    "sameAsCurrent": "Kata sandi baru harus berbeda dari kata sandi saat ini",
+    "changed": "Kata sandi berhasil diganti",
+    "changedDescription": "Sesi di perangkat lain telah dicabut. Sesi ini tetap aktif.",
+    "failed": "Kata sandi gagal diganti",
+    "show": "Tampilkan kata sandi",
+    "hide": "Sembunyikan kata sandi",
+    "strength": "Kekuatan",
+    "levels": {
+      "empty": "—",
+      "weak": "Lemah",
+      "fair": "Cukup",
+      "good": "Baik",
+      "strong": "Kuat"
+    },
+    "rulesLabel": "Ketentuan kata sandi",
+    "rules": {
+      "length": "Minimal 10 karakter",
+      "letter": "Mengandung huruf",
+      "digit": "Mengandung angka",
+      "maxLength": "Maksimal 128 karakter"
+    },
+    "ruleMet": "terpenuhi",
+    "ruleNotMet": "belum terpenuhi",
+    "revokeHint": "Kalimat sandi (passphrase) yang panjang lebih mudah diingat dan lebih sulit ditebak.",
+    "submit": "Ganti kata sandi"
+  },
+  "mfa": {
+    "title": "Autentikasi dua langkah (MFA)",
+    "description": "Kode 6 digit dari aplikasi autentikator diminta setiap kali Anda masuk.",
+    "statusOn": "Aktif",
+    "statusOff": "Nonaktif",
+    "onTitle": "Akun dilindungi MFA",
+    "onText": "Setiap proses masuk membutuhkan kata sandi dan kode dari aplikasi autentikator Anda.",
+    "offTitle": "MFA belum diaktifkan",
+    "offText": "Tambahkan lapisan keamanan kedua dengan Google Authenticator, Microsoft Authenticator, 1Password atau aplikasi TOTP lain.",
+    "enableAction": "Aktifkan MFA",
+    "enable": "Aktifkan",
+    "disable": "Nonaktifkan MFA",
+    "setupTitle": "Aktifkan autentikasi dua langkah",
+    "setupDescription": "Hubungkan aplikasi autentikator, lalu masukkan kode yang ditampilkan untuk menyelesaikan aktivasi.",
+    "steps": {
+      "install": "Buka aplikasi autentikator (TOTP) di ponsel Anda.",
+      "scan": "Pindai kode QR, atau masukkan kunci rahasia secara manual.",
+      "enter": "Masukkan kode 6 digit yang muncul di aplikasi."
+    },
+    "qrLabel": "Kode QR untuk aplikasi autentikator",
+    "manual": "Kunci rahasia (entri manual)",
+    "manualDetails": "Akun {{account}} · penerbit {{issuer}} · {{digits}} digit · berganti tiap {{period}} detik",
+    "copySecret": "Salin kunci rahasia",
+    "code": "Kode verifikasi",
+    "codeHint": "Kode berganti setiap 30 detik; masukkan kode yang sedang tampil.",
+    "codeIncomplete": "Masukkan 6 digit kode",
+    "enabled": "MFA berhasil diaktifkan",
+    "enabledDescription": "Mulai sekarang kode autentikator diminta saat masuk.",
+    "disableTitle": "Nonaktifkan autentikasi dua langkah",
+    "disableDescription": "Masukkan kode dari aplikasi autentikator untuk mengonfirmasi.",
+    "disableWarning": "Tanpa MFA, akun hanya dilindungi kata sandi. Lakukan ini hanya bila Anda akan segera mendaftarkan perangkat baru.",
+    "disabled": "MFA dinonaktifkan"
+  },
+  "sessions": {
+    "title": "Sesi aktif",
+    "description": "Perangkat dan peramban yang saat ini masuk ke akun Anda. Cabut sesi yang tidak Anda kenali.",
+    "listLabel": "Daftar sesi aktif",
+    "browserOn": "{{browser}} di {{os}}",
+    "unknownDevice": "Perangkat tidak dikenal",
+    "current": "Sesi ini",
+    "ip": "IP",
+    "organization": "Organisasi",
+    "created": "Dibuat {{date}}",
+    "lastUsed": "Aktif {{time}}",
+    "signOut": "Keluar",
+    "revoke": "Cabut sesi",
+    "revokeOthers": "Cabut semua sesi lain",
+    "revoked_other": "{{count}} sesi telah dicabut",
+    "revokeFailed": "Sesi gagal dicabut",
+    "empty": "Tidak ada sesi aktif",
+    "emptyHint": "Sesi muncul di sini setelah Anda masuk dari sebuah perangkat.",
+    "confirmTitle": "Cabut sesi ini?",
+    "confirmDescription": "Perangkat tersebut akan keluar dan harus masuk kembali dengan kata sandi.",
+    "confirmOthersTitle": "Cabut semua sesi lain?",
+    "confirmOthersDescription": "{{count}} sesi di perangkat lain akan keluar. Sesi ini tetap aktif."
+  },
+  "memberships": {
+    "title": "Keanggotaan organisasi",
+    "description": "Peran Anda di setiap organisasi. Organisasi aktif menentukan data yang Anda lihat.",
+    "listLabel": "Daftar keanggotaan",
+    "joined": "Bergabung {{date}}",
+    "active": "Aktif",
+    "switch": "Jadikan aktif",
+    "empty": "Belum menjadi anggota organisasi",
+    "emptyHint": "Minta administrator organisasi mengirim undangan ke alamat email Anda."
+  },
+  "orgKinds": {
+    "shipping_company": "Perusahaan pelayaran",
+    "authority": "Otoritas",
+    "platform": "Platform",
+    "research": "Riset"
+  },
+  "problems": {
+    "INVALID_MFA_CODE": "Kode tidak valid atau sudah dipakai. Masukkan kode terbaru dari aplikasi autentikator.",
+    "MFA_ALREADY_ENABLED": "MFA sudah aktif untuk akun ini.",
+    "MFA_NOT_ENABLED": "MFA tidak aktif untuk akun ini.",
+    "MFA_SETUP_REQUIRED": "Sesi penyiapan MFA berakhir. Tutup dialog lalu mulai lagi.",
+    "RATE_LIMITED": "Terlalu banyak percobaan. Coba lagi dalam {{seconds}} detik.",
+    "SESSION_NOT_FOUND": "Sesi sudah berakhir atau telah dicabut.",
+    "ACCOUNT_DISABLED": "Akun ini dinonaktifkan.",
+    "NOT_A_MEMBER": "Anda bukan anggota organisasi tersebut.",
+    "ORGANIZATION_NOT_FOUND": "Organisasi tidak ditemukan.",
+    "VALIDATION_FAILED": "Periksa kembali isian formulir."
+  },
+  "fieldErrors": {
+    "password_mismatch": "Kata sandi saat ini salah",
+    "password_too_short": "Minimal 10 karakter",
+    "password_too_long": "Maksimal 128 karakter",
+    "password_missing_letter": "Harus mengandung huruf",
+    "password_missing_digit": "Harus mengandung angka"
+  }
 }

@@ -6,3 +6,6 @@ export const INDONESIA_BOUNDS: [[number, number], [number, number]] = [
   [94.5, -11.5],
   [141.5, 6.5],
 ];
+
+/** Font of deck.gl labels (`TextLayer fontFamily`): the UI font, not deck's monospace default. */
+export const MAP_FONT = "'Inter Variable', Inter, system-ui, sans-serif";

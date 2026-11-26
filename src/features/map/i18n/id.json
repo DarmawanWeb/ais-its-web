@@ -3,29 +3,177 @@
     "live": "Peta Live"
   },
   "title": "Peta Live",
-  "panel": {
-    "title": "Peta Live",
-    "subtitle": "Posisi AIS realtime di area tampilan",
+  "mapLabel": "Peta live posisi kapal",
+  "status": {
+    "connected": "Live",
+    "connecting": "Menghubungkan…",
+    "reconnecting": "Menyambung ulang…",
+    "disconnected": "Terputus",
+    "idle": "Tidak aktif",
+    "error": "Gagal terhubung",
+    "vessels": "kapal",
+    "vesselsOf": "dari {{total}} kapal di tampilan",
+    "lod": {
+      "cluster": "Kluster",
+      "dot": "Titik"
+    }
+  },
+  "search": {
+    "label": "Cari kapal berdasarkan nama atau MMSI",
+    "placeholder": "Cari nama kapal atau MMSI…",
+    "results": "Hasil pencarian kapal",
+    "searching": "Mencari…",
+    "empty": "Tidak ada kapal yang cocok.",
+    "onMap": "Di peta",
+    "fleet": "Registri armada",
+    "noPosition": "Belum ada posisi AIS terbaru untuk MMSI {{mmsi}}.",
+    "locateFailed": "Posisi kapal tidak dapat dimuat. Coba lagi."
+  },
+  "controls": {
+    "title": "Lapisan & filter",
+    "activeFilters": "{{count}} filter",
+    "layers": "Lapisan",
+    "filters": "Filter"
+  },
+  "layers": {
     "vessels": "Kapal",
-    "zoom": "Zoom",
-    "connection": "Koneksi",
-    "hint": "Klik kapal untuk melihat detail."
+    "vesselsHint": "Posisi AIS realtime menurut sumber data",
+    "sources": "Sumber AIS",
+    "zones": "Zona",
+    "zonesHint": "Zona global dan zona organisasi Anda",
+    "pipelines": "Pipa bawah laut",
+    "pipelinesHint": "Koridor pipa ditonjolkan",
+    "zonesTruncated": "Zona organisasi terpotong oleh batas layanan. Perbesar peta untuk melihat semuanya.",
+    "encounters": "Pertemuan berisiko",
+    "encountersHint": "Garis pasangan dan titik CPA (risiko sedang/tinggi)",
+    "events": "Kejadian pengawasan",
+    "eventsHint": "Kejadian 24 jam terakhir menurut tipe",
+    "eventTypes": "Tipe kejadian",
+    "heatmap": "Heatmap penangkapan ikan",
+    "heatmapHint": "Kepadatan kejadian penangkapan ikan 30 hari"
+  },
+  "sources": {
+    "primary": "Utama",
+    "batam": "Batam",
+    "pusher": "Pusher"
+  },
+  "filters": {
+    "safety": "Status keselamatan",
+    "types": "Jenis kapal",
+    "navstatus": "Status navigasi",
+    "reset": "Atur ulang filter"
+  },
+  "safety": {
+    "ewsDanger": "EWS bahaya",
+    "ewsWarning": "EWS peringatan",
+    "collisionHigh": "Risiko tubrukan tinggi",
+    "collisionMedium": "Risiko tubrukan sedang",
+    "normal": "Normal"
+  },
+  "categories": {
+    "bulkca": "Kapal curah",
+    "combin": "Kapal kombinasi",
+    "contai": "Kapal kontainer",
+    "cruise": "Kapal pesiar",
+    "gascar": "Pengangkut gas",
+    "genera": "Kargo umum",
+    "lngcar": "Pengangkut LNG",
+    "refrig": "Kargo berpendingin",
+    "ro-roc": "Ro-ro kargo",
+    "ro-rop": "Ro-ro penumpang",
+    "ro-rov": "Pengangkut kendaraan",
+    "tanker": "Tanker",
+    "unknown": "Tidak diketahui"
+  },
+  "legend": {
+    "title": "Legenda",
+    "normal": "Kapal (arah haluan)",
+    "selected": "Kapal terpilih",
+    "pipeline": "Pipa bawah laut",
+    "restricted": "Zona terbatas",
+    "anchorage": "Area labuh",
+    "transhipment": "Area transhipment",
+    "encounter": "Pertemuan & titik CPA",
+    "events": "Kejadian pengawasan (huruf = tipe)",
+    "heatmap": "Kepadatan penangkapan ikan",
+    "methods": "Metode",
+    "fishingGround": "Daerah penangkapan ikan"
+  },
+  "tooltip": {
+    "lastSeen": "Terakhir {{time}}",
+    "globalZone": "zona global",
+    "orgZone": "zona organisasi"
+  },
+  "encounters": {
+    "tooltip": "Pertemuan {{a}} ↔ {{b}}"
+  },
+  "alertStatus": {
+    "open": "Terbuka",
+    "acknowledged": "Diterima",
+    "resolved": "Selesai"
   },
   "vessel": {
     "title": "Detail kapal",
     "unknownName": "Kapal tanpa nama",
+    "flag": "Bendera {{flag}}",
+    "ownFleet": "Armada Anda",
+    "notInFleet": "Tidak terdaftar di armada",
+    "kinematics": "Kinematika live",
     "position": "Posisi",
     "sog": "Kecepatan (SOG)",
     "cog": "Haluan (COG)",
     "heading": "Heading",
+    "updated": "Data terakhir",
     "navstatus": "Status navigasi",
-    "ews": "Status EWS",
-    "collision": "Risiko tubrukan",
-    "cpa": "CPA",
-    "tcpa": "TCPA",
-    "source": "Sumber",
-    "updated": "Diperbarui",
     "noData": "Menunggu data posisi kapal ini…",
-    "openVessel": "Buka halaman kapal"
+    "safety": "Keselamatan",
+    "ews": "Status EWS",
+    "pipelineDistance": "Jarak ke pipa",
+    "nearestPipeline": "Pipa terdekat",
+    "pipelineHidden": "Zona pipa tidak dapat dilihat",
+    "noPipeline": "Tidak ada pipa",
+    "collision": "Risiko tubrukan",
+    "closestEncounter": "Pertemuan terdekat",
+    "noEncounter": "Tidak ada",
+    "openEws": "Lihat di EWS",
+    "openCollision": "Riwayat tubrukan",
+    "alerts": "Alert terbaru",
+    "alertsUnavailable": "Alert belum dapat dimuat.",
+    "noAlerts": "Tidak ada alert untuk kapal ini.",
+    "links": "Tautan kapal",
+    "openVessel": "Halaman kapal",
+    "openCii": "Emisi & CII",
+    "openAlerts": "Semua alert kapal"
+  },
+  "track": {
+    "title": "Riwayat jejak",
+    "show": "Tampilkan",
+    "range": "Rentang jejak",
+    "speed": "Kecepatan putar",
+    "empty": "Tidak ada posisi dalam rentang ini.",
+    "restart": "Ke awal jejak",
+    "play": "Putar jejak",
+    "pause": "Jeda",
+    "position": "Waktu pemutaran jejak",
+    "time": "Waktu",
+    "distance": "Panjang",
+    "points": "{{count}} titik",
+    "resolutionRaw": "posisi mentah",
+    "resolution1m": "agregat 1 menit",
+    "simplified": "disederhanakan {{meters}} m",
+    "truncated": "Jejak terpotong: hanya titik terbaru yang ditampilkan.",
+    "ranges": {
+      "1h": "1 jam terakhir",
+      "6h": "6 jam terakhir",
+      "24h": "24 jam terakhir",
+      "3d": "3 hari terakhir",
+      "7d": "7 hari terakhir"
+    }
+  },
+  "problems": {
+    "trackRange": "Rentang jejak tidak dapat diproses",
+    "trackRangeDetail": "Posisi mentah tersedia hingga 7 hari dan agregat 1 menit hingga 90 hari. Pilih rentang yang lebih pendek.",
+    "noPosition": "Belum ada posisi kapal ini",
+    "noPositionDetail": "Kapal ini belum mengirim posisi AIS yang tercatat."
   }
 }

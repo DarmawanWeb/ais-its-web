@@ -39,6 +39,11 @@ export interface NavItem {
   permission?: PermissionRequirement;
   /** Extra words for the command palette. */
   keywords?: readonly string[];
+  /**
+   * Active only on exactly `path` (react-router `NavLink end`). For a section overview whose
+   * path is the prefix of other entries, e.g. `/surveillance` next to `/surveillance/dark`.
+   */
+  end?: boolean;
 }
 
 /** Metadata of a route, read by the shell through useMatches(). */

@@ -52,9 +52,7 @@
     },
     "alerts": {
       "label": "Alert",
-      "empty": "Belum ada alert baru",
-      "viewAll": "Lihat semua alert",
-      "pending": "Alert realtime akan tampil di sini."
+      "viewAll": "Lihat semua alert"
     },
     "realtime": {
       "connected": "Realtime terhubung",
@@ -106,6 +104,7 @@
     "exportCsv": "Ekspor CSV",
     "copy": "Salin",
     "copied": "Disalin",
+    "copyFailed": "Tidak dapat menyalin ke papan klip",
     "more": "Lainnya",
     "apply": "Terapkan",
     "clear": "Bersihkan",
@@ -117,10 +116,7 @@
     "loading": "Memuat…",
     "saving": "Menyimpan…",
     "noData": "Tidak ada data",
-    "comingSoon": "Segera hadir",
-    "underConstruction": "Halaman ini sedang dibangun",
-    "underConstructionDescription": "Modul {{module}} sedang dikerjakan. Kerangka halaman, izin dan navigasi sudah siap.",
-    "plannedScope": "Cakupan modul"
+    "comingSoon": "Segera hadir"
   },
   "errors": {
     "generic": "Terjadi kesalahan",
@@ -207,7 +203,8 @@
     "needsCitation": "Perlu sitasi",
     "needsCitationDescription": "Nilai berasal dari tesis dan belum memiliki sumber eksternal terverifikasi.",
     "status": "Status",
-    "formulaScrollable": "Rumus (geser ke samping untuk melihat semuanya)"
+    "formulaScrollable": "Rumus (geser ke samping untuk melihat semuanya)",
+    "more_other": "+{{count}} metode lain"
   },
   "map": {
     "basemap": "Peta dasar",

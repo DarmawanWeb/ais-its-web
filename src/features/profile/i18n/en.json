@@ -1,20 +1,170 @@
 {
   "title": "Profile & Security",
-  "description": "Account details, password, two-step verification (MFA) and active sessions.",
+  "eyebrow": "Account",
+  "description": "Manage your account identity, display preferences, password, two-step verification, active sessions and organization memberships.",
+  "hero": {
+    "label": "Account summary",
+    "mfaOn": "MFA on",
+    "mfaOff": "MFA off",
+    "activeOrg": "Active organization",
+    "lastLogin": "Last sign-in",
+    "never": "Never",
+    "memberSince": "Member since"
+  },
+  "status": {
+    "active": "Active",
+    "invited": "Invited",
+    "disabled": "Disabled"
+  },
   "account": {
-    "title": "Account",
-    "name": "Name",
+    "title": "Account information",
+    "description": "Your display name appears in the console, the audit trail and notifications.",
+    "editName": "Edit name",
+    "name": "Display name",
     "email": "E-mail",
     "userId": "User ID",
-    "organization": "Active organization",
-    "roles": "Roles",
-    "permissions": "Permissions",
-    "sessionExpires": "Access token expires"
+    "copyId": "Copy user ID",
+    "status": "Account status",
+    "createdAt": "Created",
+    "updatedAt": "Last updated",
+    "emailHint": "You cannot change your e-mail address yourself. Ask an organization administrator when it needs to change.",
+    "nameRequired": "Enter a name",
+    "nameTooLong": "At most {{max}} characters",
+    "saved": "Name updated",
+    "saveFailed": "The name could not be saved"
   },
-  "capabilities": [
-    "Change your name (PATCH /api/v2/me)",
-    "Change your password (POST /api/v2/auth/password/change) — other sessions are revoked",
-    "Enable / disable MFA with a QR code (authApi.mfaSetup, qrcode)",
-    "List and revoke active sessions (GET/DELETE /api/v2/auth/sessions)"
-  ]
+  "preferences": {
+    "title": "Preferences",
+    "description": "Language and theme of the console.",
+    "language": "Interface language",
+    "theme": "Theme",
+    "localHint": "Preferences are stored in this browser and apply immediately."
+  },
+  "password": {
+    "title": "Password",
+    "description": "Use a long, unique password for this account. Changing it signs out every other session.",
+    "current": "Current password",
+    "new": "New password",
+    "confirm": "Repeat the new password",
+    "currentRequired": "Enter your current password",
+    "policyNotMet": "The password does not meet every rule yet",
+    "mismatch": "The confirmation does not match the new password",
+    "sameAsCurrent": "The new password must differ from the current one",
+    "changed": "Password changed",
+    "changedDescription": "Sessions on other devices were signed out. This session stays active.",
+    "failed": "The password could not be changed",
+    "show": "Show password",
+    "hide": "Hide password",
+    "strength": "Strength",
+    "levels": {
+      "empty": "—",
+      "weak": "Weak",
+      "fair": "Fair",
+      "good": "Good",
+      "strong": "Strong"
+    },
+    "rulesLabel": "Password rules",
+    "rules": {
+      "length": "At least 10 characters",
+      "letter": "Contains a letter",
+      "digit": "Contains a digit",
+      "maxLength": "At most 128 characters"
+    },
+    "ruleMet": "met",
+    "ruleNotMet": "not met",
+    "revokeHint": "A long passphrase is easier to remember and harder to guess.",
+    "submit": "Change password"
+  },
+  "mfa": {
+    "title": "Two-step verification (MFA)",
+    "description": "A 6-digit code from an authenticator app is required every time you sign in.",
+    "statusOn": "On",
+    "statusOff": "Off",
+    "onTitle": "Your account is protected by MFA",
+    "onText": "Every sign-in needs your password and a code from your authenticator app.",
+    "offTitle": "MFA is not enabled",
+    "offText": "Add a second layer of security with Google Authenticator, Microsoft Authenticator, 1Password or any other TOTP app.",
+    "enableAction": "Enable MFA",
+    "enable": "Enable",
+    "disable": "Disable MFA",
+    "setupTitle": "Enable two-step verification",
+    "setupDescription": "Connect an authenticator app, then enter the code it shows to finish.",
+    "steps": {
+      "install": "Open an authenticator (TOTP) app on your phone.",
+      "scan": "Scan the QR code, or type the secret key manually.",
+      "enter": "Enter the 6-digit code the app displays."
+    },
+    "qrLabel": "QR code for the authenticator app",
+    "manual": "Secret key (manual entry)",
+    "manualDetails": "Account {{account}} · issuer {{issuer}} · {{digits}} digits · changes every {{period}} seconds",
+    "copySecret": "Copy the secret key",
+    "code": "Verification code",
+    "codeHint": "Codes change every 30 seconds; enter the one currently shown.",
+    "codeIncomplete": "Enter the 6-digit code",
+    "enabled": "MFA enabled",
+    "enabledDescription": "From now on an authenticator code is required to sign in.",
+    "disableTitle": "Disable two-step verification",
+    "disableDescription": "Enter a code from your authenticator app to confirm.",
+    "disableWarning": "Without MFA only your password protects the account. Do this only when you are about to enrol a new device.",
+    "disabled": "MFA disabled"
+  },
+  "sessions": {
+    "title": "Active sessions",
+    "description": "Devices and browsers currently signed in to your account. Revoke any session you do not recognize.",
+    "listLabel": "Active sessions",
+    "browserOn": "{{browser}} on {{os}}",
+    "unknownDevice": "Unknown device",
+    "current": "This session",
+    "ip": "IP",
+    "organization": "Organization",
+    "created": "Created {{date}}",
+    "lastUsed": "Active {{time}}",
+    "signOut": "Sign out",
+    "revoke": "Revoke session",
+    "revokeOthers": "Revoke all other sessions",
+    "revoked_one": "Session revoked",
+    "revoked_other": "{{count}} sessions revoked",
+    "revokeFailed": "The session could not be revoked",
+    "empty": "No active sessions",
+    "emptyHint": "Sessions appear here once you sign in from a device.",
+    "confirmTitle": "Revoke this session?",
+    "confirmDescription": "That device is signed out and has to sign in again with the password.",
+    "confirmOthersTitle": "Revoke every other session?",
+    "confirmOthersDescription": "{{count}} sessions on other devices are signed out. This session stays active."
+  },
+  "memberships": {
+    "title": "Organization memberships",
+    "description": "Your role in each organization. The active organization decides which data you see.",
+    "listLabel": "Memberships",
+    "joined": "Joined {{date}}",
+    "active": "Active",
+    "switch": "Make active",
+    "empty": "Not a member of any organization",
+    "emptyHint": "Ask an organization administrator to send an invitation to your e-mail address."
+  },
+  "orgKinds": {
+    "shipping_company": "Shipping company",
+    "authority": "Authority",
+    "platform": "Platform",
+    "research": "Research"
+  },
+  "problems": {
+    "INVALID_MFA_CODE": "The code is invalid or was already used. Enter the latest code from your authenticator app.",
+    "MFA_ALREADY_ENABLED": "MFA is already enabled for this account.",
+    "MFA_NOT_ENABLED": "MFA is not enabled for this account.",
+    "MFA_SETUP_REQUIRED": "The MFA setup expired. Close the dialog and start again.",
+    "RATE_LIMITED": "Too many attempts. Try again in {{seconds}} seconds.",
+    "SESSION_NOT_FOUND": "The session already ended or was revoked.",
+    "ACCOUNT_DISABLED": "This account is disabled.",
+    "NOT_A_MEMBER": "You are not a member of that organization.",
+    "ORGANIZATION_NOT_FOUND": "Organization not found.",
+    "VALIDATION_FAILED": "Check the form fields."
+  },
+  "fieldErrors": {
+    "password_mismatch": "The current password is wrong",
+    "password_too_short": "At least 10 characters",
+    "password_too_long": "At most 128 characters",
+    "password_missing_letter": "Must contain a letter",
+    "password_missing_digit": "Must contain a digit"
+  }
 }

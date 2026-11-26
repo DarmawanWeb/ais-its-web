@@ -1,35 +1,107 @@
 {
-  "nav": {
-    "dashboard": "Dashboard"
-  },
+  "nav": { "dashboard": "Dashboard" },
   "title": "Dashboard Armada",
-  "description": "Ringkasan operasi armada: kapal terlacak, keselamatan, alert dan performa emisi.",
+  "description": "Ringkasan operasi: lalu lintas AIS, alert, keselamatan pipa, pengawasan 24 jam serta emisi dan bahan bakar armada Anda.",
+  "refresh": "Perbarui",
+  "updatedAt": "Diperbarui {{time}}",
+  "autoRefresh": "Diperbarui otomatis dan secara realtime",
+  "live": {
+    "idle": "Realtime belum aktif",
+    "connecting": "Menghubungkan realtime…",
+    "connected": "Realtime terhubung",
+    "reconnecting": "Menyambung ulang…",
+    "disconnected": "Realtime terputus",
+    "error": "Realtime bermasalah"
+  },
+  "empty": {
+    "title": "Belum ada ringkasan untuk peran Anda",
+    "description": "Peran Anda tidak memiliki izin data operasional. Hubungi admin organisasi untuk akses."
+  },
   "stats": {
-    "trackedVessels": "Kapal terlacak",
-    "openAlerts": "Alert terbuka",
-    "fleetCii": "Rata-rata rating CII",
-    "fuel30d": "Bahan bakar 30 hari",
-    "pending": "Segera hadir di modul ini",
+    "trackedVessels": "Kapal aktif",
     "trackedHint": "Posisi AIS dalam {{minutes}} menit terakhir",
+    "unavailable": "Data belum tersedia",
+    "messages": "Pesan AIS",
+    "perMinute": "/menit",
+    "bySource": "Utama {{primary}} · Batam {{batam}} · Mitra {{pusher}}",
+    "openAlerts": "Alert terbuka",
     "openAlertsHint_one": "{{count}} kritis",
     "openAlertsHint_other": "{{count}} kritis",
-    "unavailable": "Data belum tersedia"
+    "warningCount_one": "{{count}} peringatan",
+    "warningCount_other": "{{count}} peringatan",
+    "infoCount_one": "{{count}} info",
+    "infoCount_other": "{{count}} info",
+    "newAlerts_one": "+{{count}} baru sejak dibuka",
+    "newAlerts_other": "+{{count}} baru sejak dibuka",
+    "ews": "EWS pipa",
+    "ewsDangerUnit": "bahaya",
+    "ewsWarning_one": "{{count}} kapal waspada",
+    "ewsWarning_other": "{{count}} kapal waspada"
   },
-  "ciiDistribution": {
-    "title": "Distribusi peringkat CII",
-    "description": "Jumlah kapal per peringkat A–E tahun berjalan."
+  "alertsChart": {
+    "title": "Alert 7 hari terakhir",
+    "description": "Jumlah alert per hari (UTC) menurut tingkat, dari kejadian pertama.",
+    "total": "Total",
+    "legend": "Keterangan tingkat alert",
+    "caption": "Grafik jumlah alert per hari menurut tingkat",
+    "day": "Hari",
+    "truncated": "Menampilkan 500 alert terbaru; buka kotak masuk untuk riwayat lengkap."
   },
-  "activity": {
-    "title": "Aktivitas terbaru",
-    "description": "Alert dan kejadian keselamatan terakhir di armada Anda.",
-    "empty": "Belum ada aktivitas",
-    "emptyDescription": "Kejadian EWS, risiko tubrukan dan pengawasan akan muncul di sini secara realtime."
+  "surveillance": {
+    "title": "Pengawasan 24 jam",
+    "description": "Kejadian detektor pengawasan menurut jenis.",
+    "open": "Ringkasan pengawasan",
+    "events_one": "kejadian",
+    "events_other": "kejadian",
+    "active_one": "{{count}} masih berlangsung",
+    "active_other": "{{count}} masih berlangsung"
+  },
+  "map": {
+    "title": "Peta armada",
+    "description": "Posisi kapal live di area operasi utama.",
+    "label": "Peta live kapal di area operasi"
+  },
+  "recent": {
+    "title": "Alert terbaru",
+    "description": "Kejadian keselamatan dan pengawasan terbaru di cakupan Anda.",
+    "all": "Semua alert",
+    "empty": "Belum ada alert",
+    "emptyHint": "Alert EWS, tubrukan dan pengawasan akan muncul di sini secara realtime."
+  },
+  "emissions": {
+    "title": "CII armada {{year}}",
+    "description": "Sebaran peringkat CII tahun berjalan dan bahan bakar terpakai.",
+    "distribution": "Jumlah kapal per peringkat CII",
+    "rated": "{{rated}} dari {{total}} kapal memiliki peringkat",
+    "notAvailable_one": "{{count}} kapal belum memiliki data",
+    "notAvailable_other": "{{count}} kapal belum memiliki data",
+    "fuel": {
+      "month": "Bahan bakar bulan ini",
+      "year": "Bahan bakar tahun ini"
+    },
+    "fuelNote_one": "ME + AE dari segmen pelayaran {{count}} kapal (telemetri, formula pertama atau Holtrop).",
+    "fuelNote_other": "ME + AE dari segmen pelayaran {{count}} kapal (telemetri, formula pertama atau Holtrop).",
+    "fuelTruncated": "Dibatasi 50 kapal pertama.",
+    "empty": "Belum ada kapal dengan data CII",
+    "emptyHint": "Peringkat muncul setelah kapal armada berlayar dan segmen bahan bakarnya dihitung."
+  },
+  "rate": {
+    "title": "Laju pesan AIS per sumber",
+    "description": "Pesan per menit dari penerima utama, stasiun Batam dan mitra (API).",
+    "perMinute": "/mnt",
+    "vessels_one": "{{count}} kapal",
+    "vessels_other": "{{count}} kapal",
+    "caption": "Riwayat pesan AIS per menit menurut sumber sejak halaman dibuka",
+    "collecting": "Riwayat laju dikumpulkan selama halaman terbuka (setiap 15 detik)."
+  },
+  "sources": {
+    "primary": "Penerima utama",
+    "batam": "Stasiun Batam",
+    "pusher": "Mitra (API)"
   },
   "quickLinks": {
-    "title": "Akses cepat",
     "map": "Buka peta live",
     "alerts": "Lihat alert",
-    "cii": "Laporan CII",
-    "methodology": "Metodologi & referensi"
+    "cii": "Laporan CII"
   }
 }

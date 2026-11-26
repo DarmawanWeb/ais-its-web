@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Notification Service
  * Alert inbox, alert rules and deliveries (e-mail, Telegram, webhook), transactional e-mail and the realtime WebSocket gateway. Realtime: socket.io at path /ws on the same origin (handshake auth { token }, events of @darmawanweb/ais-its-contracts/realtime).
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import { useMutation, useQuery } from '@tanstack/react-query';
 import type {
@@ -51,6 +51,7 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
 };
 
 /**
+ * Every webhook channel gets its own signing key: `channels[i].signingSecret` is in this response only.
  * @summary Create an alert rule in the active organization
  */
 export const alertRulesControllerCreate = (
@@ -116,7 +117,10 @@ export type AlertRulesControllerCreateMutationBody = BodyType<CreateAlertRuleDto
 export type AlertRulesControllerCreateMutationError = ErrorType<ProblemDetails>;
 export type AlertRulesControllerCreateMutationVariables = { data: BodyType<CreateAlertRuleDto> };
 
-/** @summary Create an alert rule in the active organization */
+/**
+ * Every webhook channel gets its own signing key: `channels[i].signingSecret` is in this response only.
+ * @summary Create an alert rule in the active organization
+ */
 export const useAlertRulesControllerCreate = <
   TError = ErrorType<ProblemDetails>,
   TContext = unknown,
@@ -405,6 +409,7 @@ export function useAlertRulesControllerGet<
 }
 
 /**
+ * A webhook target new to the rule gets its own signing key (`channels[i].signingSecret` in this response only); targets that stay keep their key; removed targets lose theirs.
  * @summary Change an alert rule
  */
 export const alertRulesControllerUpdate = (
@@ -474,7 +479,10 @@ export type AlertRulesControllerUpdateMutationVariables = {
   data: BodyType<UpdateAlertRuleDto>;
 };
 
-/** @summary Change an alert rule */
+/**
+ * A webhook target new to the rule gets its own signing key (`channels[i].signingSecret` in this response only); targets that stay keep their key; removed targets lose theirs.
+ * @summary Change an alert rule
+ */
 export const useAlertRulesControllerUpdate = <
   TError = ErrorType<ProblemDetails>,
   TContext = unknown,
@@ -576,4 +584,92 @@ export const useAlertRulesControllerRemove = <
   TContext
 > => {
   return useMutation(getAlertRulesControllerRemoveMutationOptions(options), queryClient);
+};
+/**
+ * The channel at `index` of `channels` gets a new key: the response carries its `keyId` and, only here, its `signingSecret`. Deliveries from now on (pending retries included) are signed with it; receivers tell the keys apart by `X-AIS-ITS-Key-Id`. A webhook from before 0.2.0 gets its first own key (it was signed with the deployment secret). 404 RULE_CHANNEL_NOT_FOUND for an index without channel, 422 RULE_CHANNEL_NOT_WEBHOOK for other channel types.
+ * @summary Replace the signing secret of a webhook channel
+ */
+export const alertRulesControllerRotateSecret = (
+  id: string,
+  index: number,
+  options?: SecondParameter<typeof apiClient>,
+  signal?: AbortSignal,
+) => {
+  return apiClient<AlertRuleDto>(
+    { url: `/api/v2/alert-rules/${id}/channels/${index}/rotate-secret`, method: 'POST', signal },
+    options,
+  );
+};
+
+export const getAlertRulesControllerRotateSecretMutationKey = () =>
+  ['alertRulesControllerRotateSecret'] as const;
+
+export const getAlertRulesControllerRotateSecretMutationOptions = <
+  TError = ErrorType<ProblemDetails>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof alertRulesControllerRotateSecret>>,
+    TError,
+    AlertRulesControllerRotateSecretMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof apiClient>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof alertRulesControllerRotateSecret>>,
+  TError,
+  AlertRulesControllerRotateSecretMutationVariables,
+  TContext
+> => {
+  const mutationKey = getAlertRulesControllerRotateSecretMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof alertRulesControllerRotateSecret>>,
+    AlertRulesControllerRotateSecretMutationVariables
+  > = (props) => {
+    const { id, index } = props ?? {};
+
+    return alertRulesControllerRotateSecret(id, index, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type AlertRulesControllerRotateSecretMutationResult = NonNullable<
+  Awaited<ReturnType<typeof alertRulesControllerRotateSecret>>
+>;
+
+export type AlertRulesControllerRotateSecretMutationError = ErrorType<ProblemDetails>;
+export type AlertRulesControllerRotateSecretMutationVariables = { id: string; index: number };
+
+/**
+ * The channel at `index` of `channels` gets a new key: the response carries its `keyId` and, only here, its `signingSecret`. Deliveries from now on (pending retries included) are signed with it; receivers tell the keys apart by `X-AIS-ITS-Key-Id`. A webhook from before 0.2.0 gets its first own key (it was signed with the deployment secret). 404 RULE_CHANNEL_NOT_FOUND for an index without channel, 422 RULE_CHANNEL_NOT_WEBHOOK for other channel types.
+ * @summary Replace the signing secret of a webhook channel
+ */
+export const useAlertRulesControllerRotateSecret = <
+  TError = ErrorType<ProblemDetails>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof alertRulesControllerRotateSecret>>,
+      TError,
+      AlertRulesControllerRotateSecretMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof alertRulesControllerRotateSecret>>,
+  TError,
+  AlertRulesControllerRotateSecretMutationVariables,
+  TContext
+> => {
+  return useMutation(getAlertRulesControllerRotateSecretMutationOptions(options), queryClient);
 };

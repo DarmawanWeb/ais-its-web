@@ -1,15 +1,420 @@
 {
+  "nav": { "cii": "Emissions & CII" },
   "cii": {
     "title": "Emissions & CII",
-    "description": "Year-to-date Carbon Intensity Indicator per vessel: attained, required, rating and grade A–E.",
-    "capabilities": [
-      "Fleet CII summary and A–E grade distribution",
-      "CII history per vessel and year",
-      "Realtime cii:updated updates (useCiiUpdates)",
-      "ⓘ method sources (cii.attained, cii.required, …)"
-    ]
+    "description": "Annual Carbon Intensity Indicator (CII) of the fleet: attained against required CII, rating and A–E grade under MARPOL Annex VI regulation 28."
   },
-  "nav": {
-    "cii": "Emissions & CII"
+  "units": { "cii": "g CO₂/cap·nm" },
+  "subnav": {
+    "label": "Emissions & CII navigation",
+    "fleet": "Fleet summary",
+    "reductionFactors": "Reduction factors Z"
+  },
+  "grade": {
+    "none": "No grade yet",
+    "aria": "CII grade {{grade}} ({{label}})",
+    "short": "Grade {{grade}}"
+  },
+  "gradeMeaning": {
+    "A": "well below the required CII",
+    "B": "slightly below the required CII",
+    "C": "at the required CII",
+    "D": "action plan after 3 consecutive years",
+    "E": "corrective action plan in the SEEMP required"
+  },
+  "source": {
+    "manual": "Manual",
+    "manualHint": "Manual / imported record: used because this year has no counted voyage segments.",
+    "segments": "AIS segments",
+    "segmentsHint": "Computed from AIS voyage segments (telemetry, first formula or Holtrop)."
+  },
+  "methods": {
+    "telemetry": "Telemetry",
+    "first_formula": "First formula",
+    "holtrop": "Holtrop + weather",
+    "none": "Not counted"
+  },
+  "methodsUsed": "Methods:",
+  "live": { "updated": "Updated {{time}}" },
+  "problems": {
+    "notAvailable": {
+      "title": "No CII data for {{year}} yet",
+      "description": "There are no counted voyage segments and no manual record for this year. Data appears automatically once the vessel's AIS positions are processed; for past years you can enter a manual record."
+    },
+    "vesselNotFound": {
+      "title": "Vessel not found",
+      "description": "The emission service knows no vessel with this MMSI. Check the MMSI or register the vessel in the Vessels module."
+    },
+    "forbidden": {
+      "title": "This vessel belongs to another organization",
+      "description": "CII, emission and SEEMP data are private to each organization. Switch to the vessel's organization to see them."
+    },
+    "reductionFactorMissing": {
+      "title": "Reduction factor Z not available",
+      "description": "The required CII cannot be computed because this year's reduction factor Z is missing. A platform administrator can add it on the Reduction factors Z page."
+    },
+    "manualNotFound": {
+      "title": "No manual record yet",
+      "description": "This year has no manual or imported record yet."
+    },
+    "recomputeRange": {
+      "title": "Invalid recomputation range",
+      "description": "The range must be at most 7 days long, end no later than now and lie inside the 7-day stream window."
+    },
+    "recomputeInProgress": {
+      "title": "A recomputation is running",
+      "description": "This vessel is being recomputed. Wait until that job finishes before starting a new one."
+    },
+    "superAdminRequired": {
+      "title": "Platform administrators only",
+      "description": "Only platform administrators (super_admin) can do this."
+    },
+    "jobNotFound": {
+      "title": "Recomputation job not found",
+      "description": "This job is no longer available on the server."
+    },
+    "validation": {
+      "title": "Invalid data",
+      "description": "Check the highlighted fields and try again."
+    }
+  },
+  "fleet": {
+    "organization": "Organization",
+    "allOrganizations": "All organizations",
+    "activeOrganization": "active",
+    "year": "Year",
+    "regulationTitle": "Regulatory thresholds {{year}}",
+    "regulationDescription": "This year's reduction factor and the meaning of every grade (MEPC.354(78)).",
+    "reductionFactor": "Reduction factor Z {{year}}",
+    "reductionFactorMissing": "Not set for this year",
+    "reductionFactorsLink": "See every year",
+    "gradeMeaning": "Meaning of the CII grades",
+    "actionPlan_one": "{{count}} vessel is graded D or E. Grade E, or D for three consecutive years, requires a corrective action plan in SEEMP Part III.",
+    "actionPlan_other": "{{count}} vessels are graded D or E. Grade E, or D for three consecutive years, requires a corrective action plan in SEEMP Part III.",
+    "noActionPlan": "No vessel is graded D or E this year.",
+    "distributionTitle": "Grade distribution {{year}}",
+    "distributionDescription": "Vessels per grade A–E across the organization's whole fleet (all pages).",
+    "distributionCaption_one": "{{count}} graded vessel",
+    "distributionCaption_other": "{{count}} graded vessels",
+    "tableTitle": "Fleet vessels {{year}}",
+    "tableDescription": "Attained against required CII, rating, grade and the trend against the previous year. Select a row to open the vessel.",
+    "tableLabel": "CII of the fleet vessels in {{year}}",
+    "vessels": "Vessels",
+    "share": "Share",
+    "view": "View",
+    "chartView": "Chart",
+    "tableView": "Table",
+    "notAvailableNote_one": "{{count}} vessel has no CII data for this year and is not part of the distribution.",
+    "notAvailableNote_other": "{{count}} vessels have no CII data for this year and are not part of the distribution.",
+    "emptyTitle": "No vessels in this fleet yet",
+    "emptyDescription": "Add vessels in the Vessels module; their CII appears once the first AIS positions are processed.",
+    "unitNote": "CII values in"
+  },
+  "kpi": {
+    "vessels": "Vessels in the fleet",
+    "vesselsDescription": "Every vessel of the organization",
+    "rated": "Vessels with a CII",
+    "ofVessels": "of {{count}}",
+    "ratedDescription": "Have CII data for {{year}}",
+    "goodShare": "Grades A–C",
+    "goodShareDescription": "Share of compliant vessels",
+    "needAction": "Need action (D–E)",
+    "needActionDescription": "Corrective action plan candidates"
+  },
+  "columns": {
+    "vessel": "Vessel",
+    "grade": "Grade",
+    "rating": "Rating",
+    "attained": "Attained",
+    "required": "Required",
+    "trend": "Trend vs {{year}}",
+    "source": "Source",
+    "year": "Year",
+    "distance": "Distance (nm)",
+    "co2": "CO₂ (t)",
+    "actions": "Actions"
+  },
+  "trend": {
+    "none": "No {{year}} data",
+    "better": "Improved",
+    "worse": "Worsened",
+    "same": "Stable",
+    "gradeChange": "{{year}}:"
+  },
+  "daily": {
+    "title": "Cumulative CII curve {{year}}",
+    "description": "Attained CII from 1 January to the end of every day against this year's A–E bands (boundaries dᵢ × required CII).",
+    "cumulative": "Cumulative CII",
+    "rating": "Cumulative rating",
+    "daily": "Daily CII",
+    "required": "Required CII",
+    "distance": "Distance",
+    "co2": "CO₂",
+    "segments": "Segments",
+    "legend": "Chart legend",
+    "bands": "Grade bands A–E",
+    "showDaily": "Show daily CII",
+    "summary": "Cumulative CII {{year}} on {{day}}: {{value}} (grade {{grade}}).",
+    "day": "Day",
+    "emptyTitle": "No daily points yet",
+    "emptyDescription": "The daily curve appears once the first voyage segment of the year is computed."
+  },
+  "summary": {
+    "grade": "Grade {{year}}",
+    "asOf": "Data up to {{time}}",
+    "attained": "Attained CII",
+    "attainedShort": "Attained",
+    "attainedDescription": "Σ CO₂ × 10⁶ / (capacity × Σ distance)",
+    "required": "Required CII",
+    "requiredShort": "Required",
+    "zMissing": "No Z for this year yet",
+    "zOfYear": "Reduction factor Z {{year}} = {{z}}%",
+    "rating": "CII rating",
+    "ratingDescription": "Attained ÷ required; lower is better",
+    "scaleTitle": "Position on the rating scale",
+    "scaleDescription": "Grade boundaries = the ship type's d-vector × this year's required CII.",
+    "scaleAria": "CII rating scale: attained {{attained}} lies in grade {{grade}}. Boundaries A ≤ {{d1}}, B ≤ {{d2}}, C ≤ {{d3}}, D ≤ {{d4}}, above is E."
+  },
+  "totals": {
+    "title": "Year-to-date operations",
+    "description": "Totals of the counted segments in {{year}} and the fuel methods used.",
+    "distance": "Distance sailed",
+    "co2": "CO₂ emissions",
+    "fuelMe": "Main engine fuel (ME)",
+    "fuelAe": "Auxiliary engine fuel (AE)",
+    "segments": "Counted segments",
+    "manualNoSegments": "— (manual record)",
+    "capacity": "CII capacity",
+    "methodMix": "Fuel methods",
+    "lastMethod": "Latest:",
+    "noMethods": "No counted segments (manual record)."
+  },
+  "projection": {
+    "title": "Year-end projection",
+    "description": "Year-to-date totals extrapolated linearly to 31 December.",
+    "elapsed": "Year elapsed",
+    "grade": "Projected grade {{grade}} · rating {{rating}}",
+    "sameAsYtd": "A linear projection scales CO₂ and distance alike, so the projected CII, rating and grade equal the year-to-date values.",
+    "distance": "Projected distance",
+    "co2": "Projected CO₂",
+    "fuelMe": "Projected ME fuel",
+    "fuelAe": "Projected AE fuel",
+    "none": "The projection is only available for the current year computed from voyage segments."
+  },
+  "manual": {
+    "title": "Manual / imported CII record",
+    "description": "Manual annual records (e.g. imported legacy data or DCS reports) are used only for years without voyage segments. Fields left empty are computed by the service.",
+    "year": "Year",
+    "newRecord": "New record",
+    "existingRecord": "Editing the existing record",
+    "lastUpdated": "Last changed {{time}}",
+    "segmentYearNote": "{{year}} has voyage segments: the manual record is stored but not used while segment data exists.",
+    "optional": "optional",
+    "gradeAuto": "Automatic (from the d-vector)",
+    "notePlaceholder": "E.g. imported 2024 DCS report from the legacy system",
+    "computedHint": "Leave required CII, rating or grade empty to have them computed from Z and the d-vector.",
+    "saved": "Manual record {{year}} saved",
+    "saveFailed": "The manual record could not be saved",
+    "fields": {
+      "attained": "Attained CII",
+      "distanceNm": "Distance",
+      "fuelMeTon": "ME fuel",
+      "fuelAeTon": "AE fuel",
+      "required": "Required CII",
+      "rating": "Rating",
+      "co2Ton": "CO₂",
+      "grade": "Grade",
+      "note": "Note"
+    },
+    "errors": {
+      "required": "Required",
+      "number": "Enter a number, e.g. 12.5",
+      "positive": "Must be greater than 0",
+      "nonNegative": "Must not be negative",
+      "noteLength": "At most 2000 characters"
+    }
+  },
+  "annual": {
+    "title": "Annual CII history",
+    "description": "CII per calendar year from voyage segments, or from the manual / imported record when the year has no segments.",
+    "addManual": "Add manual record",
+    "editManual": "Manual record",
+    "editManualFor": "Manual record {{year}}",
+    "attainedLegend": "Attained CII (grade colours)",
+    "manualLegend": "Manual / imported record (hatched)",
+    "tableLabel": "Annual CII history",
+    "manualNote_one": "{{count}} year uses a manual / imported record (marked Manual and hatched).",
+    "manualNote_other": "{{count}} years use a manual / imported record (marked Manual and hatched).",
+    "segmentsNote": "Every year is computed from AIS voyage segments."
+  },
+  "segments": {
+    "title": "Voyage segments",
+    "description": "Every segment joins two consecutive AIS positions; fuel is computed by priority telemetry → first formula → Holtrop + weather.",
+    "tableLabel": "Voyage segments",
+    "range": "Segment range",
+    "time": "Time",
+    "minutes_one": "{{count}} minute",
+    "minutes_other": "{{count}} minutes",
+    "distance": "Distance (nm)",
+    "speed": "Speed (kn)",
+    "fuel": "Fuel (t)",
+    "co2": "CO₂ (t)",
+    "method": "Method",
+    "navstatus": "Navigational status",
+    "weather": "Wind",
+    "calmFallback": "Calm weather (fallback)",
+    "beaufort": "Beaufort {{value}}",
+    "encounter": "angle {{value}}°",
+    "flags": "Flags",
+    "emptyTitle": "No segments in this range",
+    "emptyDescription": "Pick another range (at most 31 days) or wait for the next AIS positions.",
+    "note": "\"Not counted\" segments (gaps > 6 h, no fuel model, invalid results) are not part of the CII."
+  },
+  "flags": {
+    "gap": {
+      "label": "Data gap",
+      "hint": "More than 360 minutes between the positions; the segment is not counted."
+    },
+    "no_fuel_model": {
+      "label": "No fuel model",
+      "hint": "No telemetry, fuel formula or main engine with SFOC."
+    },
+    "weather_unavailable": {
+      "label": "Weather unavailable",
+      "hint": "Open-Meteo could not be reached; calm weather (0 kn) was used."
+    },
+    "telemetry_reattributed": {
+      "label": "Telemetry re-attributed",
+      "hint": "The segment's fuel was replaced by telemetry readings that arrived later."
+    },
+    "formula_error": {
+      "label": "Invalid formula",
+      "hint": "The first fuel formula could not be evaluated; the legacy 0.5 L/min was used."
+    },
+    "fuel_not_finite": {
+      "label": "Non-finite result",
+      "hint": "The Holtrop/Kwon model gave a non-finite value (very strong wind on a small hull)."
+    },
+    "fuel_negative": {
+      "label": "Negative result",
+      "hint": "The Holtrop/Kwon model gave negative fuel; the segment is not counted."
+    }
+  },
+  "dcs": {
+    "title": "IMO DCS-style summary {{year}}",
+    "description": "Annual fuel consumption per fuel type, distance, hours under way and CO₂.",
+    "downloadCsv": "Download CSV",
+    "downloaded": "DCS summary {{year}} downloaded",
+    "downloadFailed": "The CSV could not be downloaded",
+    "distance": "Distance sailed",
+    "hoursUnderWay": "Hours under way (≥ 1 kn)",
+    "hoursUnknown": "Unknown (manual record)",
+    "hours": "h",
+    "co2": "CO₂ (t)",
+    "tableLabel": "Fuel per type {{year}}",
+    "fuel": "Fuel",
+    "conversionFactor": "C_F (t CO₂/t)",
+    "fuelMe": "ME (t)",
+    "fuelAe": "AE (t)",
+    "fuelTotal": "Total (t)",
+    "total": "Total",
+    "noFuel": "No fuel consumption recorded.",
+    "disclaimer": "This summary holds the core pre-2026 DCS data (fuel, distance, hours under way). It is not an official DCS report: the finer data mandatory from 2026 (MEPC.385(81)) is not included."
+  },
+  "recompute": {
+    "open": "Recompute",
+    "title": "Recompute segments",
+    "description": "Replays the AIS positions and rebuilds the segments of this range with the current vessel profile, telemetry and weather (at most {{days}} days, inside the 7-day stream window).",
+    "from": "From",
+    "to": "To",
+    "issues": {
+      "order": "The start must be before the end.",
+      "future": "The end must not be in the future.",
+      "tooLong": "The range is at most {{days}} days.",
+      "tooOld": "The start must lie within the last {{days}} days (stream window)."
+    },
+    "warningTitle": "Older segments may be replaced",
+    "warning": "Segments that a complete replay does not produce again are deleted. The action is recorded in the audit log.",
+    "start": "Start recomputation",
+    "started": "Recomputation started",
+    "succeeded": "Recomputation finished: {{segments}} segments written",
+    "failed": "Recomputation failed",
+    "jobTitle": "Recomputation job",
+    "jobId": "Job id",
+    "loading": "Loading the job status…",
+    "status": { "running": "Running", "succeeded": "Succeeded", "failed": "Failed" },
+    "range": "Range",
+    "replayed": "Positions replayed",
+    "segments": "Segments written",
+    "deleted": "Segments deleted",
+    "heartbeat": "Last sign of life",
+    "finished": "Finished",
+    "errors": {
+      "INTERRUPTED": "Interrupted (instance stopped)",
+      "REPLAY_INCOMPLETE": "Incomplete replay",
+      "NO_POSITIONS": "No positions in this range",
+      "VESSEL_CHANGED": "The MMSI moved to another vessel during the job"
+    }
+  },
+  "vessel": {
+    "title": "Vessel CII",
+    "fallbackTitle": "Vessel MMSI {{mmsi}}",
+    "back": "Back to Emissions & CII",
+    "invalidTitle": "Invalid MMSI",
+    "invalidDescription": "An MMSI has 9 digits.",
+    "seemp": "SEEMP recommendations",
+    "addManual": "Enter manual record {{year}}",
+    "tabs": "Vessel CII sections",
+    "tab": {
+      "summary": "Summary",
+      "history": "Annual history",
+      "segments": "Voyage segments",
+      "dcs": "DCS report"
+    }
+  },
+  "factors": {
+    "title": "Reduction factors Z",
+    "description": "Annual reduction factors against the 2019 reference line that set the required CII (MEPC.338(76) for 2023–2026, MEPC.400(83) for 2027–2030).",
+    "edit": "Edit factors",
+    "editTitle": "Edit reduction factors Z",
+    "editDescription": "Change or add years. Only changed years are sent; other years are kept. Saving republishes every CII.",
+    "editTableLabel": "Editable reduction factors",
+    "source": "Source",
+    "yearOf": "Year of row {{index}}",
+    "zOf": "Z of {{year}} (%)",
+    "sourceOf": "Source of {{year}}",
+    "issues": {
+      "year": "Year 2019–2100",
+      "duplicate": "Duplicate year",
+      "z": "Z between 0 and 99.999%",
+      "source": "Source required (max. 500 characters)"
+    },
+    "removeRow": "Remove row {{year}}",
+    "addYear": "Add year",
+    "changes_one": "{{count}} change ready to save",
+    "changes_other": "{{count}} changes ready to save",
+    "fixErrors": "Fix the highlighted fields",
+    "confirmTitle": "Save the reduction factors?",
+    "confirmDescription_one": "{{count}} year is updated and every vessel CII is republished with the new factor. The action is recorded in the audit log.",
+    "confirmDescription_other": "{{count}} years are updated and every vessel CII is republished with the new factors. The action is recorded in the audit log.",
+    "confirm": "Save & republish",
+    "saved_one": "{{count}} reduction factor saved",
+    "saved_other": "{{count}} reduction factors saved",
+    "saveFailed": "The reduction factors could not be saved",
+    "emptyTitle": "No reduction factors yet",
+    "emptyDescription": "Without Z the required CII cannot be computed. A platform administrator can add them.",
+    "chartTitle": "Trajectory of Z",
+    "chartDescription": "Reduction against the 2019 reference line per year, in percent.",
+    "past": "Past years",
+    "current": "Current year ({{year}})",
+    "future": "Coming years",
+    "howTitle": "How Z is used",
+    "howDescription": "The required CII of every year shrinks with Z.",
+    "howZ": "Z(y): reduction factor of year y in percent.",
+    "howRef": "a × Cap^(−c): reference line of the ship type (MEPC.353(78)) with DWT or GT capacity.",
+    "howRepublish": "Changing Z recomputes the rating and grade of every vessel for that year.",
+    "tableTitle": "Reduction factors per year",
+    "multiplier": "Multiplier (1 − Z/100)",
+    "thisYear": "Current year"
   }
 }

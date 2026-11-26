@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Notification Service
  * Alert inbox, alert rules and deliveries (e-mail, Telegram, webhook), transactional e-mail and the realtime WebSocket gateway. Realtime: socket.io at path /ws on the same origin (handshake auth { token }, events of @darmawanweb/ais-its-contracts/realtime).
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 
 /**
@@ -20,4 +20,6 @@ export const MethodSummaryDtoDomain = {
   geo: 'geo',
   safety: 'safety',
   surveillance: 'surveillance',
+  notification: 'notification',
+  security: 'security',
 } as const;

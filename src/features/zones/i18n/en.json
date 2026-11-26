@@ -1,14 +1,288 @@
 {
-  "zones": {
-    "title": "Zones & Geofences",
-    "description": "Manage pipeline corridors, transhipment areas, fishing grounds, protected areas, restricted areas and custom zones.",
-    "capabilities": [
-      "Draw and edit zones on the map (terra-draw)",
-      "GeoJSON import (≤ 50,000 vertices)",
-      "Global and organization zones (zone:write)"
-    ]
-  },
   "nav": {
     "zones": "Zones"
+  },
+  "zones": {
+    "title": "Zones & Geofences",
+    "description": "Registry of pipeline corridors, transhipment areas, fishing grounds, protected and restricted areas, anchorages, ports and custom zones used by the safety and surveillance detectors.",
+    "tableLabel": "Zone list",
+    "mapLabel": "Zone map"
+  },
+  "scope": {
+    "all": "All",
+    "global": "Global",
+    "yourOrg": "My organization",
+    "otherOrg": "Other organization"
+  },
+  "state": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "alerting": "Alert"
+  },
+  "filters": {
+    "label": "Zone filters",
+    "search": "Search",
+    "searchPlaceholder": "Zone name or code",
+    "scope": "Scope",
+    "kind": "Zone kind",
+    "allKinds": "All kinds",
+    "kindsSelected": "{{value}} kinds selected",
+    "clearKinds": "Clear kind selection",
+    "state": "State",
+    "allStates": "All states",
+    "reset": "Reset filters"
+  },
+  "table": {
+    "name": "Zone",
+    "kind": "Kind",
+    "scope": "Scope",
+    "geometry": "Geometry",
+    "vertices": "{{value}} vertices",
+    "buffer": "Buffer",
+    "state": "State",
+    "actions": "Actions",
+    "actionsFor": "Actions for {{name}}",
+    "updatedAgo": "updated {{when}}"
+  },
+  "actions": {
+    "create": "New zone",
+    "edit": "Edit zone",
+    "view": "View zone",
+    "import": "Import GeoJSON",
+    "exportGeojson": "Export GeoJSON",
+    "exportCsv": "Export CSV"
+  },
+  "map": {
+    "legend": "Zone kinds",
+    "count": "{{value}} zones on the map",
+    "truncated": "The map was cut by the service budget — narrow the filters.",
+    "simplified": "Geometries simplified for display"
+  },
+  "empty": {
+    "title": "No zones yet",
+    "hintWrite": "Create a zone by drawing it on the map or import a GeoJSON file.",
+    "hintRead": "Zones are created by organization administrators or authorities. Contact them if a zone you need is missing.",
+    "filteredTitle": "No zones match",
+    "filteredHint": "Change the search, kinds or scope, or reset the filters."
+  },
+  "delete": {
+    "title": "Delete zone {{name}}?",
+    "description": "The zone is deleted permanently and the detectors stop using it. The action is recorded in the audit log.",
+    "descriptionGlobal": "Global zones are used by every organization. Deleting it stops detection in this zone for everyone. The action is recorded in the audit log."
+  },
+  "conflict": {
+    "title": "The zone was changed by someone else",
+    "descriptionSave": "The zone on the server is newer than the version you opened. Reload to see the latest changes (yours are discarded), or overwrite by saving your changes on top of the latest version.",
+    "descriptionDelete": "The zone changed since you opened it. Reload to review the latest version, or delete the latest version anyway.",
+    "reload": "Reload the latest version",
+    "overwrite": "Overwrite with my changes",
+    "deleteAnyway": "Delete anyway"
+  },
+  "leave": {
+    "title": "Leave without saving?",
+    "description": "Unsaved changes to the zone geometry and properties will be lost.",
+    "confirm": "Leave"
+  },
+  "readOnly": {
+    "noPermission": "You can view this zone but are not allowed to change zones (zone:write).",
+    "global": "Global zones are used by every organization and can only be changed by a super admin or an authority.",
+    "otherOrg": "This zone belongs to another organization and can only be changed by its owner."
+  },
+  "editor": {
+    "title": "Zone",
+    "newTitle": "New zone",
+    "mapLabel": "Zone editor map",
+    "back": "Back to the zone list",
+    "properties": "Zone properties",
+    "geometry": "Geometry",
+    "collapse": "Collapse the geometry panel",
+    "expand": "Expand the geometry panel",
+    "tools": "Drawing tools",
+    "modes": {
+      "select": "Select",
+      "polygon": "Polygon",
+      "linestring": "Line",
+      "point": "Point",
+      "static": "View"
+    },
+    "modeHints": {
+      "select": "Click a shape to select it; drag a vertex to change it, Delete removes a vertex.",
+      "polygon": "Click to add vertices; click the first vertex or press Enter to close the polygon, Esc to cancel.",
+      "linestring": "Click to add vertices; double-click or press Enter to finish the line, Esc to cancel.",
+      "point": "Click the map to place a point. Point zones need a buffer above 0 m.",
+      "static": "The geometry is read-only."
+    },
+    "toolNotAllowed": "{{tool}} is not allowed for this zone kind",
+    "deleteSelected": "Delete selected",
+    "nothingSelected": "Select a shape with the Select tool first.",
+    "clear": "Clear",
+    "clearTitle": "Clear the whole geometry?",
+    "clearDescription": "Every drawn shape is removed from the editor. The stored zone changes only once you save.",
+    "addPoint": "Add a point from coordinates",
+    "addPointButton": "Add point",
+    "type": "Geometry type",
+    "vertices": "Vertices",
+    "bufferSet": "Buffer set to {{value}} m for the point zone.",
+    "notFound": "Zone not found",
+    "notFoundHint": "The zone may have been deleted or belong to another organization."
+  },
+  "issues": {
+    "GEOMETRY_REQUIRED": "Draw the zone geometry on the map or import a GeoJSON file.",
+    "ZONE_GEOMETRY_TYPE_NOT_ALLOWED": "A {{type}} geometry is not allowed for this zone kind (allowed: {{allowed}}).",
+    "ZONE_GEOMETRY_TOO_COMPLEX": "The geometry has {{count}} vertices; at most {{max}}. Simplify it.",
+    "ZONE_BUFFER_REQUIRED": "Point zones need a buffer above 0 m.",
+    "ZONE_GEOMETRY_CROSSES_ANTIMERIDIAN": "An edge crosses the 180° meridian. Split the geometry there (RFC 7946).",
+    "GEOMETRY_OUT_OF_BOUNDS": "Position [{{lon}}, {{lat}}] is outside WGS84 (longitude −180…180, latitude −90…90)."
+  },
+  "problems": {
+    "typeNotAllowed": "The geometry type is not allowed for this zone kind. {{detail}}",
+    "tooComplex": "The geometry is too complex (at most 50,000 vertices). {{detail}}",
+    "bufferRequired": "Point zones need a buffer above 0 m.",
+    "antimeridian": "The geometry crosses the 180° meridian; split it there. {{detail}}",
+    "invalid": "PostGIS reports an invalid geometry: {{detail}}. Fix the shape (e.g. edges crossing each other) and save again.",
+    "conflict": "The zone was changed by someone else since you opened it.",
+    "quotaZones": "Zone quota reached ({{used}} of {{limit}} zones). Delete zones you no longer need.",
+    "quotaVertices": "Vertex quota reached ({{used}} + {{requested}} of {{limit}} vertices). Simplify or delete zones.",
+    "codeTaken": "Another zone of the same scope already uses this code.",
+    "snapshotTooLarge": "The zone is too large to publish to the detectors ({{size}} KiB, at most {{max}} KiB). Simplify the geometry.",
+    "notFound": "The zone was not found or has been deleted.",
+    "globalForbidden": "Only a super admin or an authority can change global zones.",
+    "writeForbidden": "This zone belongs to another organization.",
+    "organizationRequired": "Select an active organization first to create an organization zone.",
+    "validation": "Invalid zone data: {{detail}}",
+    "forbidden": "You are not allowed to do this.",
+    "payloadTooLarge": "The geometry exceeds the request size limit (4 MiB).",
+    "generic": "Something went wrong: {{detail}}"
+  },
+  "toast": {
+    "created": "Zone {{name}} created",
+    "saved": "Changes to zone {{name}} saved",
+    "deleted": "Zone {{name}} deleted",
+    "saveFailed": "The zone could not be saved",
+    "deleteFailed": "The zone could not be deleted",
+    "noChanges": "There are no changes to save.",
+    "fixGeometry": "Check the zone geometry",
+    "reloaded": "Latest zone version loaded",
+    "exported": "GeoJSON downloaded: {{count}} zones",
+    "exportTruncated": "Limited by the service budget; narrow the filters for a complete export.",
+    "exportFailed": "GeoJSON export failed",
+    "csvExported": "CSV downloaded: {{count}} zones"
+  },
+  "import": {
+    "title": "Import GeoJSON",
+    "description": "A Geometry, Feature or FeatureCollection in WGS84 [longitude, latitude]. Several features are merged into one zone.",
+    "drop": "Drop a .geojson file here or click to choose one",
+    "dropNow": "Release the file to check it",
+    "dropLabel": "GeoJSON file upload area",
+    "chooseFile": "Choose a GeoJSON file",
+    "hint": "At most {{size}} MiB · 50,000 vertices",
+    "paste": "Or paste GeoJSON text",
+    "check": "Check",
+    "pasted": "Pasted text",
+    "geometry": "Geometry",
+    "features": "Features",
+    "vertices": "Vertices",
+    "altitudeDropped": "Altitudes removed — zones are 2-D.",
+    "merged": "Several features were merged into one geometry.",
+    "open": "Open in the editor",
+    "loaded": "GeoJSON loaded ({{vertices}} vertices). Review it, then save.",
+    "errors": {
+      "too_large": {
+        "title": "File too large",
+        "hint": "At most 4 MiB. Simplify the geometry (e.g. in QGIS) and try again."
+      },
+      "invalid_json": {
+        "title": "Not valid JSON",
+        "hint": "Check brackets and commas. {{detail}}"
+      },
+      "not_geojson": {
+        "title": "Not GeoJSON",
+        "hint": "The file must be a Geometry, Feature or FeatureCollection (RFC 7946)."
+      },
+      "empty": {
+        "title": "No geometry",
+        "hint": "The file has no feature with a geometry."
+      },
+      "invalid_geometry": {
+        "title": "Invalid geometry structure",
+        "hint": "{{detail}} — e.g. polygon rings must be closed (first position = last position)."
+      },
+      "out_of_bounds": {
+        "title": "Coordinates outside WGS84",
+        "hint": "Position {{detail}} is outside longitude −180…180 / latitude −90…90."
+      },
+      "swapped_coordinates": {
+        "title": "Latitude and longitude swapped?",
+        "hint": "Position {{detail}} is only valid when swapped. GeoJSON uses [longitude, latitude]."
+      },
+      "nested_collection": {
+        "title": "Nested GeometryCollection",
+        "hint": "A GeometryCollection inside a GeometryCollection is not supported."
+      }
+    }
+  },
+  "form": {
+    "label": "Zone properties",
+    "readOnlyTitle": "Read-only",
+    "name": "Name",
+    "code": "Code",
+    "codeHint": "Unique slug (lowercase letters, digits, . _ -); derived from the name and immutable once saved.",
+    "codeImmutable": "The zone code cannot be changed.",
+    "kind": "Zone kind",
+    "kindHint": "Geometry: {{types}}.",
+    "kindUse": {
+      "pipeline": "Used by the EWS (distance to the pipeline).",
+      "transhipment_area": "Used by the transhipment detector.",
+      "fishing_ground": "Used by the fishing detector.",
+      "mpa": "Used by the geofence detector.",
+      "shallow_water": "For the grounding detector (planned).",
+      "restricted": "Used by the geofence and fishing detectors.",
+      "anchorage": "Used by the dark vessel harbour rule.",
+      "port": "Used by the dark vessel harbour rule.",
+      "tss_lane": "For the TSS detector (planned).",
+      "custom": "Used by the geofence detector."
+    },
+    "bufferM": "Buffer",
+    "bufferHint": "Area of effect around the geometry (0–100,000 m); a point zone is a circle of the buffer.",
+    "active": "Active",
+    "activeHint": "Inactive zones are kept but ignored by the detectors and the map tiles.",
+    "alertOnEnter": "Alert on entry",
+    "alertHint": "The geofence detector raises an alert when a vessel enters this zone.",
+    "alertHintUnused": "The geofence detector only watches restricted, protected and custom zones.",
+    "global": "Global zone",
+    "globalHint": "Used by every organization. Only super admins and authorities can change it.",
+    "propertiesTitle": "Zone kind properties",
+    "properties": {
+      "operator": "Operator",
+      "authority": "Authority",
+      "legalBasis": "Legal basis",
+      "unlocode": "UN/LOCODE",
+      "maxDraughtM": "Maximum draught (m)",
+      "directionDeg": "Lane direction (°)",
+      "maxSpeedKn": "Maximum speed (kn)",
+      "depthM": "Depth (m)",
+      "note": "Note"
+    },
+    "otherProperties": "Other properties are kept: {{keys}}.",
+    "source": "Geometry source (provenance)",
+    "sourcePlaceholder": "Dataset, survey or regulation the geometry comes from",
+    "sourceHint": "Required for official zones (methodology §17); empty means unknown.",
+    "createdBy": "Created by",
+    "createdByUser": "A user",
+    "createdBySeed": "Initial data (seed)",
+    "createdAt": "Created",
+    "updatedAt": "Updated",
+    "version": "Version (ETag)",
+    "create": "Create zone",
+    "save": "Save changes",
+    "errors": {
+      "required": "Required.",
+      "tooLong": "Too long.",
+      "codePattern": "Use lowercase letters, digits, dots, underscores or hyphens (at most 64, starting with a letter or digit).",
+      "number": "Enter a number.",
+      "bufferRange": "The buffer is between 0 and 100,000 m.",
+      "unlocode": "A UN/LOCODE has 5 characters, e.g. IDBTM.",
+      "direction": "The direction is between 0 and 359°."
+    }
   }
 }

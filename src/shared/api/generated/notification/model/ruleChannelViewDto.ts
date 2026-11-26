@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Notification Service
  * Alert inbox, alert rules and deliveries (e-mail, Telegram, webhook), transactional e-mail and the realtime WebSocket gateway. Realtime: socket.io at path /ws on the same origin (handshake auth { token }, events of @darmawanweb/ais-its-contracts/realtime).
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import type { RuleChannelViewDtoType } from './ruleChannelViewDtoType';
 
@@ -11,4 +11,14 @@ export interface RuleChannelViewDto {
   type: RuleChannelViewDtoType;
   /** E-mail address, Telegram chat id / @channel, or webhook URL */
   target: string;
+  /**
+   * Webhooks: id of the signing key, sent as `X-AIS-ITS-Key-Id`; null for other channels and for a webhook from before 0.2.0 (signed with the deployment secret, key id `deployment`, until its secret is rotated)
+   * @nullable
+   */
+  keyId: string | null;
+  /**
+   * Webhooks: the HMAC-SHA256 signing secret, **only** in the response that created the key (POST, a PATCH adding the target, rotate-secret); store it at the receiver, it is never shown again. null otherwise
+   * @nullable
+   */
+  signingSecret: string | null;
 }

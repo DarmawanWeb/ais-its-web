@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Emission Service
  * Fuel and CO2 per voyage segment, IMO CII (daily/annual, rating A-E), reduction factors, SEEMP recommendations and what-if simulation, IMO DCS summary
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import { useQuery } from '@tanstack/react-query';
 import type {
@@ -18,7 +18,13 @@ import type {
   UseQueryResult,
 } from '@tanstack/react-query';
 
-import type { DcsControllerSummaryParams, DcsSummaryDto, ProblemDetails } from '../model';
+import type {
+  DcsControllerFleetParams,
+  DcsControllerSummaryParams,
+  DcsSummaryDto,
+  FleetDcsDto,
+  ProblemDetails,
+} from '../model';
 
 import { apiClient } from '../../../mutator';
 import type { ErrorType } from '../../../mutator';
@@ -44,19 +50,19 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
  * @summary Annual fuel by type, distance, hours under way and CO2 (Accept: text/csv for CSV; default: current year)
  */
 export const dcsControllerSummary = (
-  mmsi: number,
+  mmsi: string,
   params?: DcsControllerSummaryParams,
   options?: SecondParameter<typeof apiClient>,
   signal?: AbortSignal,
 ) => {
-  return apiClient<DcsSummaryDto>(
+  return apiClient<DcsSummaryDto | string>(
     { url: `/api/v2/emission/vessels/${mmsi}/dcs`, method: 'GET', params, signal },
     options,
   );
 };
 
 export const getDcsControllerSummaryQueryKey = (
-  mmsi: number,
+  mmsi: string,
   params?: DcsControllerSummaryParams,
 ) => {
   return [`/api/v2/emission/vessels/${mmsi}/dcs`, ...(params ? [params] : [])] as const;
@@ -66,7 +72,7 @@ export const getDcsControllerSummaryQueryOptions = <
   TData = Awaited<ReturnType<typeof dcsControllerSummary>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   params?: DcsControllerSummaryParams,
   options?: {
     query?: Partial<
@@ -102,7 +108,7 @@ export function useDcsControllerSummary<
   TData = Awaited<ReturnType<typeof dcsControllerSummary>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   params: undefined | DcsControllerSummaryParams,
   options: {
     query: Partial<
@@ -125,7 +131,7 @@ export function useDcsControllerSummary<
   TData = Awaited<ReturnType<typeof dcsControllerSummary>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   params?: DcsControllerSummaryParams,
   options?: {
     query?: Partial<
@@ -148,7 +154,7 @@ export function useDcsControllerSummary<
   TData = Awaited<ReturnType<typeof dcsControllerSummary>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   params?: DcsControllerSummaryParams,
   options?: {
     query?: Partial<
@@ -163,7 +169,7 @@ export function useDcsControllerSummary<
   TData = Awaited<ReturnType<typeof dcsControllerSummary>>,
   TError = ErrorType<ProblemDetails>,
 >(
-  mmsi: number,
+  mmsi: string,
   params?: DcsControllerSummaryParams,
   options?: {
     query?: Partial<
@@ -174,6 +180,141 @@ export function useDcsControllerSummary<
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
   const queryOptions = getDcsControllerSummaryQueryOptions(mmsi, params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+/**
+ * Fleet of the active organization (super_admin: all or ?orgId), by MMSI. Each vessel as GET /emission/vessels/{mmsi}/dcs; vessels without segments or a manual record for the year are listed in `withoutData` (and left out of the CSV, which has the per-vessel layout with one header).
+ * @summary DCS-style annual summaries of every vessel of the fleet (an organization's annual submission; Accept: text/csv for one CSV)
+ */
+export const dcsControllerFleet = (
+  params?: DcsControllerFleetParams,
+  options?: SecondParameter<typeof apiClient>,
+  signal?: AbortSignal,
+) => {
+  return apiClient<FleetDcsDto | string>(
+    { url: `/api/v2/emission/fleet/dcs`, method: 'GET', params, signal },
+    options,
+  );
+};
+
+export const getDcsControllerFleetQueryKey = (params?: DcsControllerFleetParams) => {
+  return [`/api/v2/emission/fleet/dcs`, ...(params ? [params] : [])] as const;
+};
+
+export const getDcsControllerFleetQueryOptions = <
+  TData = Awaited<ReturnType<typeof dcsControllerFleet>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: DcsControllerFleetParams,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof dcsControllerFleet>>, TError, TData>>;
+    request?: SecondParameter<typeof apiClient>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getDcsControllerFleetQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof dcsControllerFleet>>> = ({ signal }) =>
+    dcsControllerFleet(params, requestOptions, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof dcsControllerFleet>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type DcsControllerFleetQueryResult = NonNullable<
+  Awaited<ReturnType<typeof dcsControllerFleet>>
+>;
+export type DcsControllerFleetQueryError = ErrorType<ProblemDetails>;
+
+/**
+ * Fleet of the active organization (super_admin: all or ?orgId), by MMSI. Each vessel as GET /emission/vessels/{mmsi}/dcs; vessels without segments or a manual record for the year are listed in `withoutData` (and left out of the CSV, which has the per-vessel layout with one header).
+ * @summary DCS-style annual summaries of every vessel of the fleet (an organization's annual submission; Accept: text/csv for one CSV)
+ */
+export function useDcsControllerFleet<
+  TData = Awaited<ReturnType<typeof dcsControllerFleet>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params: undefined | DcsControllerFleetParams,
+  options: {
+    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof dcsControllerFleet>>, TError, TData>> &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof dcsControllerFleet>>,
+          TError,
+          Awaited<ReturnType<typeof dcsControllerFleet>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Fleet of the active organization (super_admin: all or ?orgId), by MMSI. Each vessel as GET /emission/vessels/{mmsi}/dcs; vessels without segments or a manual record for the year are listed in `withoutData` (and left out of the CSV, which has the per-vessel layout with one header).
+ * @summary DCS-style annual summaries of every vessel of the fleet (an organization's annual submission; Accept: text/csv for one CSV)
+ */
+export function useDcsControllerFleet<
+  TData = Awaited<ReturnType<typeof dcsControllerFleet>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: DcsControllerFleetParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof dcsControllerFleet>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof dcsControllerFleet>>,
+          TError,
+          Awaited<ReturnType<typeof dcsControllerFleet>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Fleet of the active organization (super_admin: all or ?orgId), by MMSI. Each vessel as GET /emission/vessels/{mmsi}/dcs; vessels without segments or a manual record for the year are listed in `withoutData` (and left out of the CSV, which has the per-vessel layout with one header).
+ * @summary DCS-style annual summaries of every vessel of the fleet (an organization's annual submission; Accept: text/csv for one CSV)
+ */
+export function useDcsControllerFleet<
+  TData = Awaited<ReturnType<typeof dcsControllerFleet>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: DcsControllerFleetParams,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof dcsControllerFleet>>, TError, TData>>;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Fleet of the active organization (super_admin: all or ?orgId), by MMSI. Each vessel as GET /emission/vessels/{mmsi}/dcs; vessels without segments or a manual record for the year are listed in `withoutData` (and left out of the CSV, which has the per-vessel layout with one header).
+ * @summary DCS-style annual summaries of every vessel of the fleet (an organization's annual submission; Accept: text/csv for one CSV)
+ */
+export function useDcsControllerFleet<
+  TData = Awaited<ReturnType<typeof dcsControllerFleet>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: DcsControllerFleetParams,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof dcsControllerFleet>>, TError, TData>>;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getDcsControllerFleetQueryOptions(params, options);
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
     queryKey: DataTag<QueryKey, TData, TError>;

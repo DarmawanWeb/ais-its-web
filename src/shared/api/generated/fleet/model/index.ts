@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Fleet Service
  * Vessel master data and reference data (vessel types, fuels, engines, fuel formulas, ports, registry); publishes VesselSnapshotV1 to the FLEET stream
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 
 export * from './createEngineDto';
@@ -34,8 +34,11 @@ export * from './enginesControllerListKind';
 export * from './enginesControllerListParams';
 export * from './fuelDto';
 export * from './fuelFormulaDto';
+export * from './fuelFormulaProblemDto';
+export * from './fuelFormulaProblemDtoCode';
 export * from './fuelFormulasControllerList200';
 export * from './fuelFormulasControllerListParams';
+export * from './fuelFormulaValidationDto';
 export * from './fuelsControllerList200';
 export * from './fuelsControllerListParams';
 export * from './geoJsonPointDto';
@@ -77,6 +80,7 @@ export * from './updateVesselTypeDtoCapacityFixed';
 export * from './updateVesselTypeDtoCapacityUnit';
 export * from './updateVesselTypeDtoIcon';
 export * from './updateVesselTypeDtoSource';
+export * from './validateFuelFormulaDto';
 export * from './vesselDetailDto';
 export * from './vesselDetailDtoStatus';
 export * from './vesselDetailDtoView';
@@ -87,7 +91,9 @@ export * from './vesselEngineInputDto';
 export * from './vesselEngineInputDtoRole';
 export * from './vesselPortDto';
 export * from './vesselsControllerList200';
+export * from './vesselsControllerListOrder';
 export * from './vesselsControllerListParams';
+export * from './vesselsControllerListSort';
 export * from './vesselsControllerListStatus';
 export * from './vesselsControllerUploadPhotoBody';
 export * from './vesselSummaryDto';

@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Safety Service
  * Navigational safety analytics (pipeline Early Warning System, collision risk CPA/TCPA) built on the Detector SDK
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import { useQuery } from '@tanstack/react-query';
 import type {
@@ -46,7 +46,7 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
 };
 
 /**
- * Newest first by `time` (when the alert was raised; default range: the last 7 days, at most 366 days). With `status=open` and no `from`, every currently open occurrence is listed however long ago it was raised (`to` applies only when given). Tenancy (spec §8.5): authority and super_admin see every event, other roles the events of their organization’s vessels (mmsi or relatedMmsi).
+ * Newest first by `time` (when the alert was raised; default range: the last 7 days, at most 366 days). With `status=open` and no `from`, every currently open occurrence is listed however long ago it was raised (`to` applies only when given). Each event carries the fleet identities of its vessels (`vessel`, `relatedVessel`) and, in `data` / `resolution`, the localizable text (`messageKey`, `messageParams`). Tenancy (spec §8.5): authority and super_admin see every event, other roles the events of their organization’s vessels (mmsi or relatedMmsi).
  * @summary Safety events (EWS, collision) with their lifecycle
  */
 export const eventsControllerList = (
@@ -96,7 +96,7 @@ export type EventsControllerListQueryResult = NonNullable<
 export type EventsControllerListQueryError = ErrorType<ProblemDetails>;
 
 /**
- * Newest first by `time` (when the alert was raised; default range: the last 7 days, at most 366 days). With `status=open` and no `from`, every currently open occurrence is listed however long ago it was raised (`to` applies only when given). Tenancy (spec §8.5): authority and super_admin see every event, other roles the events of their organization’s vessels (mmsi or relatedMmsi).
+ * Newest first by `time` (when the alert was raised; default range: the last 7 days, at most 366 days). With `status=open` and no `from`, every currently open occurrence is listed however long ago it was raised (`to` applies only when given). Each event carries the fleet identities of its vessels (`vessel`, `relatedVessel`) and, in `data` / `resolution`, the localizable text (`messageKey`, `messageParams`). Tenancy (spec §8.5): authority and super_admin see every event, other roles the events of their organization’s vessels (mmsi or relatedMmsi).
  * @summary Safety events (EWS, collision) with their lifecycle
  */
 export function useEventsControllerList<
@@ -121,7 +121,7 @@ export function useEventsControllerList<
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
- * Newest first by `time` (when the alert was raised; default range: the last 7 days, at most 366 days). With `status=open` and no `from`, every currently open occurrence is listed however long ago it was raised (`to` applies only when given). Tenancy (spec §8.5): authority and super_admin see every event, other roles the events of their organization’s vessels (mmsi or relatedMmsi).
+ * Newest first by `time` (when the alert was raised; default range: the last 7 days, at most 366 days). With `status=open` and no `from`, every currently open occurrence is listed however long ago it was raised (`to` applies only when given). Each event carries the fleet identities of its vessels (`vessel`, `relatedVessel`) and, in `data` / `resolution`, the localizable text (`messageKey`, `messageParams`). Tenancy (spec §8.5): authority and super_admin see every event, other roles the events of their organization’s vessels (mmsi or relatedMmsi).
  * @summary Safety events (EWS, collision) with their lifecycle
  */
 export function useEventsControllerList<
@@ -146,7 +146,7 @@ export function useEventsControllerList<
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
- * Newest first by `time` (when the alert was raised; default range: the last 7 days, at most 366 days). With `status=open` and no `from`, every currently open occurrence is listed however long ago it was raised (`to` applies only when given). Tenancy (spec §8.5): authority and super_admin see every event, other roles the events of their organization’s vessels (mmsi or relatedMmsi).
+ * Newest first by `time` (when the alert was raised; default range: the last 7 days, at most 366 days). With `status=open` and no `from`, every currently open occurrence is listed however long ago it was raised (`to` applies only when given). Each event carries the fleet identities of its vessels (`vessel`, `relatedVessel`) and, in `data` / `resolution`, the localizable text (`messageKey`, `messageParams`). Tenancy (spec §8.5): authority and super_admin see every event, other roles the events of their organization’s vessels (mmsi or relatedMmsi).
  * @summary Safety events (EWS, collision) with their lifecycle
  */
 export function useEventsControllerList<
@@ -163,7 +163,7 @@ export function useEventsControllerList<
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
- * Newest first by `time` (when the alert was raised; default range: the last 7 days, at most 366 days). With `status=open` and no `from`, every currently open occurrence is listed however long ago it was raised (`to` applies only when given). Tenancy (spec §8.5): authority and super_admin see every event, other roles the events of their organization’s vessels (mmsi or relatedMmsi).
+ * Newest first by `time` (when the alert was raised; default range: the last 7 days, at most 366 days). With `status=open` and no `from`, every currently open occurrence is listed however long ago it was raised (`to` applies only when given). Each event carries the fleet identities of its vessels (`vessel`, `relatedVessel`) and, in `data` / `resolution`, the localizable text (`messageKey`, `messageParams`). Tenancy (spec §8.5): authority and super_admin see every event, other roles the events of their organization’s vessels (mmsi or relatedMmsi).
  * @summary Safety events (EWS, collision) with their lifecycle
  */
 export function useEventsControllerList<

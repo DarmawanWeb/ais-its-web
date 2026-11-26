@@ -3,10 +3,12 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Notification Service
  * Alert inbox, alert rules and deliveries (e-mail, Telegram, webhook), transactional e-mail and the realtime WebSocket gateway. Realtime: socket.io at path /ws on the same origin (handshake auth { token }, events of @darmawanweb/ais-its-contracts/realtime).
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import type { AlertDtoData } from './alertDtoData';
 import type { AlertDtoDomain } from './alertDtoDomain';
+import type { AlertDtoMessageParams } from './alertDtoMessageParams';
+import type { AlertDtoResolutionMessageParams } from './alertDtoResolutionMessageParams';
 import type { AlertDtoSeverity } from './alertDtoSeverity';
 import type { AlertDtoStatus } from './alertDtoStatus';
 
@@ -44,6 +46,17 @@ export interface AlertDto {
   dedupKey: string;
   /** Detector specific details */
   data: AlertDtoData;
+  /**
+   * Stable key of the text (`<domain>.<detector>.<situation>`, from `data.messageKey`) for clients that localize it; null when the detector sent none or an invalid one (render `title` / `message`)
+   * @nullable
+   * @pattern ^[a-z0-9_]+(\.[a-z0-9_]+)+$
+   */
+  messageKey: string | null;
+  /**
+   * Values of the text (`data.messageParams`, flat strings, numbers and booleans); null together with `messageKey`
+   * @nullable
+   */
+  messageParams: AlertDtoMessageParams;
   /** Producing service */
   source: string;
   /** @minimum 1 */
@@ -56,9 +69,37 @@ export interface AlertDto {
   acknowledgedBy: string | null;
   /** @nullable */
   acknowledgedAt: string | null;
-  /** @nullable */
+  /**
+   * User who resolved the alert; null while unresolved and when its detector resolved it (`resolutionEventId` set)
+   * @nullable
+   */
   resolvedBy: string | null;
-  /** @nullable */
+  /**
+   * When it was resolved: the action of the user, or the end of the condition (`resolvedAt` of `alert.resolved.v1`)
+   * @nullable
+   */
   resolvedAt: string | null;
+  /**
+   * Why the detector ended the condition (English `reason` of `alert.resolved.v1`); null otherwise
+   * @maxLength 500
+   * @nullable
+   */
+  resolutionReason: string | null;
+  /**
+   * Localizable key of `resolutionReason` (`messageKey` in the data of `alert.resolved.v1`); null otherwise
+   * @nullable
+   * @pattern ^[a-z0-9_]+(\.[a-z0-9_]+)+$
+   */
+  resolutionMessageKey: string | null;
+  /**
+   * Values of `resolutionMessageKey`; null together with it
+   * @nullable
+   */
+  resolutionMessageParams: AlertDtoResolutionMessageParams;
+  /**
+   * Envelope id of the `alert.resolved.v1` that resolved the alert; null when a user resolved it or it is unresolved
+   * @nullable
+   */
+  resolutionEventId: string | null;
   updatedAt: string;
 }

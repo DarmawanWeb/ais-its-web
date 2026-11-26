@@ -3,9 +3,10 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Safety Service
  * Navigational safety analytics (pipeline Early Warning System, collision risk CPA/TCPA) built on the Detector SDK
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import type { ClosestEncounterDto } from './closestEncounterDto';
+import type { PipelineIdentityDto } from './pipelineIdentityDto';
 import type { SafetyVesselIdentityDto } from './safetyVesselIdentityDto';
 import type { SafetyVesselStateDtoCollisionRisk } from './safetyVesselStateDtoCollisionRisk';
 import type { SafetyVesselStateDtoEwsStatus } from './safetyVesselStateDtoEwsStatus';
@@ -43,12 +44,20 @@ export interface SafetyVesselStateDto {
    * @nullable
    */
   nearestPipelineZoneId: string | null;
+  /**
+   * Code and name of that pipeline zone (also after it was deleted, until the vessel is evaluated again); `null` under the same conditions as `pipelineDistanceM`, or when the zone is not (yet) in the `zones` projection
+   * @nullable
+   */
+  nearestPipeline: PipelineIdentityDto | null;
   collisionRisk: SafetyVesselStateDtoCollisionRisk;
   /** @nullable */
   closestEncounter: ClosestEncounterDto | null;
   /** Methodology catalog ids behind the state (spec §17) */
   methodIds: string[];
-  /** @nullable */
+  /**
+   * Fleet identity of the vessel (shared across tenants); `null` for an unregistered MMSI
+   * @nullable
+   */
   vessel: SafetyVesselIdentityDto | null;
   updatedAt: string;
 }

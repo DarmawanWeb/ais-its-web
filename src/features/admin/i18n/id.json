@@ -1,60 +1,754 @@
 {
-  "organizations": {
-    "title": "Organisasi",
-    "description": "Kelola organisasi platform: perusahaan pelayaran, otoritas, platform dan riset.",
-    "capabilities": ["Daftar dan pencarian organisasi", "Buat dan ubah organisasi (org:manage)"]
-  },
   "nav": {
     "organizations": "Organisasi",
     "members": "Anggota",
-    "apiKeys": "API Keys",
+    "apiKeys": "Kunci API",
     "referenceData": "Data Referensi",
     "devices": "Perangkat",
-    "auditLog": "Audit Log"
+    "auditLog": "Log Audit"
+  },
+  "common": {
+    "organization": "Organisasi",
+    "noOrganization": "Tidak ada organisasi aktif",
+    "chooseOrganization": "Pilih organisasi",
+    "allOrganizations": "Semua organisasi",
+    "actions": "Aksi",
+    "tooLong": "Maksimal {{max}} karakter",
+    "on": "Aktif",
+    "off": "Nonaktif",
+    "never": "Belum pernah"
+  },
+  "actions": {
+    "copied": "Tersalin"
+  },
+  "orgKinds": {
+    "shipping_company": "Perusahaan pelayaran",
+    "authority": "Otoritas",
+    "research": "Riset",
+    "platform": "Platform"
+  },
+  "userStatus": {
+    "active": "Aktif",
+    "invited": "Diundang",
+    "disabled": "Dinonaktifkan"
+  },
+  "roles": {
+    "hints": {
+      "org_admin": "Mengelola anggota, kunci API, perangkat, aturan alert, dan log audit organisasi.",
+      "fleet_manager": "Mengelola armada: kapal, telemetri, CII dan SEEMP, aturan alert, serta zona.",
+      "authority": "Pengawasan lintas organisasi: alert, keselamatan, dan pengawasan seluruh armada.",
+      "viewer": "Akses baca saja ke kapal, peta, dan alert organisasi."
+    }
+  },
+  "organizations": {
+    "title": "Organisasi",
+    "description": "Tenant platform: perusahaan pelayaran, otoritas, lembaga riset, dan operator platform.",
+    "create": "Organisasi baru",
+    "statsLabel": "Organisasi per jenis",
+    "stats": {
+      "total": "Organisasi"
+    },
+    "tabs": {
+      "organizations": "Organisasi",
+      "users": "Direktori pengguna"
+    },
+    "tableLabel": "Organisasi",
+    "search": "Cari organisasi",
+    "searchPlaceholder": "Nama atau slug…",
+    "kindFilter": "Saring menurut jenis",
+    "allKinds": "Semua jenis",
+    "columns": {
+      "name": "Organisasi",
+      "kind": "Jenis",
+      "created": "Dibuat",
+      "updated": "Diperbarui"
+    },
+    "actions": "Aksi untuk {{name}}",
+    "viewMembers": "Lihat anggota",
+    "noMatches": "Tidak ada organisasi yang cocok",
+    "noMatchesHint": "Coba nama atau jenis lain, atau hapus filter.",
+    "empty": "Belum ada organisasi",
+    "emptyHint": "Buat organisasi pertama: perusahaan pelayaran, otoritas, atau lembaga riset.",
+    "form": {
+      "createTitle": "Organisasi baru",
+      "editTitle": "Ubah organisasi",
+      "description": "Jenis organisasi menentukan peran yang dapat dimiliki anggotanya: peran otoritas hanya ada di organisasi berjenis otoritas.",
+      "name": "Nama",
+      "namePlaceholder": "PT Pelayaran Nusantara",
+      "nameRequired": "Masukkan nama organisasi",
+      "slug": "Slug",
+      "slugHint": "Pengenal singkat di URL: huruf kecil, angka, dan tanda hubung.",
+      "slugAuto": "Kosongkan untuk memakai {{slug}}.",
+      "slugInvalid": "Gunakan huruf kecil dan angka yang dipisahkan satu tanda hubung (maksimal 63 karakter)",
+      "kind": "Jenis",
+      "platformKind": "Organisasi platform selalu berjenis Platform.",
+      "kindHints": {
+        "shipping_company": "Mengoperasikan kapal: armada, telemetri, CII, dan SEEMP kapal sendiri.",
+        "authority": "Pelabuhan, penjaga pantai, atau kementerian: dapat memberi peran otoritas untuk mengawasi seluruh armada.",
+        "research": "Universitas atau lembaga dengan akses baca untuk kajian.",
+        "platform": "Operator AIS Maritime Intelligence."
+      },
+      "kindWarning": "Anggota atau undangan tertunda dengan peran otoritas menghalangi perubahan ini. Ubah peran mereka terlebih dahulu, jika tidak penyimpanan akan gagal.",
+      "conflictTitle": "Organisasi tidak dapat disimpan",
+      "create": "Buat organisasi"
+    },
+    "toasts": {
+      "created": "Organisasi {{name}} dibuat",
+      "updated": "Organisasi {{name}} disimpan",
+      "saveFailed": "Organisasi tidak dapat disimpan",
+      "deleted": "Organisasi {{name}} dihapus",
+      "deleteFailed": "Organisasi tidak dapat dihapus"
+    },
+    "delete": {
+      "title": "Hapus {{name}}?",
+      "description": "Keanggotaan dan kunci API-nya dihapus, dan semua sesi di dalamnya diakhiri. Kapal dan data layanan lain tidak ikut dihapus. Tindakan ini tidak dapat dibatalkan.",
+      "typeSlug": "Ketik {{slug}} untuk mengonfirmasi",
+      "confirm": "Hapus organisasi"
+    }
+  },
+  "users": {
+    "tableLabel": "Direktori pengguna",
+    "search": "Cari pengguna",
+    "searchPlaceholder": "Nama atau e-mail…",
+    "statusFilter": "Saring menurut status",
+    "allStatuses": "Semua status",
+    "columns": {
+      "user": "Pengguna",
+      "memberships": "Keanggotaan",
+      "status": "Status",
+      "mfa": "MFA",
+      "lastLogin": "Terakhir masuk"
+    },
+    "superAdmin": "Super admin",
+    "enable": "Aktifkan",
+    "disable": "Nonaktifkan",
+    "empty": "Tidak ada pengguna yang cocok",
+    "emptyHint": "Pengguna muncul di sini setelah diundang ke sebuah organisasi.",
+    "confirmDisable": "Nonaktifkan {{email}}?",
+    "confirmDisableText": "Pengguna dikeluarkan dari semua perangkat dan tidak dapat masuk lagi sampai akunnya diaktifkan kembali.",
+    "confirmEnable": "Aktifkan {{email}}?",
+    "confirmEnableText": "Pengguna dapat masuk kembali dengan kata sandinya saat ini.",
+    "toasts": {
+      "disabled": "{{email}} dinonaktifkan",
+      "enabled": "{{email}} diaktifkan",
+      "failed": "Status akun tidak dapat diubah"
+    }
   },
   "members": {
     "title": "Anggota",
-    "description": "Undang pengguna, atur peran dan status anggota organisasi.",
-    "capabilities": [
-      "Undang anggota melalui email",
-      "Ubah peran: org_admin, fleet_manager, authority, viewer",
-      "Nonaktifkan atau hapus anggota"
-    ]
+    "description": "Undang orang melalui e-mail, beri mereka peran, dan kelola siapa yang dapat mengakses organisasi.",
+    "inviteAction": "Undang anggota",
+    "authorityOrg": "Organisasi otoritas: peran otoritas tersedia.",
+    "nonAuthorityOrg": "Peran otoritas hanya tersedia di organisasi berjenis otoritas.",
+    "noOrgHint": "Pilih organisasi untuk melihat dan mengelola anggotanya.",
+    "statsLabel": "Ringkasan anggota",
+    "stats": {
+      "members": "Anggota",
+      "admins": "Admin organisasi",
+      "adminsHint": "Minimal satu per organisasi",
+      "mfa": "Penggunaan MFA",
+      "mfaHint": "Anggota dengan MFA aktif",
+      "invitations": "Undangan tertunda",
+      "invitationsHint": "Belum diterima"
+    },
+    "tabs": {
+      "members": "Anggota",
+      "invitations": "Undangan"
+    },
+    "tableLabel": "Anggota",
+    "columns": {
+      "member": "Anggota",
+      "role": "Peran",
+      "status": "Status",
+      "mfa": "MFA",
+      "lastLogin": "Terakhir masuk",
+      "joined": "Bergabung"
+    },
+    "you": "Anda",
+    "actions": "Aksi untuk {{name}}",
+    "changeRole": "Ubah peran",
+    "remove": "Keluarkan dari organisasi",
+    "empty": "Belum ada anggota",
+    "emptyHint": "Undang anggota pertama melalui e-mail; mereka bergabung setelah menerima tautannya.",
+    "invitations": {
+      "tableLabel": "Undangan",
+      "columns": {
+        "invitee": "Penerima undangan",
+        "state": "Keadaan",
+        "sent": "Dikirim",
+        "expires": "Kedaluwarsa"
+      },
+      "pending": "Tertunda",
+      "expired": "Kedaluwarsa",
+      "resend": "Kirim ulang",
+      "withdraw": "Tarik undangan",
+      "empty": "Tidak ada undangan tertunda",
+      "emptyHint": "Undangan yang Anda kirim muncul di sini sampai diterima atau ditarik."
+    },
+    "invite": {
+      "title": "Undang anggota",
+      "description": "E-mail undangan akan dikirim; alamat tersebut bergabung dengan {{org}} setelah menerima tautannya.",
+      "email": "E-mail",
+      "emailInvalid": "Masukkan alamat e-mail yang valid",
+      "name": "Nama",
+      "nameRequired": "Masukkan nama penerima undangan",
+      "role": "Peran",
+      "authorityHint": "Peran otoritas hanya tersedia di organisasi berjenis otoritas.",
+      "locale": "Bahasa e-mail undangan",
+      "consent": "Tidak ada yang ditambahkan tanpa persetujuan: keanggotaan dimulai saat penerima menerima tautan di e-mail dan memilih kata sandi.",
+      "submit": "Kirim undangan"
+    },
+    "role": {
+      "title": "Ubah peran",
+      "description": "Peran baru {{name}} di organisasi ini.",
+      "lastAdmin": "Ini admin organisasi terakhir: berikan peran admin organisasi kepada anggota lain terlebih dahulu.",
+      "submit": "Simpan peran"
+    },
+    "removeConfirm": {
+      "title": "Keluarkan {{name}}?",
+      "description": "Anggota kehilangan akses ke organisasi ini dan dikeluarkan dari sesinya di sini. Akunnya tetap ada.",
+      "self": "Anda mengeluarkan diri sendiri: akses Anda ke organisasi ini langsung berakhir."
+    },
+    "withdrawConfirm": {
+      "title": "Tarik undangan untuk {{email}}?",
+      "description": "Tautan di e-mail tidak berlaku lagi. Anda dapat mengundang alamat ini lagi nanti."
+    },
+    "toasts": {
+      "invited": "Undangan dikirim ke {{email}}",
+      "invitedNoMail": "Undangan untuk {{email}} tercatat, tetapi e-mail tidak dapat dikirim. Kirim ulang nanti.",
+      "inviteFailed": "Undangan tidak dapat dikirim",
+      "resent": "Undangan dikirim ulang ke {{email}}",
+      "roleChanged": "Peran {{name}} diubah",
+      "removed": "{{name}} dikeluarkan",
+      "removeFailed": "Anggota tidak dapat dikeluarkan",
+      "withdrawn": "Undangan untuk {{email}} ditarik",
+      "withdrawFailed": "Undangan tidak dapat ditarik"
+    }
   },
   "apiKeys": {
-    "title": "API Keys",
-    "description": "Kunci API untuk pengirim AIS, perangkat telemetri dan mitra. Kunci hanya ditampilkan sekali saat dibuat.",
-    "capabilities": [
-      "Buat kunci dengan scope ais:ingest, telemetry:ingest, ais:read",
-      "Salin kunci sekali tampil",
-      "Cabut kunci"
-    ]
+    "title": "Kunci API",
+    "description": "Kunci untuk perangkat telemetri, umpan AIS, dan integrasi mitra. Rahasia kunci hanya ditampilkan sekali, saat kunci dibuat.",
+    "create": "Kunci API baru",
+    "listTitle": "Daftar kunci",
+    "tableLabel": "Kunci API",
+    "includeRevoked": "Tampilkan kunci yang dicabut",
+    "columns": {
+      "name": "Nama",
+      "scopes": "Cakupan",
+      "created": "Dibuat",
+      "lastUsed": "Terakhir dipakai",
+      "status": "Status"
+    },
+    "unknownCreator": "Pengguna tidak dikenal",
+    "active": "Aktif",
+    "revokedOn": "Dicabut {{date}}",
+    "revoke": "Cabut",
+    "empty": "Belum ada kunci API",
+    "emptyHint": "Buat kunci untuk perangkat telemetri atau integrasi, lalu simpan rahasianya di sistem tersebut.",
+    "scopes": {
+      "telemetry_ingest": "Mengirim pembacaan bahan bakar kapal organisasi (perangkat telemetri HTTP).",
+      "ais_read": "Membaca posisi AIS dan data kapal melalui API.",
+      "ais_ingest": "Mengirim pesan AIS ke umpan bersama semua tenant (khusus administrator platform)."
+    },
+    "guide": {
+      "title": "Cakupan",
+      "description": "Berikan setiap kunci hanya cakupan yang dibutuhkan sistemnya.",
+      "header": "Sistem mengirim kunci di header X-API-Key. Kunci tidak kedaluwarsa: cabut kunci segera setelah perangkat atau mitra tidak membutuhkannya lagi."
+    },
+    "revokeConfirm": {
+      "title": "Cabut {{name}}?",
+      "description": "Permintaan dengan kunci ini langsung ditolak, dan perangkat yang memakainya berhenti mengirim data. Tindakan ini tidak dapat dibatalkan."
+    },
+    "form": {
+      "title": "Kunci API baru",
+      "description": "Kunci ini milik {{org}}.",
+      "name": "Nama",
+      "namePlaceholder": "Flow meter KM Dharma Ferry",
+      "nameRequired": "Masukkan nama kunci",
+      "scopes": "Cakupan",
+      "scopesRequired": "Pilih minimal satu cakupan",
+      "superAdminOnly": "(khusus administrator platform)",
+      "submit": "Buat kunci"
+    },
+    "secret": {
+      "title": "Salin kunci sekarang",
+      "description": "Kunci {{name}} telah dibuat.",
+      "onceTitle": "Hanya ditampilkan sekali",
+      "onceText": "Hanya hash kunci yang disimpan. Jika kunci hilang, cabut lalu buat kunci baru.",
+      "key": "Kunci API",
+      "copy": "Salin kunci",
+      "usage": "Kirim di header",
+      "stored": "Saya sudah menyimpan kunci di tempat yang aman",
+      "done": "Selesai"
+    },
+    "toasts": {
+      "revoked": "Kunci {{name}} dicabut",
+      "revokeFailed": "Kunci tidak dapat dicabut"
+    }
   },
   "referenceData": {
     "title": "Data Referensi",
-    "description": "Tipe kapal, bahan bakar, mesin, formula bahan bakar dan pelabuhan beserta sumbernya.",
-    "capabilities": [
-      "Tabel per jenis data referensi",
-      "Ubah data (reference:write, super admin)",
-      "Sumber setiap nilai (MEPC.353(78), MEPC.364(79), …)"
-    ]
+    "description": "Tipe kapal, bahan bakar, mesin, rumus bahan bakar pertama, pelabuhan, dan registri kapal yang dipakai perhitungan emisi dan CII.",
+    "editable": "Dapat diubah",
+    "readOnly": "Baca saja",
+    "tabs": {
+      "vessel-types": "Tipe kapal",
+      "fuels": "Bahan bakar",
+      "engines": "Mesin",
+      "formulas": "Rumus bahan bakar",
+      "ports": "Pelabuhan",
+      "registry": "Registri kapal"
+    },
+    "hints": {
+      "vessel-types": "Tipe kapal IMO dengan garis referensi CII (a, c) dan batas peringkat d1–d4.",
+      "fuels": "Bahan bakar dengan faktor konversi CO₂ Cf, kandungan karbon, dan densitas.",
+      "engines": "Mesin induk dan mesin bantu dengan daya, putaran, dan konsumsi bahan bakar spesifik (SFOC).",
+      "formulas": "Regresi aliran bahan bakar terhadap kecepatan per kapal, diperiksa dengan tata bahasa rumus yang aman.",
+      "ports": "Pelabuhan singgah dengan lokasi dan radius kedatangan.",
+      "registry": "Data kapal di luar armada (cari registri menurut nama, IMO, atau MMSI)."
+    }
+  },
+  "reference": {
+    "search": "Cari",
+    "rowActions": "Aksi untuk {{name}}",
+    "noMatches": "Tidak ada yang cocok dengan pencarian",
+    "noMatchesHint": "Coba nama atau kode lain.",
+    "emptyHint": "Administrator platform menambahkan data referensi di sini; seed menyediakan nilai bawaan IMO.",
+    "fields": {
+      "code": "Kode",
+      "codeOptional": "Kode (opsional)",
+      "name": "Nama",
+      "source": "Sumber"
+    },
+    "form": {
+      "required": "Wajib diisi",
+      "number": "Masukkan angka",
+      "positive": "Harus lebih besar dari 0",
+      "code": "Huruf kecil dan angka, dipisahkan satu garis bawah (mis. bulk_carrier)"
+    },
+    "delete": {
+      "title": "Hapus {{name}}?",
+      "description": "Data yang masih dipakai kapal tidak dapat dihapus. Tindakan ini tidak dapat dibatalkan."
+    },
+    "toasts": {
+      "saved": "{{name}} disimpan",
+      "saveFailed": "Data tidak dapat disimpan",
+      "deleted": "{{name}} dihapus",
+      "deleteFailed": "Data tidak dapat dihapus",
+      "inUseTitle": "Masih dipakai kapal"
+    },
+    "vesselTypes": {
+      "table": "Tipe kapal",
+      "search": "Cari tipe kapal…",
+      "empty": "Belum ada tipe kapal",
+      "create": "Tipe kapal baru",
+      "edit": "Ubah tipe kapal",
+      "formHint": "Parameter garis referensi dan peringkat CII (MEPC.353(78), MEPC.354(78)).",
+      "capacityUnit": "Satuan kapasitas",
+      "dwt": "Bobot mati (DWT)",
+      "gt": "Tonase kotor (GT)",
+      "capacityFixed": "Kapasitas tetap",
+      "capacityFixedHint": "Kapasitas yang dipakai alih-alih milik kapal (kosong = DWT atau GT kapal).",
+      "a": "Parameter a",
+      "c": "Parameter c",
+      "icon": "Ikon peta",
+      "line": "Garis referensi",
+      "dd": "Batas peringkat",
+      "ddOrder": "Batas harus naik: d1 < d2 < d3 < d4"
+    },
+    "fuels": {
+      "table": "Bahan bakar",
+      "search": "Cari bahan bakar…",
+      "empty": "Belum ada bahan bakar",
+      "create": "Bahan bakar baru",
+      "edit": "Ubah bahan bakar",
+      "formHint": "CO₂ per ton bahan bakar dan densitas untuk pembacaan volume (MEPC.364(79)).",
+      "cf": "Faktor konversi Cf (t CO₂ / t bahan bakar)",
+      "carbon": "Kandungan karbon",
+      "carbonHint": "Fraksi massa antara 0 dan 1.",
+      "fraction": "Masukkan fraksi antara 0 dan 1",
+      "density": "Densitas (t/m³)",
+      "densityShort": "Densitas"
+    },
+    "engines": {
+      "table": "Mesin",
+      "search": "Cari mesin…",
+      "empty": "Belum ada mesin",
+      "allKinds": "Semua mesin",
+      "create": "Mesin baru",
+      "edit": "Ubah mesin",
+      "formHint": "Data mesin untuk jalur bahan bakar Holtrop (MCR × SFOC × waktu).",
+      "kind": "Jenis",
+      "kinds": {
+        "main": "Mesin induk",
+        "auxiliary": "Mesin bantu"
+      },
+      "power": "Daya (kW)",
+      "rpm": "Putaran nominal (rpm)",
+      "sfoc": "SFOC (g/kWh)"
+    },
+    "formulas": {
+      "table": "Rumus bahan bakar",
+      "search": "Cari rumus…",
+      "empty": "Belum ada rumus bahan bakar",
+      "create": "Rumus bahan bakar baru",
+      "edit": "Ubah rumus bahan bakar",
+      "formHint": "Aliran bahan bakar mesin induk dan mesin bantu sebagai fungsi speedKnot (L/menit).",
+      "main": "Rumus mesin induk",
+      "mainShort": "Mesin induk",
+      "auxiliary": "Rumus mesin bantu",
+      "auxiliaryShort": "Mesin bantu",
+      "grammar": "Angka, speedKnot, + − * / ^ ( ), serta exp, log, ln, sqrt, pow, abs, min, max (boleh dengan Math.). Maksimal 500 karakter."
+    },
+    "ports": {
+      "table": "Pelabuhan",
+      "search": "Cari pelabuhan…",
+      "empty": "Belum ada pelabuhan",
+      "create": "Pelabuhan baru",
+      "edit": "Ubah pelabuhan",
+      "formHint": "Lokasi (WGS 84) dan radius tempat kapal dianggap telah tiba.",
+      "code": "Kode pelabuhan (UN/LOCODE)",
+      "codeRule": "2–16 huruf kapital atau angka",
+      "lat": "Lintang antara −90 dan 90",
+      "lon": "Bujur antara −180 dan 180",
+      "radius": "Radius kedatangan (m)",
+      "admin": "Lokasi administratif"
+    },
+    "registry": {
+      "table": "Registri kapal",
+      "search": "Cari di registri",
+      "searchPlaceholder": "Nama, IMO, atau MMSI (minimal 2 karakter)…",
+      "prompt": "Cari di registri kapal",
+      "promptHint": "Ketik minimal dua karakter nama, nomor IMO, atau MMSI.",
+      "flag": "Bendera",
+      "built": "Dibangun",
+      "class": "Klasifikasi"
+    }
+  },
+  "formula": {
+    "valid": "Rumus valid",
+    "previewCaption": "Aliran bahan bakar hasil rumus pada beberapa kecepatan",
+    "speed": "Kecepatan (kn)",
+    "flow": "Aliran bahan bakar (L/menit)",
+    "problems": {
+      "empty": "Masukkan rumus",
+      "tooLong": "Maksimal 500 karakter",
+      "tooDeep": "Terlalu bertingkat di sekitar karakter {{position}} (maksimal 32 tingkat)",
+      "unexpectedEnd": "Rumus berakhir terlalu cepat (karakter {{position}})",
+      "unexpectedToken": "“{{token}}” tidak terduga pada karakter {{position}}",
+      "unknownName": "Nama “{{token}}” tidak dikenal pada karakter {{position}}: gunakan speedKnot atau exp, log, ln, sqrt, pow, abs, min, max",
+      "badNumber": "Angka “{{token}}” tidak valid pada karakter {{position}}",
+      "arity": "{{token}} memerlukan {{expected}} argumen, diberi {{actual}} (karakter {{position}})"
+    }
   },
   "devices": {
     "title": "Perangkat",
-    "description": "Registri perangkat telemetri (flow meter, gateway MQTT) dan status terakhir terlihat.",
-    "capabilities": [
-      "Daftar perangkat per kapal",
-      "Tambah perangkat dan kaitkan API key",
-      "Topik MQTT aisits/telemetry/<deviceId>"
-    ]
+    "description": "Perangkat telemetri yang mengirim pembacaan bahan bakar: gateway MQTT di atas kapal dan flow meter HTTP dengan kunci API sendiri.",
+    "create": "Daftarkan perangkat",
+    "statsLabel": "Ringkasan perangkat",
+    "stats": {
+      "total": "Perangkat",
+      "active": "Aktif",
+      "activeHint": "Diizinkan mengirim pembacaan",
+      "online": "Daring",
+      "onlineHint": "Ada pembacaan dalam 15 menit terakhir",
+      "transport": "MQTT · HTTP",
+      "transportHint": "Perangkat per jenis koneksi"
+    },
+    "listTitle": "Perangkat terdaftar",
+    "tableLabel": "Perangkat telemetri",
+    "search": "Cari perangkat",
+    "searchPlaceholder": "Nama atau nomor seri…",
+    "vesselFilter": "Saring menurut kapal",
+    "allVessels": "Semua kapal",
+    "kindFilter": "Saring menurut koneksi",
+    "allKinds": "Semua koneksi",
+    "statusFilter": "Saring menurut status",
+    "allStatuses": "Semua status",
+    "kinds": {
+      "mqtt": "MQTT",
+      "http": "HTTP"
+    },
+    "statuses": {
+      "active": "Aktif",
+      "inactive": "Nonaktif"
+    },
+    "states": {
+      "online": "Daring",
+      "idle": "Diam",
+      "offline": "Luring",
+      "never": "Belum ada data",
+      "inactive": "Nonaktif"
+    },
+    "columns": {
+      "device": "Perangkat",
+      "vessel": "Kapal",
+      "kind": "Koneksi",
+      "credential": "Kredensial",
+      "status": "Status",
+      "lastSeen": "Pembacaan terakhir"
+    },
+    "keyRevoked": "Kunci dicabut",
+    "actions": "Aksi untuk {{name}}",
+    "connect": "Panduan koneksi",
+    "activate": "Aktifkan",
+    "deactivate": "Nonaktifkan",
+    "noMatches": "Tidak ada perangkat yang cocok",
+    "noMatchesHint": "Coba nama, kapal, atau status lain, atau hapus filter.",
+    "empty": "Belum ada perangkat terdaftar",
+    "emptyHint": "Daftarkan flow meter atau gateway MQTT sebuah kapal untuk mulai menerima pembacaan bahan bakar.",
+    "deleteConfirm": {
+      "title": "Hapus {{name}}?",
+      "description": "Perangkat tidak dapat mengirim pembacaan lagi. Pembacaan yang sudah dikirim tetap disimpan."
+    },
+    "form": {
+      "createTitle": "Daftarkan perangkat",
+      "editTitle": "Ubah perangkat",
+      "description": "Sebuah perangkat mengirim pembacaan bahan bakar satu kapal milik organisasi.",
+      "vessel": "Kapal",
+      "vesselPlaceholder": "Pilih kapal",
+      "vesselRequired": "Pilih kapal",
+      "moveHint": "Memindahkan perangkat ke kapal lain hanya berlaku untuk pembacaan baru.",
+      "name": "Nama",
+      "namePlaceholder": "Flow meter ME sisi kiri",
+      "nameRequired": "Masukkan nama perangkat",
+      "serial": "Nomor seri (opsional)",
+      "kind": "Koneksi",
+      "kindHints": {
+        "mqtt": "Menerbitkan pembacaan ke topik MQTT miliknya sendiri; tidak perlu kunci API.",
+        "http": "Mengirim pembacaan ke REST API dengan kunci API sendiri (cakupan telemetry:ingest)."
+      },
+      "apiKey": "Kunci API",
+      "apiKeyPlaceholder": "Pilih kunci API",
+      "apiKeyNone": "Tanpa kunci",
+      "apiKeyRequired": "Perangkat HTTP memerlukan kunci API dengan cakupan telemetry:ingest",
+      "apiKeyHint": "Hanya kunci aktif dengan cakupan telemetry:ingest yang tidak dipakai perangkat lain.",
+      "apiKeyCreate": "Buat kunci",
+      "active": "Aktif",
+      "activeHint": "Perangkat nonaktif tidak dapat mengirim pembacaan.",
+      "create": "Daftarkan perangkat"
+    },
+    "connection": {
+      "title": "Panduan koneksi",
+      "description": "Cara {{name}} mengirim pembacaan bahan bakar {{vessel}}.",
+      "copy": "Salin {{what}}",
+      "mqtt": {
+        "broker": "Hubungkan ke broker MQTT platform dengan kredensial dari administrator Anda (TLS).",
+        "topic": "Terbitkan ke topik perangkat di bawah ini dengan QoS 1.",
+        "payload": "Kirim satu pembacaan sebagai JSON, atau larik berisi hingga 1000 pembacaan; kapalnya adalah kapal perangkat."
+      },
+      "topic": "Topik MQTT",
+      "payloadLabel": "Payload (JSON)",
+      "command": "Uji dengan mosquitto_pub",
+      "http": {
+        "key": "Gunakan kunci API yang terhubung ke perangkat (ditampilkan sekali saat dibuat).",
+        "request": "Kirim pembacaan sebagai JSON dengan POST ke API telemetri, maksimal 1000 per permintaan.",
+        "vessel": "MMSI harus kapal milik perangkat; kapal lain ditolak."
+      },
+      "request": "Permintaan",
+      "rulesTitle": "Aturan untuk setiap pembacaan",
+      "rules": {
+        "units": "Bahan bakar dalam ton: fuelMeTon (mesin induk) dan fuelAeTon (mesin bantu), tidak boleh negatif.",
+        "time": "time adalah akhir periode pengukuran dalam UTC (ISO 8601); periodStart opsional.",
+        "unique": "Satu pembacaan per kapal dan waktu: pengulangan yang sama persis diabaikan, nilai berbeda pada waktu yang sama ditolak.",
+        "active": "Hanya perangkat aktif yang boleh mengirim; nonaktifkan perangkat alih-alih menghapusnya untuk menjedanya."
+      }
+    },
+    "toasts": {
+      "created": "Perangkat {{name}} didaftarkan",
+      "updated": "Perangkat {{name}} disimpan",
+      "saveFailed": "Perangkat tidak dapat disimpan",
+      "deleted": "Perangkat {{name}} dihapus",
+      "deleteFailed": "Perangkat tidak dapat dihapus",
+      "activated": "Perangkat {{name}} diaktifkan",
+      "deactivated": "Perangkat {{name}} dinonaktifkan"
+    }
   },
   "auditLog": {
-    "title": "Audit Log",
-    "description": "Jejak audit seluruh layanan: siapa melakukan apa, kapan dan dari mana.",
-    "capabilities": [
-      "Filter aktor, aksi, target dan rentang waktu",
-      "Cursor pagination",
-      "Ekspor CSV"
-    ]
+    "title": "Log Audit",
+    "description": "Siapa melakukan apa, kapan, dan dari mana, di seluruh layanan. Catatan disimpan selama dua tahun.",
+    "filters": {
+      "title": "Filter",
+      "clear": "Hapus filter",
+      "time": "Rentang waktu",
+      "actor": "Pelaku",
+      "anyActor": "Semua pelaku",
+      "action": "Aksi",
+      "targetType": "Target",
+      "anyTarget": "Semua target",
+      "targetId": "ID target"
+    },
+    "records": "Catatan",
+    "tableLabel": "Catatan audit",
+    "columns": {
+      "at": "Waktu",
+      "actor": "Pelaku",
+      "action": "Aksi",
+      "target": "Target",
+      "source": "Layanan",
+      "ip": "Alamat IP"
+    },
+    "actorTypes": {
+      "user": "Pengguna",
+      "api_key": "Kunci API",
+      "system": "Sistem"
+    },
+    "targetTypes": {
+      "user": "Pengguna",
+      "session": "Sesi",
+      "organization": "Organisasi",
+      "membership": "Keanggotaan",
+      "membership_invitation": "Undangan",
+      "api_key": "Kunci API",
+      "signing_key": "Kunci penandatanganan",
+      "vessel": "Kapal",
+      "vessel_type": "Tipe kapal",
+      "fuel": "Bahan bakar",
+      "engine": "Mesin",
+      "fuel_formula": "Rumus bahan bakar",
+      "port": "Pelabuhan",
+      "device": "Perangkat",
+      "alert": "Alert",
+      "alert_rule": "Aturan alert",
+      "zone": "Zona"
+    },
+    "noMatches": "Tidak ada catatan yang cocok dengan filter",
+    "noMatchesHint": "Perlebar rentang waktu atau hapus salah satu filter.",
+    "empty": "Tidak ada catatan audit dalam 30 hari terakhir",
+    "emptyHint": "Aktivitas masuk dan perubahan anggota, kunci, kapal, serta aturan muncul di sini saat terjadi.",
+    "detail": {
+      "title": "Catatan audit",
+      "actor": "Pelaku",
+      "actorType": "Jenis pelaku",
+      "target": "Target",
+      "source": "Layanan",
+      "ip": "Alamat IP",
+      "org": "Organisasi",
+      "id": "ID catatan",
+      "userAgent": "User agent",
+      "changes": "Rincian",
+      "noMeta": "Catatan ini tidak memiliki rincian tambahan.",
+      "changedValues": "Nilai yang berubah",
+      "value": "Nilai",
+      "becomes": "menjadi",
+      "fields": "Kolom yang berubah:",
+      "raw": "Data mentah (JSON)",
+      "copyRaw": "Salin JSON"
+    }
+  },
+  "audit": {
+    "actions": {
+      "auth__login__succeeded": "Masuk",
+      "auth__login__failed": "Gagal masuk",
+      "auth__logout": "Keluar",
+      "auth__refresh__reuse_detected": "Penggunaan ulang refresh token terdeteksi",
+      "auth__session__revoke": "Sesi dicabut",
+      "auth__session__switch_org": "Organisasi dialihkan",
+      "auth__password__change": "Kata sandi diubah",
+      "auth__password__reset": "Kata sandi diatur ulang",
+      "auth__password__reset_request": "Permintaan atur ulang kata sandi",
+      "auth__invite__accept": "Undangan diterima",
+      "auth__mfa__enable": "MFA diaktifkan",
+      "auth__mfa__disable": "MFA dinonaktifkan",
+      "auth__signing_key__rotate": "Kunci penandatanganan dirotasi",
+      "membership__invite": "Anggota diundang",
+      "membership__invite__cancel": "Undangan ditarik",
+      "membership__update": "Peran anggota diubah",
+      "membership__delete": "Anggota dikeluarkan",
+      "api_key__create": "Kunci API dibuat",
+      "api_key__revoke": "Kunci API dicabut",
+      "organization__create": "Organisasi dibuat",
+      "organization__update": "Organisasi diperbarui",
+      "organization__delete": "Organisasi dihapus",
+      "user__update": "Profil diperbarui",
+      "user__status__update": "Status akun diubah",
+      "platform__bootstrap": "Platform diinisialisasi",
+      "vessel__create": "Kapal dibuat",
+      "vessel__update": "Kapal diperbarui",
+      "vessel__delete": "Kapal dihapus",
+      "vessel_type__create": "Tipe kapal dibuat",
+      "vessel_type__update": "Tipe kapal diperbarui",
+      "vessel_type__delete": "Tipe kapal dihapus",
+      "fuel__create": "Bahan bakar dibuat",
+      "fuel__update": "Bahan bakar diperbarui",
+      "fuel__delete": "Bahan bakar dihapus",
+      "engine__create": "Mesin dibuat",
+      "engine__update": "Mesin diperbarui",
+      "engine__delete": "Mesin dihapus",
+      "fuel_formula__create": "Rumus bahan bakar dibuat",
+      "fuel_formula__update": "Rumus bahan bakar diperbarui",
+      "fuel_formula__delete": "Rumus bahan bakar dihapus",
+      "port__create": "Pelabuhan dibuat",
+      "port__update": "Pelabuhan diperbarui",
+      "port__delete": "Pelabuhan dihapus",
+      "device__create": "Perangkat didaftarkan",
+      "device__update": "Perangkat diperbarui",
+      "device__delete": "Perangkat dihapus",
+      "fuel_reading__create": "Pembacaan bahan bakar dicatat",
+      "alert__acknowledge": "Alert diterima",
+      "alert__resolve": "Alert diselesaikan",
+      "alert_rule__create": "Aturan alert dibuat",
+      "alert_rule__update": "Aturan alert diperbarui",
+      "alert_rule__delete": "Aturan alert dihapus",
+      "notification__test": "Notifikasi uji dikirim",
+      "zone__create": "Zona dibuat",
+      "zone__update": "Zona diperbarui",
+      "zone__delete": "Zona dihapus"
+    }
+  },
+  "problems": {
+    "VALIDATION_FAILED": "Periksa kembali kolom yang ditandai.",
+    "FORBIDDEN": "Anda tidak memiliki izin untuk tindakan ini.",
+    "RATE_LIMITED": "Terlalu banyak permintaan. Coba lagi dalam {{seconds}} detik.",
+    "ORGANIZATION_REQUIRED": "Beralihlah ke sebuah organisasi terlebih dahulu.",
+    "PLATFORM_ADMIN_REQUIRED": "Hanya administrator platform yang dapat melakukan ini.",
+    "ORGANIZATION_NOT_FOUND": "Organisasi sudah tidak ada.",
+    "ORGANIZATION_SLUG_TAKEN": "Slug ini sudah dipakai organisasi lain.",
+    "ORGANIZATION_PROTECTED": "Organisasi platform tidak dapat dihapus dan jenisnya tidak dapat diubah.",
+    "ORGANIZATION_KIND_CONFLICT": "Anggota atau undangan tertunda memiliki peran yang tidak diizinkan jenis baru (peran otoritas memerlukan organisasi otoritas). Ubah peran tersebut atau tarik undangannya terlebih dahulu.",
+    "USER_NOT_FOUND": "Pengguna sudah tidak ada.",
+    "MEMBER_NOT_FOUND": "Anggota sudah tidak tergabung dalam organisasi.",
+    "MEMBER_ALREADY_EXISTS": "Alamat ini sudah menjadi anggota organisasi.",
+    "INVITATION_NOT_FOUND": "Undangan sudah diterima atau ditarik.",
+    "INVITATION_CONFLICT": "Undangan berubah pada saat yang sama. Coba lagi.",
+    "LAST_ORG_ADMIN": "Organisasi harus memiliki minimal satu admin organisasi: berikan peran itu kepada anggota lain terlebih dahulu.",
+    "ROLE_NOT_GRANTABLE": "Peran otoritas hanya dapat diberikan di organisasi berjenis otoritas.",
+    "NOT_A_MEMBER": "Pengguna bukan anggota organisasi ini.",
+    "CANNOT_CHANGE_OWN_STATUS": "Anda tidak dapat menonaktifkan akun Anda sendiri.",
+    "INVALID_STATUS_TRANSITION": "Akun tidak dapat diubah ke status tersebut (akun undangan menjadi aktif saat undangan diterima).",
+    "API_KEY_NOT_FOUND": "Kunci API sudah tidak ada atau telah dicabut.",
+    "SCOPE_NOT_GRANTABLE": "Anda tidak boleh memberikan cakupan ini: ais:ingest menulis umpan AIS bersama semua tenant dan hanya diberikan oleh administrator platform.",
+    "CODE_ALREADY_EXISTS": "Kode ini sudah dipakai.",
+    "REFERENCE_IN_USE": "Data ini masih dipakai kapal. Ganti dulu pada kapal-kapal tersebut.",
+    "VESSEL_TYPE_NOT_FOUND": "Tipe kapal sudah tidak ada.",
+    "FUEL_NOT_FOUND": "Bahan bakar sudah tidak ada.",
+    "ENGINE_NOT_FOUND": "Mesin sudah tidak ada.",
+    "FUEL_FORMULA_NOT_FOUND": "Rumus bahan bakar sudah tidak ada.",
+    "PORT_NOT_FOUND": "Pelabuhan sudah tidak ada.",
+    "VESSEL_NOT_FOUND": "Kapal sudah tidak ada di armada.",
+    "DEVICE_NOT_FOUND": "Perangkat sudah tidak ada.",
+    "DEVICE_NAME_TAKEN": "Organisasi sudah memiliki perangkat dengan nama ini.",
+    "DEVICE_API_KEY_TAKEN": "Kunci API ini sudah dipakai perangkat lain.",
+    "DEVICE_CREDENTIAL_CONFLICT": "Perangkat berubah pada saat yang sama. Muat ulang lalu coba lagi.",
+    "VESSEL_WITHOUT_ORGANIZATION": "Kapal tidak termasuk organisasi mana pun, sehingga perangkat tidak dapat didaftarkan padanya."
+  },
+  "fieldErrors": {
+    "isEmail": "Masukkan alamat e-mail yang valid",
+    "isNotEmpty": "Wajib diisi",
+    "isDefined": "Wajib diisi",
+    "maxLength": "Terlalu panjang",
+    "minLength": "Terlalu pendek",
+    "matches": "Format tidak valid",
+    "isIn": "Pilih salah satu opsi",
+    "isEnum": "Pilih salah satu opsi",
+    "isUuid": "Pengenal tidak valid",
+    "isMmsi": "MMSI terdiri dari tepat sembilan angka",
+    "isInt": "Masukkan bilangan bulat",
+    "isNumber": "Masukkan angka",
+    "min": "Nilai terlalu kecil",
+    "max": "Nilai terlalu besar",
+    "arrayNotEmpty": "Pilih minimal satu",
+    "arrayMinSize": "Pilih minimal satu",
+    "formula": "Rumus tidak valid"
   }
 }

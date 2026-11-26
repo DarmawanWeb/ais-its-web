@@ -1,9 +1,4 @@
 {
-  "organizations": {
-    "title": "Organizations",
-    "description": "Manage platform organizations: shipping companies, authorities, platform and research.",
-    "capabilities": ["Organization list and search", "Create and edit organizations (org:manage)"]
-  },
   "nav": {
     "organizations": "Organizations",
     "members": "Members",
@@ -12,49 +7,748 @@
     "devices": "Devices",
     "auditLog": "Audit Log"
   },
+  "common": {
+    "organization": "Organization",
+    "noOrganization": "No active organization",
+    "chooseOrganization": "Choose an organization",
+    "allOrganizations": "All organizations",
+    "actions": "Actions",
+    "tooLong": "At most {{max}} characters",
+    "on": "On",
+    "off": "Off",
+    "never": "Never"
+  },
+  "actions": {
+    "copied": "Copied"
+  },
+  "orgKinds": {
+    "shipping_company": "Shipping company",
+    "authority": "Authority",
+    "research": "Research",
+    "platform": "Platform"
+  },
+  "userStatus": {
+    "active": "Active",
+    "invited": "Invited",
+    "disabled": "Disabled"
+  },
+  "roles": {
+    "hints": {
+      "org_admin": "Manages members, API keys, devices, alert rules and the audit log of the organization.",
+      "fleet_manager": "Manages the fleet: vessels, telemetry, CII and SEEMP, alert rules and zones.",
+      "authority": "Supervision across organizations: alerts, safety and surveillance of every fleet.",
+      "viewer": "Read-only access to the organization's vessels, maps and alerts."
+    }
+  },
+  "organizations": {
+    "title": "Organizations",
+    "description": "Tenants of the platform: shipping companies, authorities, research institutes and the platform operator.",
+    "create": "New organization",
+    "statsLabel": "Organizations by kind",
+    "stats": {
+      "total": "Organizations"
+    },
+    "tabs": {
+      "organizations": "Organizations",
+      "users": "User directory"
+    },
+    "tableLabel": "Organizations",
+    "search": "Search organizations",
+    "searchPlaceholder": "Name or slug…",
+    "kindFilter": "Filter by kind",
+    "allKinds": "All kinds",
+    "columns": {
+      "name": "Organization",
+      "kind": "Kind",
+      "created": "Created",
+      "updated": "Updated"
+    },
+    "actions": "Actions for {{name}}",
+    "viewMembers": "View members",
+    "noMatches": "No organization matches",
+    "noMatchesHint": "Try another name or kind, or clear the filters.",
+    "empty": "No organizations yet",
+    "emptyHint": "Create the first organization: a shipping company, an authority or a research institute.",
+    "form": {
+      "createTitle": "New organization",
+      "editTitle": "Edit organization",
+      "description": "The kind decides which roles its members can hold: the authority role exists in authority organizations only.",
+      "name": "Name",
+      "namePlaceholder": "PT Pelayaran Nusantara",
+      "nameRequired": "Enter the organization's name",
+      "slug": "Slug",
+      "slugHint": "Short identifier in URLs: lowercase letters, digits and hyphens.",
+      "slugAuto": "Leave empty to use {{slug}}.",
+      "slugInvalid": "Use lowercase letters and digits separated by single hyphens (at most 63 characters)",
+      "kind": "Kind",
+      "platformKind": "The platform organization always keeps the kind Platform.",
+      "kindHints": {
+        "shipping_company": "Operates vessels: fleet, telemetry, CII and SEEMP of its own ships.",
+        "authority": "Port, coast guard or ministry: may grant the authority role to supervise every fleet.",
+        "research": "University or institute with read access for studies.",
+        "platform": "Operator of AIS Maritime Intelligence."
+      },
+      "kindWarning": "Members or pending invitations with the authority role block this change. Change their roles first, otherwise saving fails.",
+      "conflictTitle": "The organization cannot be saved",
+      "create": "Create organization"
+    },
+    "toasts": {
+      "created": "Organization {{name}} created",
+      "updated": "Organization {{name}} saved",
+      "saveFailed": "The organization could not be saved",
+      "deleted": "Organization {{name}} deleted",
+      "deleteFailed": "The organization could not be deleted"
+    },
+    "delete": {
+      "title": "Delete {{name}}?",
+      "description": "Its memberships and API keys are deleted and every session in it is signed out. Vessels and records of other services are not removed. This cannot be undone.",
+      "typeSlug": "Type {{slug}} to confirm",
+      "confirm": "Delete organization"
+    }
+  },
+  "users": {
+    "tableLabel": "User directory",
+    "search": "Search users",
+    "searchPlaceholder": "Name or e-mail…",
+    "statusFilter": "Filter by status",
+    "allStatuses": "All statuses",
+    "columns": {
+      "user": "User",
+      "memberships": "Memberships",
+      "status": "Status",
+      "mfa": "MFA",
+      "lastLogin": "Last sign-in"
+    },
+    "superAdmin": "Super admin",
+    "enable": "Enable",
+    "disable": "Disable",
+    "empty": "No user matches",
+    "emptyHint": "Users appear here once they are invited to an organization.",
+    "confirmDisable": "Disable {{email}}?",
+    "confirmDisableText": "The user is signed out on every device and can no longer sign in until the account is enabled again.",
+    "confirmEnable": "Enable {{email}}?",
+    "confirmEnableText": "The user can sign in again with their current password.",
+    "toasts": {
+      "disabled": "{{email}} disabled",
+      "enabled": "{{email}} enabled",
+      "failed": "The account status could not be changed"
+    }
+  },
   "members": {
     "title": "Members",
-    "description": "Invite users and manage the roles and status of organization members.",
-    "capabilities": [
-      "Invite members by e-mail",
-      "Change roles: org_admin, fleet_manager, authority, viewer",
-      "Disable or remove members"
-    ]
+    "description": "Invite people by e-mail, give them a role and manage who can access the organization.",
+    "inviteAction": "Invite member",
+    "authorityOrg": "Authority organization: the authority role is available.",
+    "nonAuthorityOrg": "The authority role is available in authority organizations only.",
+    "noOrgHint": "Choose an organization to see and manage its members.",
+    "statsLabel": "Member summary",
+    "stats": {
+      "members": "Members",
+      "admins": "Org admins",
+      "adminsHint": "At least one per organization",
+      "mfa": "MFA adoption",
+      "mfaHint": "Members with MFA on",
+      "invitations": "Pending invitations",
+      "invitationsHint": "Not accepted yet"
+    },
+    "tabs": {
+      "members": "Members",
+      "invitations": "Invitations"
+    },
+    "tableLabel": "Members",
+    "columns": {
+      "member": "Member",
+      "role": "Role",
+      "status": "Status",
+      "mfa": "MFA",
+      "lastLogin": "Last sign-in",
+      "joined": "Joined"
+    },
+    "you": "You",
+    "actions": "Actions for {{name}}",
+    "changeRole": "Change role",
+    "remove": "Remove from organization",
+    "empty": "No members yet",
+    "emptyHint": "Invite the first member by e-mail; they join when they accept the link.",
+    "invitations": {
+      "tableLabel": "Invitations",
+      "columns": {
+        "invitee": "Invitee",
+        "state": "State",
+        "sent": "Sent",
+        "expires": "Expires"
+      },
+      "pending": "Pending",
+      "expired": "Expired",
+      "resend": "Send again",
+      "withdraw": "Withdraw",
+      "empty": "No pending invitations",
+      "emptyHint": "Invitations you send appear here until they are accepted or withdrawn."
+    },
+    "invite": {
+      "title": "Invite member",
+      "description": "An invitation e-mail is sent; the address joins {{org}} when it accepts the link.",
+      "email": "E-mail",
+      "emailInvalid": "Enter a valid e-mail address",
+      "name": "Name",
+      "nameRequired": "Enter the invitee's name",
+      "role": "Role",
+      "authorityHint": "The authority role is available in authority organizations only.",
+      "locale": "Language of the invitation e-mail",
+      "consent": "Nobody is added without consent: the membership starts when the invitee accepts the e-mailed link and chooses a password.",
+      "submit": "Send invitation"
+    },
+    "role": {
+      "title": "Change role",
+      "description": "New role of {{name}} in this organization.",
+      "lastAdmin": "This is the last org admin: give another member the org admin role first.",
+      "submit": "Save role"
+    },
+    "removeConfirm": {
+      "title": "Remove {{name}}?",
+      "description": "The member loses access to this organization and is signed out of it. The account itself is kept.",
+      "self": "You are removing yourself: you lose access to this organization immediately."
+    },
+    "withdrawConfirm": {
+      "title": "Withdraw the invitation to {{email}}?",
+      "description": "The link in the e-mail stops working. You can invite the address again later."
+    },
+    "toasts": {
+      "invited": "Invitation sent to {{email}}",
+      "invitedNoMail": "Invitation for {{email}} recorded, but the e-mail could not be sent. Send it again later.",
+      "inviteFailed": "The invitation could not be sent",
+      "resent": "Invitation sent to {{email}} again",
+      "roleChanged": "Role of {{name}} changed",
+      "removed": "{{name}} removed",
+      "removeFailed": "The member could not be removed",
+      "withdrawn": "Invitation to {{email}} withdrawn",
+      "withdrawFailed": "The invitation could not be withdrawn"
+    }
   },
   "apiKeys": {
     "title": "API Keys",
-    "description": "API keys for AIS pushers, telemetry devices and partners. A key is shown only once when created.",
-    "capabilities": [
-      "Create keys with scopes ais:ingest, telemetry:ingest, ais:read",
-      "Copy the key shown once",
-      "Revoke keys"
-    ]
+    "description": "Keys for telemetry devices, AIS feeds and partner integrations. The secret is shown only once, when the key is created.",
+    "create": "New API key",
+    "listTitle": "Keys",
+    "tableLabel": "API keys",
+    "includeRevoked": "Show revoked keys",
+    "columns": {
+      "name": "Name",
+      "scopes": "Scopes",
+      "created": "Created",
+      "lastUsed": "Last used",
+      "status": "Status"
+    },
+    "unknownCreator": "Unknown user",
+    "active": "Active",
+    "revokedOn": "Revoked {{date}}",
+    "revoke": "Revoke",
+    "empty": "No API keys yet",
+    "emptyHint": "Create a key for a telemetry device or an integration, then store its secret in that system.",
+    "scopes": {
+      "telemetry_ingest": "Send fuel readings of the organization's vessels (HTTP telemetry devices).",
+      "ais_read": "Read AIS positions and vessel data through the API.",
+      "ais_ingest": "Push AIS messages into the shared feed of every tenant (platform administrators only)."
+    },
+    "guide": {
+      "title": "Scopes",
+      "description": "Grant each key only the scopes its system needs.",
+      "header": "Systems send the key in the X-API-Key header. Keys do not expire: revoke a key as soon as a device or partner no longer needs it."
+    },
+    "revokeConfirm": {
+      "title": "Revoke {{name}}?",
+      "description": "Requests with this key are refused at once, and devices linked to it stop sending data. This cannot be undone."
+    },
+    "form": {
+      "title": "New API key",
+      "description": "The key belongs to {{org}}.",
+      "name": "Name",
+      "namePlaceholder": "Flow meter MV Dharma Ferry",
+      "nameRequired": "Enter a name for the key",
+      "scopes": "Scopes",
+      "scopesRequired": "Choose at least one scope",
+      "superAdminOnly": "(platform administrators only)",
+      "submit": "Create key"
+    },
+    "secret": {
+      "title": "Copy the key now",
+      "description": "Key {{name}} has been created.",
+      "onceTitle": "Shown only once",
+      "onceText": "Only a hash of the key is stored. If it is lost, revoke it and create a new one.",
+      "key": "API key",
+      "copy": "Copy key",
+      "usage": "Send it in the header",
+      "stored": "I have stored the key in a safe place",
+      "done": "Done"
+    },
+    "toasts": {
+      "revoked": "Key {{name}} revoked",
+      "revokeFailed": "The key could not be revoked"
+    }
   },
   "referenceData": {
     "title": "Reference Data",
-    "description": "Vessel types, fuels, engines, fuel formulas and ports with their sources.",
-    "capabilities": [
-      "Tables per kind of reference data",
-      "Edit data (reference:write, super admin)",
-      "Source of every value (MEPC.353(78), MEPC.364(79), …)"
-    ]
+    "description": "Vessel types, fuels, engines, first fuel formulas, ports and the ship registry used by the emission and CII computations.",
+    "editable": "Editable",
+    "readOnly": "Read only",
+    "tabs": {
+      "vessel-types": "Vessel types",
+      "fuels": "Fuels",
+      "engines": "Engines",
+      "formulas": "Fuel formulas",
+      "ports": "Ports",
+      "registry": "Ship registry"
+    },
+    "hints": {
+      "vessel-types": "IMO ship types with the CII reference line (a, c) and the rating boundaries d1–d4.",
+      "fuels": "Fuels with their CO₂ conversion factor Cf, carbon content and density.",
+      "engines": "Main and auxiliary engines with power, speed and specific fuel oil consumption (SFOC).",
+      "formulas": "Vessel-specific fuel-flow regressions of speed, checked against the safe formula grammar.",
+      "ports": "Ports of call with location and arrival radius.",
+      "registry": "Particulars of ships outside the fleet (registry search by name, IMO or MMSI)."
+    }
+  },
+  "reference": {
+    "search": "Search",
+    "rowActions": "Actions for {{name}}",
+    "noMatches": "Nothing matches the search",
+    "noMatchesHint": "Try another name or code.",
+    "emptyHint": "Platform administrators add reference data here; the seeds provide the IMO defaults.",
+    "fields": {
+      "code": "Code",
+      "codeOptional": "Code (optional)",
+      "name": "Name",
+      "source": "Source"
+    },
+    "form": {
+      "required": "Required",
+      "number": "Enter a number",
+      "positive": "Must be greater than 0",
+      "code": "Lowercase letters and digits, separated by single underscores (e.g. bulk_carrier)"
+    },
+    "delete": {
+      "title": "Delete {{name}}?",
+      "description": "Rows still used by a vessel cannot be deleted. This cannot be undone."
+    },
+    "toasts": {
+      "saved": "{{name}} saved",
+      "saveFailed": "The entry could not be saved",
+      "deleted": "{{name}} deleted",
+      "deleteFailed": "The entry could not be deleted",
+      "inUseTitle": "Still used by vessels"
+    },
+    "vesselTypes": {
+      "table": "Vessel types",
+      "search": "Search vessel types…",
+      "empty": "No vessel types",
+      "create": "New vessel type",
+      "edit": "Edit vessel type",
+      "formHint": "Parameters of the CII reference line and rating (MEPC.353(78), MEPC.354(78)).",
+      "capacityUnit": "Capacity unit",
+      "dwt": "Deadweight (DWT)",
+      "gt": "Gross tonnage (GT)",
+      "capacityFixed": "Fixed capacity",
+      "capacityFixedHint": "Capacity used instead of the vessel's own (empty = the vessel's DWT or GT).",
+      "a": "Parameter a",
+      "c": "Parameter c",
+      "icon": "Map icon",
+      "line": "Reference line",
+      "dd": "Rating boundaries",
+      "ddOrder": "The boundaries must increase: d1 < d2 < d3 < d4"
+    },
+    "fuels": {
+      "table": "Fuels",
+      "search": "Search fuels…",
+      "empty": "No fuels",
+      "create": "New fuel",
+      "edit": "Edit fuel",
+      "formHint": "CO₂ per tonne of fuel and the density used for volume readings (MEPC.364(79)).",
+      "cf": "Conversion factor Cf (t CO₂ / t fuel)",
+      "carbon": "Carbon content",
+      "carbonHint": "Mass fraction between 0 and 1.",
+      "fraction": "Enter a fraction between 0 and 1",
+      "density": "Density (t/m³)",
+      "densityShort": "Density"
+    },
+    "engines": {
+      "table": "Engines",
+      "search": "Search engines…",
+      "empty": "No engines",
+      "allKinds": "All engines",
+      "create": "New engine",
+      "edit": "Edit engine",
+      "formHint": "Engine data of the Holtrop fuel path (MCR × SFOC × time).",
+      "kind": "Kind",
+      "kinds": {
+        "main": "Main engine",
+        "auxiliary": "Auxiliary engine"
+      },
+      "power": "Power (kW)",
+      "rpm": "Rated speed (rpm)",
+      "sfoc": "SFOC (g/kWh)"
+    },
+    "formulas": {
+      "table": "Fuel formulas",
+      "search": "Search formulas…",
+      "empty": "No fuel formulas",
+      "create": "New fuel formula",
+      "edit": "Edit fuel formula",
+      "formHint": "Fuel flow of the main and auxiliary engines as a function of speedKnot (L/min).",
+      "main": "Main engine formula",
+      "mainShort": "Main engine",
+      "auxiliary": "Auxiliary engine formula",
+      "auxiliaryShort": "Auxiliary engine",
+      "grammar": "Numbers, speedKnot, + − * / ^ ( ), and exp, log, ln, sqrt, pow, abs, min, max (optionally with Math.). At most 500 characters."
+    },
+    "ports": {
+      "table": "Ports",
+      "search": "Search ports…",
+      "empty": "No ports",
+      "create": "New port",
+      "edit": "Edit port",
+      "formHint": "Location (WGS 84) and the radius within which a vessel counts as arrived.",
+      "code": "Port code (UN/LOCODE)",
+      "codeRule": "2–16 capital letters or digits",
+      "lat": "Latitude between −90 and 90",
+      "lon": "Longitude between −180 and 180",
+      "radius": "Arrival radius (m)",
+      "admin": "Administrative location"
+    },
+    "registry": {
+      "table": "Ship registry",
+      "search": "Search the registry",
+      "searchPlaceholder": "Name, IMO or MMSI (at least 2 characters)…",
+      "prompt": "Search the ship registry",
+      "promptHint": "Type at least two characters of a name, an IMO number or an MMSI.",
+      "flag": "Flag",
+      "built": "Built",
+      "class": "Class"
+    }
+  },
+  "formula": {
+    "valid": "Valid formula",
+    "previewCaption": "Fuel flow computed by the formula at several speeds",
+    "speed": "Speed (kn)",
+    "flow": "Fuel flow (L/min)",
+    "problems": {
+      "empty": "Enter a formula",
+      "tooLong": "At most 500 characters",
+      "tooDeep": "Nested too deeply near character {{position}} (at most 32 levels)",
+      "unexpectedEnd": "The formula ends too early (character {{position}})",
+      "unexpectedToken": "Unexpected “{{token}}” at character {{position}}",
+      "unknownName": "Unknown name “{{token}}” at character {{position}}: use speedKnot or exp, log, ln, sqrt, pow, abs, min, max",
+      "badNumber": "Invalid number “{{token}}” at character {{position}}",
+      "arity": "{{token}} expects {{expected}} argument(s), got {{actual}} (character {{position}})"
+    }
   },
   "devices": {
     "title": "Devices",
-    "description": "Registry of telemetry devices (flow meters, MQTT gateways) and when they were last seen.",
-    "capabilities": [
-      "Devices per vessel",
-      "Add devices and link an API key",
-      "MQTT topic aisits/telemetry/<deviceId>"
-    ]
+    "description": "Telemetry devices that report fuel readings: MQTT gateways on board and HTTP flow meters with their own API key.",
+    "create": "Register device",
+    "statsLabel": "Device summary",
+    "stats": {
+      "total": "Devices",
+      "active": "Active",
+      "activeHint": "Allowed to send readings",
+      "online": "Online",
+      "onlineHint": "Reading in the last 15 minutes",
+      "transport": "MQTT · HTTP",
+      "transportHint": "Devices per connection type"
+    },
+    "listTitle": "Registered devices",
+    "tableLabel": "Telemetry devices",
+    "search": "Search devices",
+    "searchPlaceholder": "Name or serial number…",
+    "vesselFilter": "Filter by vessel",
+    "allVessels": "All vessels",
+    "kindFilter": "Filter by connection",
+    "allKinds": "All connections",
+    "statusFilter": "Filter by status",
+    "allStatuses": "All statuses",
+    "kinds": {
+      "mqtt": "MQTT",
+      "http": "HTTP"
+    },
+    "statuses": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "states": {
+      "online": "Online",
+      "idle": "Idle",
+      "offline": "Offline",
+      "never": "No data yet",
+      "inactive": "Inactive"
+    },
+    "columns": {
+      "device": "Device",
+      "vessel": "Vessel",
+      "kind": "Connection",
+      "credential": "Credential",
+      "status": "Status",
+      "lastSeen": "Last reading"
+    },
+    "keyRevoked": "Key revoked",
+    "actions": "Actions for {{name}}",
+    "connect": "Connection guide",
+    "activate": "Activate",
+    "deactivate": "Deactivate",
+    "noMatches": "No device matches",
+    "noMatchesHint": "Try another name, vessel or status, or clear the filters.",
+    "empty": "No devices registered",
+    "emptyHint": "Register the flow meter or MQTT gateway of a vessel to start receiving fuel readings.",
+    "deleteConfirm": {
+      "title": "Delete {{name}}?",
+      "description": "The device can no longer send readings. Readings it already sent are kept."
+    },
+    "form": {
+      "createTitle": "Register device",
+      "editTitle": "Edit device",
+      "description": "A device reports the fuel readings of one vessel of the organization.",
+      "vessel": "Vessel",
+      "vesselPlaceholder": "Choose a vessel",
+      "vesselRequired": "Choose a vessel",
+      "moveHint": "Moving the device to another vessel applies to new readings only.",
+      "name": "Name",
+      "namePlaceholder": "Flow meter ME port side",
+      "nameRequired": "Enter a name for the device",
+      "serial": "Serial number (optional)",
+      "kind": "Connection",
+      "kindHints": {
+        "mqtt": "Publishes readings to its own MQTT topic; no API key needed.",
+        "http": "Posts readings to the REST API with its own API key (scope telemetry:ingest)."
+      },
+      "apiKey": "API key",
+      "apiKeyPlaceholder": "Choose an API key",
+      "apiKeyNone": "No key",
+      "apiKeyRequired": "HTTP devices need an API key with the scope telemetry:ingest",
+      "apiKeyHint": "Only active keys with the scope telemetry:ingest that no other device uses.",
+      "apiKeyCreate": "Create a key",
+      "active": "Active",
+      "activeHint": "Inactive devices cannot send readings.",
+      "create": "Register device"
+    },
+    "connection": {
+      "title": "Connection guide",
+      "description": "How {{name}} sends the fuel readings of {{vessel}}.",
+      "copy": "Copy {{what}}",
+      "mqtt": {
+        "broker": "Connect to the platform's MQTT broker with the credentials from your administrator (TLS).",
+        "topic": "Publish to the device's own topic below with QoS 1.",
+        "payload": "Send one reading as JSON, or an array of up to 1000 readings; the vessel is the device's."
+      },
+      "topic": "MQTT topic",
+      "payloadLabel": "Payload (JSON)",
+      "command": "Test with mosquitto_pub",
+      "http": {
+        "key": "Use the API key linked to the device (shown once when it was created).",
+        "request": "POST the readings as JSON to the telemetry API, at most 1000 per request.",
+        "vessel": "The MMSI must be the device's vessel; other vessels are refused."
+      },
+      "request": "Request",
+      "rulesTitle": "Rules for every reading",
+      "rules": {
+        "units": "Fuel in tonnes: fuelMeTon (main engines) and fuelAeTon (auxiliary engines), never negative.",
+        "time": "time is the end of the measured period in UTC (ISO 8601); periodStart is optional.",
+        "unique": "One reading per vessel and instant: exact repeats are ignored, different values at the same time are refused.",
+        "active": "Only active devices may send; deactivate a device instead of deleting it to pause it."
+      }
+    },
+    "toasts": {
+      "created": "Device {{name}} registered",
+      "updated": "Device {{name}} saved",
+      "saveFailed": "The device could not be saved",
+      "deleted": "Device {{name}} deleted",
+      "deleteFailed": "The device could not be deleted",
+      "activated": "Device {{name}} activated",
+      "deactivated": "Device {{name}} deactivated"
+    }
   },
   "auditLog": {
     "title": "Audit Log",
-    "description": "Audit trail of every service: who did what, when and from where.",
-    "capabilities": [
-      "Filter by actor, action, target and time range",
-      "Cursor pagination",
-      "CSV export"
-    ]
+    "description": "Who did what, when and from where, across every service. Records are kept for two years.",
+    "filters": {
+      "title": "Filters",
+      "clear": "Clear filters",
+      "time": "Time range",
+      "actor": "Actor",
+      "anyActor": "Any actor",
+      "action": "Action",
+      "targetType": "Target",
+      "anyTarget": "Any target",
+      "targetId": "Target ID"
+    },
+    "records": "Records",
+    "tableLabel": "Audit records",
+    "columns": {
+      "at": "Time",
+      "actor": "Actor",
+      "action": "Action",
+      "target": "Target",
+      "source": "Service",
+      "ip": "IP address"
+    },
+    "actorTypes": {
+      "user": "User",
+      "api_key": "API key",
+      "system": "System"
+    },
+    "targetTypes": {
+      "user": "User",
+      "session": "Session",
+      "organization": "Organization",
+      "membership": "Membership",
+      "membership_invitation": "Invitation",
+      "api_key": "API key",
+      "signing_key": "Signing key",
+      "vessel": "Vessel",
+      "vessel_type": "Vessel type",
+      "fuel": "Fuel",
+      "engine": "Engine",
+      "fuel_formula": "Fuel formula",
+      "port": "Port",
+      "device": "Device",
+      "alert": "Alert",
+      "alert_rule": "Alert rule",
+      "zone": "Zone"
+    },
+    "noMatches": "No record matches the filters",
+    "noMatchesHint": "Widen the time range or clear a filter.",
+    "empty": "No audit records in the last 30 days",
+    "emptyHint": "Sign-ins and changes to members, keys, vessels and rules appear here as they happen.",
+    "detail": {
+      "title": "Audit record",
+      "actor": "Actor",
+      "actorType": "Actor type",
+      "target": "Target",
+      "source": "Service",
+      "ip": "IP address",
+      "org": "Organization",
+      "id": "Record ID",
+      "userAgent": "User agent",
+      "changes": "Details",
+      "noMeta": "This record carries no further details.",
+      "changedValues": "Changed values",
+      "value": "Value",
+      "becomes": "becomes",
+      "fields": "Changed fields:",
+      "raw": "Raw data (JSON)",
+      "copyRaw": "Copy JSON"
+    }
+  },
+  "audit": {
+    "actions": {
+      "auth__login__succeeded": "Signed in",
+      "auth__login__failed": "Sign-in failed",
+      "auth__logout": "Signed out",
+      "auth__refresh__reuse_detected": "Refresh token reuse detected",
+      "auth__session__revoke": "Session revoked",
+      "auth__session__switch_org": "Organization switched",
+      "auth__password__change": "Password changed",
+      "auth__password__reset": "Password reset",
+      "auth__password__reset_request": "Password reset requested",
+      "auth__invite__accept": "Invitation accepted",
+      "auth__mfa__enable": "MFA enabled",
+      "auth__mfa__disable": "MFA disabled",
+      "auth__signing_key__rotate": "Signing key rotated",
+      "membership__invite": "Member invited",
+      "membership__invite__cancel": "Invitation withdrawn",
+      "membership__update": "Member role changed",
+      "membership__delete": "Member removed",
+      "api_key__create": "API key created",
+      "api_key__revoke": "API key revoked",
+      "organization__create": "Organization created",
+      "organization__update": "Organization updated",
+      "organization__delete": "Organization deleted",
+      "user__update": "Profile updated",
+      "user__status__update": "Account status changed",
+      "platform__bootstrap": "Platform initialized",
+      "vessel__create": "Vessel created",
+      "vessel__update": "Vessel updated",
+      "vessel__delete": "Vessel deleted",
+      "vessel_type__create": "Vessel type created",
+      "vessel_type__update": "Vessel type updated",
+      "vessel_type__delete": "Vessel type deleted",
+      "fuel__create": "Fuel created",
+      "fuel__update": "Fuel updated",
+      "fuel__delete": "Fuel deleted",
+      "engine__create": "Engine created",
+      "engine__update": "Engine updated",
+      "engine__delete": "Engine deleted",
+      "fuel_formula__create": "Fuel formula created",
+      "fuel_formula__update": "Fuel formula updated",
+      "fuel_formula__delete": "Fuel formula deleted",
+      "port__create": "Port created",
+      "port__update": "Port updated",
+      "port__delete": "Port deleted",
+      "device__create": "Device registered",
+      "device__update": "Device updated",
+      "device__delete": "Device deleted",
+      "fuel_reading__create": "Fuel readings recorded",
+      "alert__acknowledge": "Alert acknowledged",
+      "alert__resolve": "Alert resolved",
+      "alert_rule__create": "Alert rule created",
+      "alert_rule__update": "Alert rule updated",
+      "alert_rule__delete": "Alert rule deleted",
+      "notification__test": "Test notification sent",
+      "zone__create": "Zone created",
+      "zone__update": "Zone updated",
+      "zone__delete": "Zone deleted"
+    }
+  },
+  "problems": {
+    "VALIDATION_FAILED": "Check the highlighted fields.",
+    "FORBIDDEN": "You do not have permission for this action.",
+    "RATE_LIMITED": "Too many requests. Try again in {{seconds}} seconds.",
+    "ORGANIZATION_REQUIRED": "Switch to an organization first.",
+    "PLATFORM_ADMIN_REQUIRED": "Only platform administrators can do this.",
+    "ORGANIZATION_NOT_FOUND": "The organization no longer exists.",
+    "ORGANIZATION_SLUG_TAKEN": "Another organization already uses this slug.",
+    "ORGANIZATION_PROTECTED": "The platform organization cannot be deleted and keeps its kind.",
+    "ORGANIZATION_KIND_CONFLICT": "Members or pending invitations hold roles the new kind does not allow (the authority role needs an authority organization). Change those roles or withdraw the invitations first.",
+    "USER_NOT_FOUND": "The user no longer exists.",
+    "MEMBER_NOT_FOUND": "The member is no longer part of the organization.",
+    "MEMBER_ALREADY_EXISTS": "This address is already a member of the organization.",
+    "INVITATION_NOT_FOUND": "The invitation was already accepted or withdrawn.",
+    "INVITATION_CONFLICT": "The invitation changed at the same time. Try again.",
+    "LAST_ORG_ADMIN": "The organization must keep at least one org admin: give another member that role first.",
+    "ROLE_NOT_GRANTABLE": "The authority role can only be granted in authority organizations.",
+    "NOT_A_MEMBER": "The user is not a member of this organization.",
+    "CANNOT_CHANGE_OWN_STATUS": "You cannot disable your own account.",
+    "INVALID_STATUS_TRANSITION": "The account cannot change to that status (invited accounts become active when they accept).",
+    "API_KEY_NOT_FOUND": "The API key no longer exists or was already revoked.",
+    "SCOPE_NOT_GRANTABLE": "You may not grant this scope: ais:ingest writes the AIS feed shared by every tenant and is granted by platform administrators only.",
+    "CODE_ALREADY_EXISTS": "This code is already used.",
+    "REFERENCE_IN_USE": "Vessels still use this entry. Assign them another one first.",
+    "VESSEL_TYPE_NOT_FOUND": "The vessel type no longer exists.",
+    "FUEL_NOT_FOUND": "The fuel no longer exists.",
+    "ENGINE_NOT_FOUND": "The engine no longer exists.",
+    "FUEL_FORMULA_NOT_FOUND": "The fuel formula no longer exists.",
+    "PORT_NOT_FOUND": "The port no longer exists.",
+    "VESSEL_NOT_FOUND": "The vessel no longer exists in the fleet.",
+    "DEVICE_NOT_FOUND": "The device no longer exists.",
+    "DEVICE_NAME_TAKEN": "The organization already has a device with this name.",
+    "DEVICE_API_KEY_TAKEN": "Another device already uses this API key.",
+    "DEVICE_CREDENTIAL_CONFLICT": "The device changed at the same time. Reload and try again.",
+    "VESSEL_WITHOUT_ORGANIZATION": "The vessel belongs to no organization, so no device can be registered on it."
+  },
+  "fieldErrors": {
+    "isEmail": "Enter a valid e-mail address",
+    "isNotEmpty": "Required",
+    "isDefined": "Required",
+    "maxLength": "Too long",
+    "minLength": "Too short",
+    "matches": "Invalid format",
+    "isIn": "Choose one of the options",
+    "isEnum": "Choose one of the options",
+    "isUuid": "Invalid identifier",
+    "isMmsi": "An MMSI has exactly nine digits",
+    "isInt": "Enter a whole number",
+    "isNumber": "Enter a number",
+    "min": "Value too small",
+    "max": "Value too large",
+    "arrayNotEmpty": "Choose at least one",
+    "arrayMinSize": "Choose at least one",
+    "formula": "The formula is not valid"
   }
 }

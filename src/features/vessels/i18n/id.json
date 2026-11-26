@@ -1,24 +1,469 @@
 {
-  "list": {
-    "title": "Kapal",
-    "description": "Data induk kapal armada Anda: identitas, dimensi, mesin, bahan bakar dan foto.",
-    "capabilities": [
-      "Daftar kapal dengan pencarian nama / MMSI / IMO (page pagination)",
-      "Halaman detail di /vessels/:mmsi",
-      "Form kapal, dimensi, mesin dan pelabuhan (vessel:write)",
-      "Unggah foto kapal (≤ 5 MB)"
-    ]
-  },
   "nav": {
     "list": "Kapal"
   },
+  "commands": {
+    "create": "Tambah kapal baru"
+  },
+  "actions": {
+    "create": "Tambah kapal",
+    "edit": "Ubah",
+    "delete": "Hapus"
+  },
+  "list": {
+    "title": "Kapal",
+    "description": "Data induk armada: identitas, dimensi, mesin, bahan bakar, foto, posisi terakhir dan peringkat CII.",
+    "searchPlaceholder": "Cari nama, MMSI atau IMO…",
+    "searchLabel": "Cari kapal berdasarkan nama, MMSI atau IMO",
+    "tableLabel": "Daftar kapal",
+    "noMatch": "Tidak ada kapal yang cocok",
+    "noMatchDescription": "Ubah kata kunci atau filter tipe dan status untuk melihat kapal lain.",
+    "resetFilters": "Atur ulang filter",
+    "emptyFleet": "Belum ada kapal di armada Anda",
+    "emptyAll": "Belum ada kapal terdaftar",
+    "emptyDescription": "Tambahkan kapal pertama Anda: isi identitas, dimensi dan mesin, atau ambil datanya dari registri.",
+    "emptyNoWrite": "Minta admin organisasi atau manajer armada untuk menambahkan kapal.",
+    "allScopeNote": "Kapal organisasi lain hanya menampilkan identitas; data teknis, CII dan telemetri bersifat privat bagi pemiliknya.",
+    "technicalHidden": "Data teknis hanya untuk organisasi pemilik",
+    "ciiNone": "Belum ada"
+  },
+  "stats": {
+    "fleet": "Kapal armada",
+    "registered": "Kapal terdaftar",
+    "active": "Aktif",
+    "laidUp": "Laid up",
+    "ciiAttention": "CII D/E",
+    "ciiAttentionHint": "Peringkat D/E tahun ini",
+    "ciiUnavailable": "Data CII belum tersedia"
+  },
+  "filters": {
+    "type": "Tipe kapal",
+    "allTypes": "Semua tipe",
+    "status": "Status",
+    "allStatuses": "Semua status",
+    "scope": "Cakupan daftar",
+    "scopeFleet": "Armada saya",
+    "scopeAll": "Semua kapal"
+  },
+  "columns": {
+    "photo": "Foto",
+    "name": "Nama kapal",
+    "mmsi": "MMSI",
+    "imo": "IMO",
+    "type": "Tipe",
+    "flag": "Bendera",
+    "tonnage": "GT / DWT",
+    "cii": "CII",
+    "lastSeen": "Terakhir terlihat"
+  },
+  "lastSeen": {
+    "never": "Belum pernah",
+    "live": "Siaran langsung",
+    "recent": "Beberapa jam lalu",
+    "stale": "Sudah lama",
+    "none": "Tidak ada posisi"
+  },
   "detail": {
     "title": "Detail Kapal",
-    "description": "Identitas, posisi live, keselamatan, emisi dan telemetri satu kapal.",
-    "capabilities": [
-      "Posisi dan status keselamatan live (useVesselLive)",
-      "Partikular, dimensi dan mesin",
-      "Ringkasan CII dan telemetri"
-    ]
+    "back": "Kembali ke daftar kapal",
+    "invalidMmsi": "MMSI tidak valid",
+    "invalidMmsiHint": "MMSI harus terdiri dari 9 digit. Periksa tautan atau cari kapal dari daftar.",
+    "showOnMap": "Lihat di peta",
+    "photoAlt": "Foto kapal {{name}}",
+    "identity": "Identitas kapal",
+    "built": "Dibangun {{year}}",
+    "ownFleet": "Armada Anda",
+    "platformAccess": "Akses admin platform",
+    "otherOrg": "Organisasi lain",
+    "restrictedTitle": "Data teknis bersifat privat",
+    "restrictedDescription": "Dimensi, mesin, bahan bakar, CII dan telemetri kapal ini hanya dapat dilihat oleh organisasi pemiliknya (aturan tenancy §8.5)."
+  },
+  "tabs": {
+    "label": "Bagian detail kapal",
+    "overview": "Ringkasan",
+    "live": "Live",
+    "cii": "CII",
+    "telemetry": "Telemetri",
+    "alerts": "Alert"
+  },
+  "fields": {
+    "name": "Nama kapal",
+    "mmsi": "MMSI",
+    "imo": "Nomor IMO",
+    "flag": "Bendera (ISO alpha-2)",
+    "type": "Tipe kapal",
+    "status": "Status",
+    "builtYear": "Tahun dibangun",
+    "annualVoyagePercentage": "Porsi tahun berlayar",
+    "updatedAt": "Diperbarui",
+    "capacity": "Kapasitas CII ({{unit}})",
+    "gt": "Gross tonnage (GT)",
+    "dwt": "Deadweight (DWT)",
+    "loa": "Panjang keseluruhan (LOA)",
+    "lpp": "Panjang antar garis tegak (LPP)",
+    "lwl": "Panjang garis air (LWL)",
+    "b": "Lebar (B)",
+    "t": "Sarat (T)",
+    "vs": "Kecepatan dinas (Vs)",
+    "cb": "Koefisien blok C_B",
+    "cbnsp": "Koefisien blok C_bnsp",
+    "cp": "Koefisien prismatik C_P",
+    "cm": "Koefisien gading tengah C_M",
+    "cwp": "Koefisien bidang air C_WP",
+    "cstern": "Koefisien buritan C_stern",
+    "bulbousBow": "Haluan bulbous",
+    "c1": "Faktor c1 (tipe kapal)",
+    "c2": "Faktor c2 (tipe kemudi)",
+    "c3": "Faktor c3 (profil kemudi)",
+    "c5": "Faktor c5 (susunan kemudi)",
+    "conversionFactor": "Faktor konversi C_F",
+    "carbonContent": "Kandungan karbon",
+    "density": "Densitas (t/m³)",
+    "code": "Kode",
+    "fuel": "Bahan bakar",
+    "firstFuelFormula": "Formula bahan bakar pertama"
+  },
+  "overview": {
+    "identity": "Identitas",
+    "dimensions": "Dimensi & koefisien lambung",
+    "dimensionsDescription": "Masukan kapasitas CII dan rantai resistansi Holtrop–Mennen di layanan emisi.",
+    "principal": "Ukuran utama",
+    "hull": "Koefisien lambung",
+    "rudder": "Faktor kemudi",
+    "capacityFixed": "(tetap menurut regulasi)",
+    "yes": "Ya",
+    "no": "Tidak",
+    "engines": "Mesin",
+    "installedPower": "Daya terpasang total {{power}} kW",
+    "noEngines": "Belum ada mesin",
+    "noEnginesHint": "Tambahkan mesin utama dan mesin bantu melalui tombol Ubah.",
+    "fuel": "Bahan bakar & formula",
+    "firstFormula": "Formula bahan bakar pertama",
+    "noFormula": "Tanpa formula: layanan emisi memakai telemetri bila aktif, lalu model Holtrop.",
+    "ports": "Pelabuhan singgah",
+    "noPorts": "Belum ada pelabuhan singgah."
+  },
+  "engines": {
+    "main": "Mesin utama",
+    "auxiliary": "Mesin bantu",
+    "powerKw": "Daya",
+    "rpm": "rpm",
+    "sfoc": "SFOC",
+    "noMain": "Tanpa mesin utama",
+    "quantity": "Jumlah",
+    "addAux": "Tambah mesin bantu",
+    "noAux": "Belum ada mesin bantu.",
+    "auxRow": "Mesin bantu {{index}}",
+    "removeAux": "Hapus mesin bantu {{index}}",
+    "limit": "{{count}} dari maksimal {{max}} baris mesin"
+  },
+  "formula": {
+    "main": "Mesin utama (ME)",
+    "auxiliary": "Mesin bantu (AE)",
+    "previewUnavailable": "Pratinjau tidak tersedia",
+    "previewAt": "Pada kecepatan dinas {{speed}} kn: {{value}} L/mnt",
+    "needSpeed": "isi kecepatan dinas",
+    "unit": "L/mnt",
+    "created": "Formula {{name}} dibuat",
+    "createFailed": "Formula belum dapat dibuat",
+    "newTitle": "Formula bahan bakar baru",
+    "newDescription": "Laju bahan bakar (L/mnt) sebagai fungsi speedKnot. Formula divalidasi dengan tata bahasa aman yang sama dengan layanan armada dan emisi.",
+    "name": "Nama formula",
+    "grammarHint": "Angka, speedKnot, + - * / ** ^ ( ) dan exp, log, ln, sqrt, pow, abs, min, max (boleh diawali Math.). ^ berarti pangkat.",
+    "create": "Buat formula",
+    "choose": "Pilih formula",
+    "none": "Tanpa formula (Holtrop)",
+    "new": "Formula baru",
+    "atServiceSpeed": "pada Vs:",
+    "noneHint": "Tanpa formula pertama, bahan bakar dihitung dari telemetri (bila aktif) atau model Holtrop.",
+    "issues": {
+      "tooLong": "Formula lebih dari {{max}} karakter",
+      "empty": "Formula wajib diisi",
+      "unexpectedCharacter": "Karakter tidak diizinkan \"{{text}}\" pada posisi {{position}}",
+      "unknownIdentifier": "Nama tidak dikenal \"{{text}}\" pada posisi {{position}} (hanya speedKnot dan fungsi yang diizinkan)",
+      "arity": "{{text}}() memerlukan {{expected}} argumen, bukan {{actual}} (posisi {{position}})",
+      "tooDeep": "Formula bersarang lebih dari {{max}} tingkat (posisi {{position}})",
+      "numberOutOfRange": "Angka {{text}} di luar jangkauan (posisi {{position}})",
+      "expected": "Diharapkan \"{{text}}\" pada posisi {{position}}",
+      "unexpectedToken": "\"{{text}}\" tidak diharapkan pada posisi {{position}}",
+      "unexpectedEnd": "Formula berakhir terlalu cepat (posisi {{position}})"
+    }
+  },
+  "live": {
+    "position": "Posisi terakhir",
+    "coordinates": "Koordinat",
+    "positionTime": "Waktu posisi",
+    "sog": "Kecepatan (SOG)",
+    "cog": "Haluan (COG)",
+    "heading": "Heading",
+    "headingNa": "Tidak tersedia",
+    "navstatus": "Status navigasi",
+    "predicted": "Prediksi status",
+    "source": "Sumber AIS",
+    "sources": {
+      "primary": "Penerima utama",
+      "batam": "Stasiun Batam",
+      "pusher": "Mitra (API)"
+    },
+    "map": "Peta",
+    "track": "Lintasan di peta",
+    "mapLabel": "Peta posisi {{name}}",
+    "noPosition": "Belum ada posisi AIS",
+    "noPositionHint": "Kapal belum mengirim posisi dalam 24 jam terakhir. Posisi akan muncul otomatis saat diterima.",
+    "openMap": "Buka peta live",
+    "safety": "Keselamatan navigasi",
+    "safetyDescription": "Status EWS pipa dan risiko tubrukan dari layanan keselamatan.",
+    "noSafety": "Belum ada status keselamatan",
+    "noSafetyHint": "Status dihitung setelah posisi berikutnya diterima.",
+    "ews": "Status EWS",
+    "pipelineDistance": "Jarak ke pipa",
+    "collisionRisk": "Risiko tubrukan",
+    "closestEncounter": "Pertemuan terdekat",
+    "cpa": "CPA",
+    "tcpa": "TCPA"
+  },
+  "cii": {
+    "title": "CII tahun {{year}}",
+    "scaleLabel": "Posisi CII tercapai {{value}} pada skala peringkat A sampai E",
+    "attained": "CII tercapai",
+    "required": "CII disyaratkan",
+    "rating": "Rasio rating",
+    "z": "Faktor reduksi Z",
+    "distance": "Jarak tempuh",
+    "co2": "Emisi CO₂",
+    "fuelMe": "Bahan bakar ME",
+    "fuelAe": "Bahan bakar AE",
+    "methods": "Metode bahan bakar",
+    "methodShares": "Telemetri {{telemetry}}% · Formula {{formula}}% · Holtrop {{holtrop}}%",
+    "manual": "Catatan tahunan manual",
+    "asOf": "Data hingga",
+    "dailyCaption": "CII tercapai kumulatif per hari dibandingkan CII yang disyaratkan",
+    "cumulative": "CII kumulatif",
+    "empty": "Belum ada data CII tahun ini",
+    "emptyHint": "CII dihitung dari segmen pelayaran AIS. Data akan muncul setelah kapal berlayar dan bahan bakarnya terhitung.",
+    "report": "Laporan CII",
+    "grade": "Peringkat tahun berjalan",
+    "sourceManual": "Dari catatan tahunan manual",
+    "sourceSegments_one": "Dari {{count}} segmen pelayaran",
+    "sourceSegments_other": "Dari {{count}} segmen pelayaran",
+    "projection": "Proyeksi akhir tahun",
+    "capacity": "Kapasitas CII: {{capacity}}",
+    "figures": "Angka CII",
+    "figuresDescription": "g CO₂ per kapasitas·nm, tahun kalender berjalan."
+  },
+  "telemetry": {
+    "status": "Status telemetri",
+    "active": "Aktif",
+    "inactive": "Tidak aktif",
+    "lastReading": "Pembacaan terakhir {{time}}",
+    "noReading": "Belum ada pembacaan",
+    "total30d": "Total 30 hari",
+    "readings_one": "{{count}} pembacaan",
+    "readings_other": "{{count}} pembacaan",
+    "me30d": "Mesin utama 30 hari",
+    "ae30d": "Mesin bantu 30 hari",
+    "dailyTitle": "Konsumsi harian",
+    "dailyDescription": "Jumlah harian (UTC) dari pembacaan alat ukur. Telemetri aktif bila ada pembacaan dalam {{minutes}} menit terakhir.",
+    "explore": "Buka eksplorer telemetri",
+    "empty": "Belum ada pembacaan bahan bakar",
+    "emptyHint": "Pasang perangkat MQTT/HTTP atau masukkan pembacaan manual di halaman Telemetri.",
+    "me": "Mesin utama",
+    "ae": "Mesin bantu",
+    "methodNote": "Saat telemetri aktif, layanan emisi memakai pembacaan ini untuk bahan bakar segmen.",
+    "latestTitle": "Pembacaan terbaru",
+    "latestDescription": "Pembacaan mentah terakhir yang diterima layanan telemetri (ton metrik).",
+    "since": "sejak {{time}}",
+    "columns": {
+      "time": "Waktu",
+      "me": "ME (t)",
+      "ae": "AE (t)",
+      "total": "Total (t)",
+      "source": "Sumber"
+    },
+    "sources": {
+      "device": "Perangkat HTTP",
+      "mqtt": "MQTT",
+      "api": "API",
+      "manual": "Manual",
+      "import": "Impor"
+    }
+  },
+  "alerts": {
+    "title": "Alert kapal",
+    "description": "20 alert terbaru yang melibatkan kapal ini (sebagai kapal utama atau terkait).",
+    "inbox": "Buka kotak masuk",
+    "empty": "Tidak ada alert",
+    "emptyHint": "Alert EWS, tubrukan dan pengawasan untuk kapal ini akan muncul di sini."
+  },
+  "delete": {
+    "title": "Hapus {{name}}?",
+    "description": "Kapal MMSI {{mmsi}} beserta dimensi, mesin, pelabuhan dan fotonya akan dihapus dari armada. Riwayat AIS dan CII tetap tersimpan. Tindakan ini tidak dapat dibatalkan.",
+    "confirm": "Hapus kapal",
+    "done": "{{name}} dihapus",
+    "failed": "Kapal belum dapat dihapus"
+  },
+  "form": {
+    "createTitle": "Tambah Kapal",
+    "createDescription": "Daftarkan kapal ke armada organisasi aktif. Isi otomatis dari registri untuk mempercepat.",
+    "editTitle": "Ubah Data Kapal",
+    "editDescription": "Perubahan identitas, dimensi, mesin dan pelabuhan dipublikasikan ke layanan emisi, keselamatan dan pengawasan.",
+    "createLabel": "Formulir kapal baru",
+    "editLabel": "Formulir ubah {{name}}",
+    "notOwnTitle": "Kapal ini milik organisasi lain",
+    "notOwnDescription": "Hanya organisasi pemilik (atau admin platform) yang dapat mengubah data kapal.",
+    "sections": {
+      "identity": "Identitas",
+      "identityHint": "Data identitas dibagikan ke semua pengguna platform.",
+      "type": "Tipe & bahan bakar",
+      "typeHint": "Tipe menentukan garis referensi CII; bahan bakar menentukan faktor CO₂.",
+      "dimensions": "Dimensi",
+      "dimensionsHint": "Panjang dalam meter, kecepatan dalam knot, koefisien tanpa satuan.",
+      "engines": "Mesin",
+      "enginesHint": "Satu baris mesin utama (dengan jumlah) dan mesin bantu, maksimal 16 baris.",
+      "ports": "Pelabuhan singgah",
+      "portsHint": "Urutan pelabuhan dalam rute kapal."
+    },
+    "sectionsNav": "Bagian formulir",
+    "mmsiHint": "9 digit, unik di platform",
+    "imoHint": "7 digit (awalan IMO boleh)",
+    "voyageHint": "Dipakai simulasi SEEMP",
+    "selectType": "Pilih tipe kapal",
+    "selectFuel": "Pilih bahan bakar",
+    "selectEngine": "Pilih mesin",
+    "typeParams": "Parameter CII tipe",
+    "typeParamsValue": "Kapasitas {{unit}} · a = {{a}} · c = {{c}}",
+    "fuelParams": "C_F {{cf}} t CO₂/t · densitas {{density}} t/m³",
+    "bulbousBowHint": "Dipakai model resistansi Holtrop (luas bulb A_BT).",
+    "unsaved": "Ada perubahan yang belum disimpan",
+    "noChanges": "Belum ada perubahan",
+    "save": "Simpan perubahan",
+    "create": "Simpan kapal",
+    "created": "{{name}} ditambahkan ke armada",
+    "saved": "Perubahan {{name}} disimpan",
+    "unchanged": "Tidak ada perubahan untuk disimpan",
+    "newVessel": "Kapal baru",
+    "tenancyNote": "Kapal dibuat di organisasi aktif Anda. Data teknis, CII dan telemetri hanya terlihat oleh organisasi ini.",
+    "leaveTitle": "Tinggalkan formulir?",
+    "leaveDescription": "Perubahan yang belum disimpan akan hilang.",
+    "leave": "Tinggalkan",
+    "errors": {
+      "required": "Wajib diisi",
+      "number": "Masukkan angka",
+      "integer": "Harus bilangan bulat",
+      "range": "Harus antara {{min}} dan {{max}}",
+      "positive": "Harus lebih dari {{min}}",
+      "min": "Minimal {{min}}",
+      "max": "Maksimal {{max}}",
+      "mmsi": "MMSI harus 9 digit (100000000–999999999)",
+      "imo": "Nomor IMO harus 7 digit",
+      "flag": "Gunakan kode negara 2 huruf, mis. ID",
+      "maxLength": "Maksimal {{max}} karakter",
+      "select": "Pilih salah satu",
+      "maxPorts": "Maksimal {{max}} pelabuhan",
+      "duplicateEngine": "Mesin ini sudah dipilih di baris lain",
+      "maxEngines": "Maksimal {{max}} baris mesin",
+      "duplicatePort": "Pelabuhan tidak boleh berulang"
+    }
+  },
+  "photo": {
+    "title": "Foto kapal",
+    "tooLarge": "Ukuran foto melebihi 5 MB",
+    "invalidType": "Format harus JPEG, PNG atau WebP",
+    "invalid": "Berkas tidak dapat dipakai",
+    "input": "Pilih foto kapal",
+    "uploading": "Mengunggah…",
+    "drop": "Lepaskan untuk mengunggah",
+    "hint": "Seret foto ke sini",
+    "limits": "JPEG, PNG atau WebP · maks. 5 MB",
+    "replace": "Ganti foto",
+    "choose": "Pilih foto",
+    "remove": "Hapus foto",
+    "uploadFailedAfterCreate": "Kapal tersimpan, tetapi foto gagal diunggah",
+    "uploaded": "Foto kapal diperbarui",
+    "uploadFailed": "Foto gagal diunggah",
+    "afterCreate": "Foto diunggah setelah kapal tersimpan.",
+    "removeTitle": "Hapus foto kapal?",
+    "removeDescription": "Foto dihapus dari penyimpanan dan tidak dapat dipulihkan.",
+    "removed": "Foto kapal dihapus",
+    "removeFailed": "Foto gagal dihapus"
+  },
+  "ports": {
+    "add": "Tambah pelabuhan",
+    "choose": "Pilih pelabuhan",
+    "noneLeft": "Semua pelabuhan sudah dipilih",
+    "addButton": "Tambahkan",
+    "empty": "Belum ada pelabuhan singgah.",
+    "order": "Urutan pelabuhan singgah",
+    "up": "Naikkan {{name}}",
+    "down": "Turunkan {{name}}",
+    "remove": "Hapus {{name}}"
+  },
+  "registry": {
+    "open": "Isi dari registri",
+    "title": "Cari di registri kapal",
+    "description": "Data partikular publik kapal (registri sekunder). Pilih entri untuk mengisi identitas dan ukuran utama.",
+    "placeholder": "Nama, nomor IMO atau MMSI…",
+    "label": "Kata kunci registri",
+    "start": "Ketik minimal 2 karakter",
+    "startHint": "Nama dicocokkan dari awal; angka mencocokkan IMO atau MMSI.",
+    "none": "Tidak ada entri registri",
+    "noneHint": "Coba ejaan lain atau masukkan data kapal secara manual.",
+    "built": "Dibangun {{year}}",
+    "applied_one": "{{count}} kolom diisi dari registri ({{name}})",
+    "applied_other": "{{count}} kolom diisi dari registri ({{name}})"
+  },
+  "problems": {
+    "VALIDATION_FAILED": {
+      "title": "Data belum valid",
+      "detail": "Periksa kolom yang ditandai lalu simpan lagi."
+    },
+    "FORBIDDEN": {
+      "title": "Akses ditolak",
+      "detail": "Kapal ini milik organisasi lain atau peran Anda tidak mengizinkan tindakan ini."
+    },
+    "ORGANIZATION_REQUIRED": {
+      "title": "Pilih organisasi aktif",
+      "detail": "Kapal dibuat di organisasi aktif; pilih organisasi melalui pengalih organisasi."
+    },
+    "PLATFORM_ADMIN_REQUIRED": {
+      "title": "Khusus admin platform",
+      "detail": "Kolom ini hanya dapat diubah oleh admin platform."
+    },
+    "VESSEL_NOT_FOUND": {
+      "title": "Kapal tidak ditemukan",
+      "detail": "Kapal mungkin telah dihapus atau MMSI-nya berubah."
+    },
+    "REGISTRY_ENTRY_NOT_FOUND": {
+      "title": "Entri registri tidak ditemukan",
+      "detail": "Tidak ada partikular dengan IMO atau MMSI tersebut."
+    },
+    "PHOTO_NOT_FOUND": {
+      "title": "Foto tidak ditemukan",
+      "detail": "Kapal ini belum memiliki foto."
+    },
+    "MMSI_ALREADY_EXISTS": {
+      "title": "MMSI sudah terdaftar",
+      "detail": "Setiap MMSI hanya boleh dimiliki satu kapal di platform."
+    },
+    "IMO_ALREADY_EXISTS": {
+      "title": "Nomor IMO sudah terdaftar",
+      "detail": "Nomor IMO ini sudah dipakai kapal lain."
+    },
+    "REFERENCE_IN_USE": {
+      "title": "Data referensi masih dipakai",
+      "detail": "Pindahkan kapal ke data referensi lain terlebih dahulu."
+    },
+    "PAYLOAD_TOO_LARGE": {
+      "title": "Foto terlalu besar",
+      "detail": "Ukuran maksimal foto adalah 5 MB."
+    },
+    "UNSUPPORTED_MEDIA_TYPE": {
+      "title": "Format foto tidak didukung",
+      "detail": "Gunakan JPEG, PNG atau WebP."
+    },
+    "SERVICE_UNAVAILABLE": {
+      "title": "Penyimpanan foto tidak tersedia",
+      "detail": "Coba unggah lagi beberapa saat lagi."
+    }
   }
 }

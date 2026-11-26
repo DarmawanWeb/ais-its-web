@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Fleet Service
  * Vessel master data and reference data (vessel types, fuels, engines, fuel formulas, ports, registry); publishes VesselSnapshotV1 to the FLEET stream
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 
 export interface FuelDto {
@@ -15,6 +15,13 @@ export interface FuelDto {
   density: number;
   /** @nullable */
   source: string | null;
+  /** Ids of the methodology catalog's references behind the values (docs/references/references.json) */
+  referenceIds: string[];
+  /**
+   * Vessels of every organization that use this row; a row in use cannot be deleted (409 REFERENCE_IN_USE). Present only for principals with reference:write (platform administrators): the count spans the technical data of every tenant (spec §8.5).
+   * @minimum 0
+   */
+  vesselCount?: number;
   createdAt: string;
   updatedAt: string;
 }

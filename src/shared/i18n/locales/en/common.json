@@ -52,9 +52,7 @@
     },
     "alerts": {
       "label": "Alerts",
-      "empty": "No new alerts",
-      "viewAll": "View all alerts",
-      "pending": "Realtime alerts will appear here."
+      "viewAll": "View all alerts"
     },
     "realtime": {
       "connected": "Realtime connected",
@@ -106,6 +104,7 @@
     "exportCsv": "Export CSV",
     "copy": "Copy",
     "copied": "Copied",
+    "copyFailed": "Could not copy to the clipboard",
     "more": "More",
     "apply": "Apply",
     "clear": "Clear",
@@ -117,10 +116,7 @@
     "loading": "Loading…",
     "saving": "Saving…",
     "noData": "No data",
-    "comingSoon": "Coming soon",
-    "underConstruction": "This page is under construction",
-    "underConstructionDescription": "The {{module}} module is being built. The page frame, permissions and navigation are ready.",
-    "plannedScope": "Module scope"
+    "comingSoon": "Coming soon"
   },
   "errors": {
     "generic": "Something went wrong",
@@ -207,7 +203,9 @@
     "needsCitation": "Needs citation",
     "needsCitationDescription": "The value comes from the thesis and has no verified external source yet.",
     "status": "Status",
-    "formulaScrollable": "Formula (scroll sideways to see all of it)"
+    "formulaScrollable": "Formula (scroll sideways to see all of it)",
+    "more_one": "+{{count}} more method",
+    "more_other": "+{{count}} more methods"
   },
   "map": {
     "basemap": "Basemap",

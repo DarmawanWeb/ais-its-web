@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Emission Service
  * Fuel and CO2 per voyage segment, IMO CII (daily/annual, rating A-E), reduction factors, SEEMP recommendations and what-if simulation, IMO DCS summary
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import type { FleetVesselCiiDto } from './fleetVesselCiiDto';
 import type { GradeCountsDto } from './gradeCountsDto';
@@ -16,15 +16,15 @@ export interface FleetSummaryDto {
    * @nullable
    */
   orgId: string | null;
-  /** Vessels of the fleet (all pages) */
+  /** Vessels of the fleet (all pages, before the filters) */
   vessels: number;
   /** Grade distribution of the whole fleet */
   grades: GradeCountsDto;
   /** Vessels without CII data for the year */
   notAvailable: number;
-  /** One page of the vessels (`page`, `pageSize` ≤ 100), ordered by MMSI */
+  /** One page (`page`, `pageSize` ≤ 100) of the vessels matching `grade` and `search`, in the order of `sort` (default MMSI) */
   items: FleetVesselCiiDto[];
-  /** Page of `items` */
+  /** Page of `items`; `total` counts the matching vessels */
   meta: PageMetaDto;
   /** Methodology catalog ids behind the figure (GET /api/v2/emission/methodology) */
   methodIds: string[];

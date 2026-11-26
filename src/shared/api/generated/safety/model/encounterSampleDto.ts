@@ -3,8 +3,9 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Safety Service
  * Navigational safety analytics (pipeline Early Warning System, collision risk CPA/TCPA) built on the Detector SDK
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
+import type { CpaPositionsDto } from './cpaPositionsDto';
 import type { EncounterPositionsDto } from './encounterPositionsDto';
 import type { EncounterSampleDtoRisk } from './encounterSampleDtoRisk';
 
@@ -23,4 +24,9 @@ export interface EncounterSampleDto {
   /** Risk band after hysteresis */
   risk: EncounterSampleDtoRisk;
   positions: EncounterPositionsDto;
+  /**
+   * Predicted positions of both vessels at the closest point of approach (method `collision.cpa_tcpa`): each report dead-reckoned on constant SOG/COG to `time` + `tcpaMin`. `null` without relative motion (`tcpaMin` `null`) or when the closest point lies in the past (`tcpaMin` < 0)
+   * @nullable
+   */
+  cpaPositions: CpaPositionsDto | null;
 }

@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Geo Service
  * Zones and geofences registry: validated GeoJSON zones, map layers and the GEO zone snapshot stream
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import { useMutation, useQuery } from '@tanstack/react-query';
 import type {
@@ -26,8 +26,10 @@ import type {
   ProblemDetails,
   RepublishResultDto,
   UpdateZoneDto,
+  ValidateZoneDto,
   ZoneDto,
   ZoneFeatureCollectionDto,
+  ZoneValidationDto,
   ZonesControllerGeojsonParams,
   ZonesControllerList200,
   ZonesControllerListParams,
@@ -429,6 +431,8 @@ export function useZonesControllerGeojson<
 
 /**
  * Enqueues one geo.zone.upserted.v1 per zone in the outbox; the relay publishes them asynchronously.
+ *
+ * Requires a platform administrator (super_admin); other users and API keys get 403 PLATFORM_ADMIN_REQUIRED.
  * @summary Republish the snapshot of every zone to the GEO stream (super_admin)
  */
 export const zonesControllerRepublish = (
@@ -485,6 +489,8 @@ export type ZonesControllerRepublishMutationError = ErrorType<ProblemDetails>;
 
 /**
  * Enqueues one geo.zone.upserted.v1 per zone in the outbox; the relay publishes them asynchronously.
+ *
+ * Requires a platform administrator (super_admin); other users and API keys get 403 PLATFORM_ADMIN_REQUIRED.
  * @summary Republish the snapshot of every zone to the GEO stream (super_admin)
  */
 export const useZonesControllerRepublish = <TError = ErrorType<ProblemDetails>, TContext = unknown>(
@@ -505,6 +511,95 @@ export const useZonesControllerRepublish = <TError = ErrorType<ProblemDetails>, 
   TContext
 > => {
   return useMutation(getZonesControllerRepublishMutationOptions(options), queryClient);
+};
+/**
+ * Dry run of the input rules of POST /zones (README steps 2-8), for editors while drawing: GeoJSON structure and WGS84 bounds, geometry type per kind, at most 50 000 vertices, bufferM > 0 for point zones, no edge across the antimeridian, properties of the kind, PostGIS ST_IsValidDetail. Nothing is stored or published. A broken rule answers 200 with valid=false and problem = the problem details POST /zones would answer (e.g. ZONE_GEOMETRY_INVALID with reason and location [lon, lat] of a self-intersection). Owner, quota, code, If-Match and snapshot size are checked by the write only. A malformed body (kind or geometry missing, bufferM out of range) answers 400 VALIDATION_FAILED.
+ * @summary Check a zone draft against the input rules without saving it
+ */
+export const zonesControllerValidate = (
+  validateZoneDto: BodyType<ValidateZoneDto>,
+  options?: SecondParameter<typeof apiClient>,
+  signal?: AbortSignal,
+) => {
+  return apiClient<ZoneValidationDto>(
+    {
+      url: `/api/v2/zones/validate`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      data: validateZoneDto,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getZonesControllerValidateMutationKey = () => ['zonesControllerValidate'] as const;
+
+export const getZonesControllerValidateMutationOptions = <
+  TError = ErrorType<ProblemDetails>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof zonesControllerValidate>>,
+    TError,
+    ZonesControllerValidateMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof apiClient>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof zonesControllerValidate>>,
+  TError,
+  ZonesControllerValidateMutationVariables,
+  TContext
+> => {
+  const mutationKey = getZonesControllerValidateMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof zonesControllerValidate>>,
+    ZonesControllerValidateMutationVariables
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return zonesControllerValidate(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ZonesControllerValidateMutationResult = NonNullable<
+  Awaited<ReturnType<typeof zonesControllerValidate>>
+>;
+export type ZonesControllerValidateMutationBody = BodyType<ValidateZoneDto>;
+export type ZonesControllerValidateMutationError = ErrorType<ProblemDetails>;
+export type ZonesControllerValidateMutationVariables = { data: BodyType<ValidateZoneDto> };
+
+/**
+ * Dry run of the input rules of POST /zones (README steps 2-8), for editors while drawing: GeoJSON structure and WGS84 bounds, geometry type per kind, at most 50 000 vertices, bufferM > 0 for point zones, no edge across the antimeridian, properties of the kind, PostGIS ST_IsValidDetail. Nothing is stored or published. A broken rule answers 200 with valid=false and problem = the problem details POST /zones would answer (e.g. ZONE_GEOMETRY_INVALID with reason and location [lon, lat] of a self-intersection). Owner, quota, code, If-Match and snapshot size are checked by the write only. A malformed body (kind or geometry missing, bufferM out of range) answers 400 VALIDATION_FAILED.
+ * @summary Check a zone draft against the input rules without saving it
+ */
+export const useZonesControllerValidate = <TError = ErrorType<ProblemDetails>, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof zonesControllerValidate>>,
+      TError,
+      ZonesControllerValidateMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof zonesControllerValidate>>,
+  TError,
+  ZonesControllerValidateMutationVariables,
+  TContext
+> => {
+  return useMutation(getZonesControllerValidateMutationOptions(options), queryClient);
 };
 /**
  * @summary Get a zone with its geometry
