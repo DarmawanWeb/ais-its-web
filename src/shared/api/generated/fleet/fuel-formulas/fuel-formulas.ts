@@ -588,7 +588,7 @@ export const useFuelFormulasControllerRemove = <
   return useMutation(getFuelFormulasControllerRemoveMutationOptions(options), queryClient);
 };
 /**
- * The grammar the service stores formulas with (contracts validateFuelFormula: numbers, speedKnot, + - * / ** ^, parentheses, exp, log/ln, sqrt, pow, abs, min, max; at most 500 characters, depth 32). Always 200 with { valid, problem }: the first problem with a stable code, its position and token. Nothing is stored. Clients on contracts >= 0.4 can run validateFuelFormula locally instead.
+ * The grammar the service stores formulas with (contracts validateFuelFormula: numbers, speedKnot, + - * / ** ^, parentheses, exp, log/ln, sqrt, pow, abs, min, max; at most 500 characters, depth 32). The formula is checked as POST and PATCH store it, without surrounding whitespace; positions refer to the text as sent. Always 200 with { valid, problem }: the first problem with a stable code, its position and token. Nothing is stored. Clients on contracts >= 0.4 can run validateFuelFormula locally instead.
  * @summary Check a formula against the safe grammar
  */
 export const fuelFormulasControllerValidate = (
@@ -657,7 +657,7 @@ export type FuelFormulasControllerValidateMutationVariables = {
 };
 
 /**
- * The grammar the service stores formulas with (contracts validateFuelFormula: numbers, speedKnot, + - * / ** ^, parentheses, exp, log/ln, sqrt, pow, abs, min, max; at most 500 characters, depth 32). Always 200 with { valid, problem }: the first problem with a stable code, its position and token. Nothing is stored. Clients on contracts >= 0.4 can run validateFuelFormula locally instead.
+ * The grammar the service stores formulas with (contracts validateFuelFormula: numbers, speedKnot, + - * / ** ^, parentheses, exp, log/ln, sqrt, pow, abs, min, max; at most 500 characters, depth 32). The formula is checked as POST and PATCH store it, without surrounding whitespace; positions refer to the text as sent. Always 200 with { valid, problem }: the first problem with a stable code, its position and token. Nothing is stored. Clients on contracts >= 0.4 can run validateFuelFormula locally instead.
  * @summary Check a formula against the safe grammar
  */
 export const useFuelFormulasControllerValidate = <

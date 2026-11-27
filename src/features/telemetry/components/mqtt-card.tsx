@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs';
 
 import { devicePayloadJsonSchema, examplePayload } from '../lib/mqtt';
 import { nowMs } from '@/shared/lib/clock';
-import { CopyText } from './copy-text';
+import { CopyText } from '@/shared/ui/copy-text';
 
 /**
  * How fuel meters report: MQTT topic `aisits/telemetry/<deviceId>` (NATS MQTT gateway) with the

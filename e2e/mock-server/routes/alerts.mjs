@@ -377,6 +377,101 @@ export const routes = [
   },
   {
     method: 'GET',
+    path: '/api/v2/alerts/:id/occurrences',
+    permission: 'alert:read',
+    handler: ({ params, url, send }) => {
+      const alert = findAlert(params.id);
+      const count = Math.max(1, alert.occurrences ?? 1);
+      const first = Date.parse(alert.occurredAt);
+      const last = Date.parse(alert.lastOccurredAt ?? alert.occurredAt);
+      const step = count > 1 ? (last - first) / (count - 1) : 0;
+      // Newest first: the repeats (merged) and the raise that opened the alert.
+      const items = Array.from({ length: count }, (_, index) => {
+        const at = new Date(last - index * step).toISOString();
+        const raised = index === count - 1;
+        return {
+          eventId: raised ? alert.id : `${alert.id.slice(0, 24)}${String(index).padStart(12, '0')}`,
+          occurredAt: at,
+          outcome: raised ? 'raised' : 'merged',
+          severity: alert.severity,
+          title: alert.title,
+          message: alert.message,
+          messageKey: null,
+          messageParams: null,
+          lat: alert.lat ?? null,
+          lon: alert.lon ?? null,
+          relatedMmsi: alert.relatedMmsi ?? null,
+          zoneId: alert.zoneId ?? null,
+          methodId: alert.methodId,
+          data: alert.data ?? {},
+          receivedAt: at,
+        };
+      });
+      send(200, cursorPageOf(items, url));
+    },
+  },
+  {
+    method: 'GET',
+    path: '/api/v2/alerts/export.csv',
+    permission: 'alert:read',
+    handler: ({ req, url, send }) => {
+      const q = url.searchParams;
+      const mmsi = q.get('mmsi') ? Number(q.get('mmsi')) : null;
+      const from = q.get('from') ? Date.parse(q.get('from')) : null;
+      const to = q.get('to') ? Date.parse(q.get('to')) : null;
+      const items = alerts
+        .filter(
+          (a) =>
+            (!q.get('status') || a.status === q.get('status')) &&
+            (!q.get('type') || a.type === q.get('type')) &&
+            (!q.get('domain') || a.domain === q.get('domain')) &&
+            (!q.get('severity') || a.severity === q.get('severity')) &&
+            (mmsi === null || a.mmsi === mmsi || a.relatedMmsi === mmsi) &&
+            (from === null || Date.parse(a.occurredAt) >= from) &&
+            (to === null || Date.parse(a.occurredAt) <= to),
+        )
+        .sort((a, b) => b.occurredAt.localeCompare(a.occurredAt));
+      const english = /^en\b/i.test(req.headers['accept-language'] ?? '');
+      const columns = [
+        ['id', 'ID', 'ID'],
+        ['occurredAt', 'Pertama terjadi', 'First occurred'],
+        ['lastOccurredAt', 'Terakhir terjadi', 'Last occurred'],
+        ['type', 'Tipe', 'Type'],
+        ['domain', 'Domain', 'Domain'],
+        ['severity', 'Tingkat', 'Severity'],
+        ['status', 'Status', 'Status'],
+        ['mmsi', 'MMSI', 'MMSI'],
+        ['relatedMmsi', 'MMSI terkait', 'Related MMSI'],
+        ['title', 'Judul', 'Title'],
+        ['message', 'Pesan', 'Message'],
+      ];
+      const cell = (value) => {
+        const text = value === null || value === undefined ? '' : String(value);
+        const safe = /^[=+\-@]/.test(text) ? `'${text}` : text;
+        return /[",\r\n]/.test(safe) ? `"${safe.replaceAll('"', '""')}"` : safe;
+      };
+      const lines = [
+        columns.map(([, id, en]) => (english ? en : id)).join(','),
+        ...items.map((a) => columns.map(([key]) => cell(a[key])).join(',')),
+      ];
+      const stamp = new Date().toISOString().replace(/[-:]/g, '').slice(0, 13).replace('T', '-');
+      send(200, `${lines.join('\r\n')}\r\n`, {
+        'Content-Type': 'text/csv; charset=utf-8',
+        'Content-Disposition': `attachment; filename="alerts-${stamp}.csv"`,
+        'Content-Language': english ? 'en' : 'id',
+        'X-Truncated': 'false',
+        'Access-Control-Expose-Headers': 'Content-Disposition, Content-Language, X-Truncated',
+      });
+    },
+  },
+  {
+    method: 'GET',
+    path: '/api/v2/alerts/stats/series',
+    permission: 'alert:read',
+    handler: ({ url, send }) => send(200, alertSeries(alerts, url)),
+  },
+  {
+    method: 'GET',
     path: '/api/v2/alerts/summary',
     permission: 'alert:read',
     handler: ({ send }) => {
@@ -483,3 +578,66 @@ export const routes = [
     },
   },
 ];
+
+const SERIES_KEYS = {
+  severity: ['info', 'warning', 'critical'],
+  domain: ['safety', 'surveillance'],
+  type: ['ews', 'collision', 'transhipment', 'anomaly', 'dark', 'geofence', 'fishing'],
+};
+
+/** Offset (ms) of an IANA time zone from UTC at an instant (whole minutes). */
+function zoneOffset(timeZone, at) {
+  const local = new Date(new Date(at).toLocaleString('en-US', { timeZone }));
+  const utc = new Date(new Date(at).toLocaleString('en-US', { timeZone: 'UTC' }));
+  return local.getTime() - utc.getTime();
+}
+
+/** `GET /alerts/stats/series`: alerts per bucket by first occurrence, local to `tz`. */
+function alertSeries(items, url) {
+  const q = url.searchParams;
+  const bucket = q.get('bucket') ?? '1d';
+  const groupBy = q.get('groupBy') ?? 'severity';
+  const timeZone = q.get('tz') ?? 'UTC';
+  const size = bucket === '1h' ? 3_600_000 : 86_400_000;
+  if (!SERIES_KEYS[groupBy] || !['1h', '1d'].includes(bucket)) {
+    throw new MockHttpError(400, 'VALIDATION_FAILED', 'Validation failed', {
+      errors: [{ field: SERIES_KEYS[groupBy] ? 'bucket' : 'groupBy', message: 'invalid value' }],
+    });
+  }
+  const to = q.get('to') ? Date.parse(q.get('to')) : Date.now();
+  const from = q.get('from') ? Date.parse(q.get('from')) : to - 7 * 86_400_000;
+  const offset = zoneOffset(timeZone, from);
+  const floor = (time) => Math.floor((time + offset) / size) * size - offset;
+  const keys = SERIES_KEYS[groupBy];
+  const buckets = [];
+  for (let start = floor(from); start < to; start += size) {
+    const end = start + size;
+    const inBucket = items.filter((a) => {
+      const at = Date.parse(a.occurredAt);
+      return (
+        at >= Math.max(start, from) &&
+        at < Math.min(end, to) &&
+        (!q.get('status') || a.status === q.get('status')) &&
+        (!q.get('domain') || a.domain === q.get('domain')) &&
+        (!q.get('type') || a.type === q.get('type'))
+      );
+    });
+    buckets.push({
+      from: new Date(start).toISOString(),
+      to: new Date(end).toISOString(),
+      total: inBucket.length,
+      counts: Object.fromEntries(
+        keys.map((key) => [key, inBucket.filter((a) => a[groupBy] === key).length]),
+      ),
+    });
+  }
+  return {
+    from: new Date(from).toISOString(),
+    to: new Date(to).toISOString(),
+    bucket,
+    groupBy,
+    timeZone,
+    keys,
+    buckets,
+  };
+}

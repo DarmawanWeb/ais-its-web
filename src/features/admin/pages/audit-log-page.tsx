@@ -3,13 +3,15 @@ import { Download, Filter, ScrollText, X } from 'lucide-react';
 import { useId, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { downloadServerFile } from '@/shared/api/download';
 import type { AuditLogDto } from '@/shared/api/generated/auth/model';
+import { problemMessage } from '@/shared/api/problem-copy';
 import { DataTable, useCursorState } from '@/shared/domain-ui/data-table';
 import { EmptyState } from '@/shared/domain-ui/feedback';
 import { PageHeader } from '@/shared/domain-ui/page-header';
 import { useDebouncedValue } from '@/shared/hooks/use-debounced-value';
-import { downloadCsv } from '@/shared/lib/csv';
 import { formatDateTime, formatRelativeTime } from '@/shared/lib/format';
+import { cn } from '@/shared/lib/utils';
 import { Button } from '@/shared/ui/button';
 import {
   DateRangePicker,
@@ -19,8 +21,9 @@ import {
 } from '@/shared/ui/date-range-picker';
 import { Input } from '@/shared/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select';
+import { toast } from '@/shared/ui/sonner';
 
-import { useAllMembers, useAuditLogs, useUserDirectory } from '../api/auth-admin';
+import { useAllMembers, useAuditActions, useAuditLogs } from '../api/auth-admin';
 import { OrgContextPicker } from '../components/common';
 import { ActionBadge, AuditDetailSheet } from '../components/audit-detail-sheet';
 import { useOrgContext } from '../hooks/use-org-context';
@@ -43,24 +46,32 @@ export function AuditLogPage() {
   const debouncedAction = useDebouncedValue(action.trim(), 350);
   const debouncedTarget = useDebouncedValue(targetId.trim(), 350);
   const members = useAllMembers(context.orgId);
-  // Platform administrators read every organization: the user directory names every actor.
-  const directory = useUserDirectory({
-    page: 1,
-    pageSize: 100,
-    enabled: context.isPlatformAdmin,
-  });
-  const memberNames = useMemo(() => {
-    const names = new Map<string, string>();
-    for (const user of directory.data?.data ?? []) names.set(user.id, user.name || user.email);
-    for (const member of members.data?.data ?? [])
-      names.set(member.userId, member.name || member.email);
-    return names;
-  }, [members.data, directory.data]);
-  const orgNames = useMemo(
-    () => new Map(context.options.map((org) => [org.id, org.name])),
-    [context.options],
+  // Names captured by the auth service with each record (actorName, orgName, targetLabel);
+  // the members list only fills in records stored before auth 0.2.
+  const memberNames = useMemo(
+    () => new Map((members.data?.data ?? []).map((m) => [m.userId, m.name || m.email] as const)),
+    [members.data],
   );
   const { from, to } = toIsoRange(range);
+  const scopeOrg = context.isPlatformAdmin && context.orgId ? { orgId: context.orgId } : {};
+  const actions = useAuditActions({
+    ...(from ? { from } : {}),
+    ...(to ? { to } : {}),
+    ...scopeOrg,
+  });
+  const suggestions = useMemo(() => {
+    const recorded = (actions.data?.data ?? []).map((item) => item.action);
+    return [...new Set([...recorded, ...KNOWN_AUDIT_ACTIONS])];
+  }, [actions.data]);
+  const filters = {
+    ...(from ? { from } : {}),
+    ...(to ? { to } : {}),
+    ...(actor !== ANY ? { actorId: actor } : {}),
+    ...(debouncedAction ? { action: debouncedAction } : {}),
+    ...(targetType !== ANY ? { targetType } : {}),
+    ...(debouncedTarget ? { targetId: debouncedTarget } : {}),
+    ...scopeOrg,
+  };
   const logs = useAuditLogs({
     ...(from ? { from } : {}),
     ...(to ? { to } : {}),
@@ -80,7 +91,7 @@ export function AuditLogPage() {
     };
   const filtered = actor !== ANY || action !== '' || targetType !== ANY || targetId !== '';
   const actorName = (record: AuditLogDto) =>
-    record.actorId ? (memberNames.get(record.actorId) ?? null) : null;
+    record.actorName ?? (record.actorId ? (memberNames.get(record.actorId) ?? null) : null);
 
   const columns = useMemo<ColumnDef<AuditLogDto>[]>(
     () => [
@@ -103,14 +114,14 @@ export function AuditLogPage() {
         id: 'actor',
         header: t('auditLog.columns.actor'),
         cell: ({ row }) => {
-          const name = row.original.actorId ? memberNames.get(row.original.actorId) : undefined;
+          const record = row.original;
+          const name =
+            record.actorName ?? (record.actorId ? memberNames.get(record.actorId) : undefined);
           return (
             <div className="min-w-0">
-              <p className="truncate">
-                {name ?? t(`auditLog.actorTypes.${row.original.actorType}`)}
-              </p>
+              <p className="truncate">{name ?? t(`auditLog.actorTypes.${record.actorType}`)}</p>
               <p className="truncate font-mono text-[11px] text-muted-foreground">
-                {shortId(row.original.actorId)}
+                {record.actorEmail ?? shortId(record.actorId)}
               </p>
             </div>
           );
@@ -132,8 +143,13 @@ export function AuditLogPage() {
                   defaultValue: row.original.targetType,
                 })}
               </p>
-              <p className="truncate font-mono text-[11px] text-muted-foreground">
-                {shortId(row.original.targetId)}
+              <p
+                className={cn(
+                  'truncate text-[11px] text-muted-foreground',
+                  !row.original.targetLabel && 'font-mono',
+                )}
+              >
+                {row.original.targetLabel ?? shortId(row.original.targetId)}
               </p>
             </div>
           ) : (
@@ -154,23 +170,22 @@ export function AuditLogPage() {
     [t, i18n.language, memberNames],
   );
 
-  const exportCsv = () =>
-    downloadCsv(
-      `audit-log-${new Date().toISOString().slice(0, 10)}.csv`,
-      (logs.data?.data ?? []).map((record) => ({
-        at: record.at,
-        actorType: record.actorType,
-        actorId: record.actorId ?? '',
-        actor: actorName(record) ?? '',
-        action: record.action,
-        targetType: record.targetType ?? '',
-        targetId: record.targetId ?? '',
-        orgId: record.orgId ?? '',
-        source: record.source,
-        ip: record.ip ?? '',
-        meta: JSON.stringify(record.meta),
-      })),
-    );
+  const [exporting, setExporting] = useState(false);
+  /** Every record of the filters as one streamed file (`GET /audit-logs.csv`). */
+  const exportCsv = async () => {
+    setExporting(true);
+    try {
+      await downloadServerFile(
+        '/api/v2/audit-logs.csv',
+        filters,
+        `audit-log-${new Date().toISOString().slice(0, 10)}.csv`,
+      );
+    } catch (error) {
+      toast.error(t('auditLog.exportFailed'), { description: problemMessage(t, error) });
+    } finally {
+      setExporting(false);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -184,8 +199,8 @@ export function AuditLogPage() {
             <OrgContextPicker context={context} allowAll />
             <Button
               variant="outline"
-              onClick={exportCsv}
-              disabled={(logs.data?.data.length ?? 0) === 0}
+              onClick={() => void exportCsv()}
+              disabled={exporting || (logs.data?.data.length ?? 0) === 0}
             >
               <Download /> {t('common:actions.exportCsv')}
             </Button>
@@ -260,7 +275,7 @@ export function AuditLogPage() {
               spellCheck={false}
             />
             <datalist id={actionsListId}>
-              {KNOWN_AUDIT_ACTIONS.map((value) => (
+              {suggestions.map((value) => (
                 <option key={value} value={value}>
                   {t(actionKey(value), { defaultValue: value })}
                 </option>
@@ -334,7 +349,8 @@ export function AuditLogPage() {
         actorName={selected ? actorName(selected) : null}
         orgName={
           selected?.orgId
-            ? (orgNames.get(selected.orgId) ??
+            ? (selected.orgName ??
+              context.options.find((org) => org.id === selected.orgId)?.name ??
               (selected.orgId === context.orgId ? context.orgName : null))
             : null
         }

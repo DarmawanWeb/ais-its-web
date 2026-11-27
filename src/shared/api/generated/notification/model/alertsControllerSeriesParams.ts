@@ -22,7 +22,7 @@ export type AlertsControllerSeriesParams = {
   severity?: AlertsControllerSeriesSeverity;
   /** Vessel or related vessel */
   mmsi?: number;
-  /** Bucket size (at most 1000 buckets per request) */
+  /** Bucket size (at most 1000 buckets per request, counted after clipping the first and last to the range; more: `400 VALIDATION_FAILED`) */
   bucket?: AlertsControllerSeriesBucket;
   /** Dimension of the counts */
   groupBy?: AlertsControllerSeriesGroupBy;

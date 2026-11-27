@@ -3,7 +3,7 @@
 // hook records the positions as the latest known state (sent on `vessel:subscribe`); with
 // MOCK_REALTIME_SIMULATE=true the vessels also move (30x time-lapse) and stream `positions`
 // batches every second — handy with `pnpm dev`, off in e2e runs so maps stay deterministic.
-import { nowIso, vesselId, VESSELS } from '../lib.mjs';
+import { MockHttpError, nowIso, vesselId, VESSELS } from '../lib.mjs';
 
 const SIMULATE = process.env.MOCK_REALTIME_SIMULATE === 'true';
 const TIME_LAPSE = 30;
@@ -71,9 +71,12 @@ export const routes = [
     handler: ({ url, send }) => {
       const bbox = bboxOf(url);
       const limit = Number(url.searchParams.get('limit') ?? 10_000);
+      // `mmsi=a,b,c`: batch lookup of up to 100 vessels ("last seen" of the fleet list).
+      const only = url.searchParams.get('mmsi')?.split(',').map(Number) ?? null;
       const inside = latestPositions().filter(
-        ({ lat, lon }) =>
-          !bbox || (lon >= bbox[0] && lat >= bbox[1] && lon <= bbox[2] && lat <= bbox[3]),
+        ({ lat, lon, mmsi }) =>
+          (!only || only.includes(mmsi)) &&
+          (!bbox || (lon >= bbox[0] && lat >= bbox[1] && lon <= bbox[2] && lat <= bbox[3])),
       );
       send(200, inside.slice(0, limit), inside.length > limit ? { 'X-Truncated': 'true' } : {});
     },
@@ -93,6 +96,12 @@ export const routes = [
   },
   {
     method: 'GET',
+    path: '/api/v2/ais/stats/series',
+    permission: 'ais:read',
+    handler: ({ url, send }) => send(200, trafficSeries(url)),
+  },
+  {
+    method: 'GET',
     path: '/api/v2/ais/stats',
     handler: ({ send }) =>
       send(200, {
@@ -108,3 +117,47 @@ export const routes = [
       }),
   },
 ];
+
+const BUCKET_MINUTES = { '1m': 1, '5m': 5, '1h': 60 };
+
+/** `GET /ais/stats/series`: deterministic traffic around the current rates (84 + 44 per minute). */
+function trafficSeries(url) {
+  const q = url.searchParams;
+  const bucket = q.get('bucket') ?? '5m';
+  const minutes = BUCKET_MINUTES[bucket];
+  if (!minutes) {
+    throw new MockHttpError(400, 'VALIDATION_FAILED', 'Validation failed', {
+      errors: [{ field: 'bucket', message: 'bucket must be one of 1m, 5m, 1h' }],
+    });
+  }
+  const size = minutes * 60_000;
+  const to = q.get('to') ? Date.parse(q.get('to')) : Date.now();
+  const from = q.get('from') ? Date.parse(q.get('from')) : to - 24 * 60 * 60_000;
+  const first = Math.floor(from / size) * size;
+  const points = [];
+  for (let at = first; at < to; at += size) {
+    const wave = 1 + 0.18 * Math.sin(at / 3_600_000) + 0.06 * Math.sin(at / 420_000);
+    const samples = Math.max(1, Math.min(minutes, Math.ceil((to - at) / 60_000)));
+    const primary = Math.round(84 * wave * samples);
+    const batam = Math.round(44 * (2 - wave) * samples);
+    points.push({
+      at: new Date(at).toISOString(),
+      samples,
+      messages: primary + batam,
+      activeVessels: VESSELS.length,
+      bySource: {
+        primary: { messages: primary, activeVessels: 9 },
+        batam: { messages: batam, activeVessels: 5 },
+        pusher: { messages: 0, activeVessels: 0 },
+      },
+    });
+  }
+  return {
+    from: new Date(first).toISOString(),
+    to: new Date(to).toISOString(),
+    bucket,
+    bucketMinutes: minutes,
+    activeWindowMinutes: 30,
+    points,
+  };
+}

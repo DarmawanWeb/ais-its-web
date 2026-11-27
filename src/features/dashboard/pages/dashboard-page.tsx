@@ -15,11 +15,16 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 
-import { getCiiControllerFleetSummaryQueryKey } from '@/shared/api/generated/emission/cii/cii';
+import {
+  getCiiControllerFleetFuelQueryKey,
+  getCiiControllerFleetSummaryQueryKey,
+} from '@/shared/api/generated/emission/cii/cii';
 import {
   getAlertsControllerListQueryKey,
+  getAlertsControllerSeriesQueryKey,
   getAlertsControllerSummaryQueryKey,
 } from '@/shared/api/generated/notification/alerts/alerts';
+import { getSafetyStatsControllerStatsQueryKey } from '@/shared/api/generated/safety/stats/stats';
 import { getVesselStatesControllerListQueryKey } from '@/shared/api/generated/safety/vessels/vessels';
 import { getStatisticsControllerStatsQueryKey } from '@/shared/api/generated/surveillance/statistics/statistics';
 import { usePermission } from '@/shared/auth/hooks';
@@ -36,15 +41,14 @@ import { Button } from '@/shared/ui/button';
 import { Skeleton } from '@/shared/ui/skeleton';
 
 import {
-  FUEL_MAX_VESSELS,
-  fuelOf,
   useAisStats,
   useAlertSummary,
-  useAlertWindow,
-  useEwsStates,
+  useAlertSeries,
+  useEwsDangerVessels,
   useFleetCii,
   useFleetFuel,
-  useRateHistory,
+  useRateSeries,
+  useSafetyStats,
   useRecentAlerts,
   useSurveillance24h,
 } from '../api/dashboard';
@@ -54,7 +58,7 @@ import { RateChart } from '../components/rate-chart';
 import { RecentAlerts } from '../components/recent-alerts';
 import { SurveillanceBreakdown } from '../components/surveillance-card';
 import { useNow } from '@/shared/hooks/use-now';
-import { alertTimeline, ewsCounts } from '../lib/dashboard';
+import { alertSeriesRows } from '../lib/dashboard';
 import { currentYear } from '@/shared/lib/clock';
 
 const FleetMap = lazy(() =>
@@ -95,22 +99,25 @@ export function DashboardPage() {
   const year = currentYear();
 
   const stats = useAisStats(can.ais);
-  const history = useRateHistory(stats.data, stats.dataUpdatedAt);
+  const rateSeries = useRateSeries(can.ais, anchor);
   const summary = useAlertSummary(can.alerts);
-  const window7d = useAlertWindow(can.alerts, anchor);
+  const window7d = useAlertSeries(can.alerts, anchor);
   const recent = useRecentAlerts(can.alerts);
-  const ews = useEwsStates(can.safety);
+  const ews = useSafetyStats(can.safety);
+  const dangerVessels = useEwsDangerVessels(can.safety && (ews.data?.ews.danger ?? 0) > 0);
   const surveillance = useSurveillance24h(can.surveillance, anchor);
   const cii = useFleetCii(can.cii, year);
-  const fuel = useFleetFuel(can.cii, cii.data?.items ?? [], year);
+  const fuel = useFleetFuel(can.cii, year);
 
   const [newAlerts, setNewAlerts] = useState(0);
   useAlertStream((alert, kind) => {
     if (kind === 'raised') setNewAlerts((count) => count + 1);
     void queryClient.invalidateQueries({ queryKey: getAlertsControllerSummaryQueryKey() });
     void queryClient.invalidateQueries({ queryKey: getAlertsControllerListQueryKey() });
+    void queryClient.invalidateQueries({ queryKey: getAlertsControllerSeriesQueryKey() });
     // The counters of the alert's domain follow at once instead of at their next refresh.
     if (alert.type === 'ews') {
+      void queryClient.invalidateQueries({ queryKey: getSafetyStatsControllerStatsQueryKey() });
       void queryClient.invalidateQueries({ queryKey: getVesselStatesControllerListQueryKey() });
     } else if (alert.domain === 'surveillance') {
       void queryClient.invalidateQueries({ queryKey: getStatisticsControllerStatsQueryKey() });
@@ -118,14 +125,21 @@ export function DashboardPage() {
   });
   useCiiUpdates(() => {
     void queryClient.invalidateQueries({ queryKey: getCiiControllerFleetSummaryQueryKey() });
+    void queryClient.invalidateQueries({ queryKey: getCiiControllerFleetFuelQueryKey() });
   });
 
   const timeline = useMemo(
-    () => alertTimeline(window7d.data?.data ?? [], anchor),
-    [window7d.data, anchor],
+    () => (window7d.data ? alertSeriesRows(window7d.data) : []),
+    [window7d.data],
   );
-  const ewsCount = useMemo(() => ewsCounts(ews.data ?? []), [ews.data]);
-  const fuelTotals = fuelOf(fuel.points, anchor);
+  const ewsCount = {
+    danger: ews.data?.ews.danger ?? 0,
+    warning: ews.data?.ews.warning ?? 0,
+    dangerVessels: (dangerVessels.data ?? []).map((state) => ({
+      mmsi: state.mmsi,
+      name: state.vessel?.name ?? String(state.mmsi),
+    })),
+  };
   const lastUpdated = Math.max(stats.dataUpdatedAt, summary.dataUpdatedAt, ews.dataUpdatedAt);
 
   const refresh = () => {
@@ -332,11 +346,6 @@ export function DashboardPage() {
               ) : (
                 <>
                   <AlertsTimelineChart rows={timeline} />
-                  {window7d.data.page.nextCursor && (
-                    <p className="mt-2 text-xs text-muted-foreground">
-                      {t('alertsChart.truncated')}
-                    </p>
-                  )}
                 </>
               )}
             </Section>
@@ -426,14 +435,17 @@ export function DashboardPage() {
               ) : (
                 <EmissionsCard
                   summary={cii.data}
-                  fuel={{
-                    ...fuelTotals,
-                    pending: fuel.pending,
-                    vessels: fuel.vessels,
-                    truncated:
-                      cii.data.items.filter((item) => item.grade !== null).length >
-                      FUEL_MAX_VESSELS,
-                  }}
+                  fuel={
+                    fuel.data
+                      ? {
+                          month: fuel.data.month.totalFuelTon,
+                          year: fuel.data.year.totalFuelTon,
+                          pending: false,
+                          vessels: fuel.data.year.vesselsWithData,
+                        }
+                      : { month: 0, year: 0, pending: fuel.isPending, vessels: 0 }
+                  }
+                  fuelError={fuel.error}
                 />
               )}
             </Section>
@@ -454,7 +466,11 @@ export function DashboardPage() {
               ) : stats.error ? (
                 <ErrorState error={stats.error} onRetry={() => void stats.refetch()} size="sm" />
               ) : (
-                <RateChart stats={stats.data} history={history} />
+                <RateChart
+                  stats={stats.data}
+                  history={rateSeries.data ?? []}
+                  pending={rateSeries.isPending}
+                />
               )}
             </Section>
           )}

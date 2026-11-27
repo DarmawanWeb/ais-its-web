@@ -28,8 +28,8 @@ export interface TimeBucket {
 /**
  * Splits `[from, to)` into at most `maxBuckets` aligned buckets (hour sizes align to UTC hours,
  * day sizes to UTC midnight). The first bucket starts at `from`, the last ends at `to`, so the
- * buckets cover the range exactly. Used to query `GET /surveillance/stats` per bucket (the
- * service has no time-series endpoint yet).
+ * buckets cover the range exactly. The overview shows them as the chart's time axis while
+ * `GET /surveillance/stats/series` loads.
  */
 export function buildBuckets(from: Date, to: Date, maxBuckets = 14): TimeBucket[] {
   const start = from.getTime();

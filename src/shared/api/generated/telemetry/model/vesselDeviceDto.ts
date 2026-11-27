@@ -16,7 +16,7 @@ export interface VesselDeviceDto {
   /** Registry status: readings of inactive devices are rejected */
   status: VesselDeviceDtoStatus;
   /**
-   * Last reading received from the device (updated at most once a minute)
+   * When the device last delivered readings (receipt time, minute resolution)
    * @nullable
    */
   lastSeenAt: string | null;

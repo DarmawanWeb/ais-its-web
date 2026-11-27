@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Auth Service
  * Identity, organizations, memberships and roles, sessions, JWT signing keys and JWKS, API keys, MFA and the central audit log
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import { useMutation, useQuery } from '@tanstack/react-query';
 import type {
@@ -155,6 +155,7 @@ export function useJwksControllerJwks<
 }
 
 /**
+ * Requires a platform administrator (super_admin); other users and API keys get 403 PLATFORM_ADMIN_REQUIRED.
  * @summary Rotate the signing key (super_admin): the active key becomes retiring
  */
 export const keysControllerRotate = (
@@ -209,7 +210,10 @@ export type KeysControllerRotateMutationResult = NonNullable<
 
 export type KeysControllerRotateMutationError = ErrorType<ProblemDetails>;
 
-/** @summary Rotate the signing key (super_admin): the active key becomes retiring */
+/**
+ * Requires a platform administrator (super_admin); other users and API keys get 403 PLATFORM_ADMIN_REQUIRED.
+ * @summary Rotate the signing key (super_admin): the active key becomes retiring
+ */
 export const useKeysControllerRotate = <TError = ErrorType<ProblemDetails>, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<

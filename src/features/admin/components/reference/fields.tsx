@@ -17,7 +17,13 @@ import { Input } from '@/shared/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select';
 import { Textarea } from '@/shared/ui/textarea';
 
-import { checkFormula, PREVIEW_SPEEDS, previewFormula } from '../../lib/fuel-formula';
+import {
+  checkFuelFormula,
+  FUEL_FORMULA_PREVIEW_SPEEDS as PREVIEW_SPEEDS,
+  previewFuelFormula,
+} from '@/shared/lib/fuel-formula';
+
+import { formulaProblemMessage } from '../../lib/formula-messages';
 
 interface FieldProps<T extends FieldValues> {
   control: Control<T>;
@@ -182,8 +188,8 @@ export function FormulaField<T extends FieldValues>({
       name={name}
       render={({ field, fieldState }) => {
         const source = (field.value as string | undefined) ?? '';
-        const check = source ? checkFormula(source) : null;
-        const preview = check?.valid ? previewFormula(source) : null;
+        const check = source ? checkFuelFormula(source) : null;
+        const preview = check?.valid ? previewFuelFormula(source) : null;
         return (
           <FormItem className={className}>
             <FormLabel>{label}</FormLabel>
@@ -203,17 +209,12 @@ export function FormulaField<T extends FieldValues>({
               <div className="space-y-1 text-xs text-danger" role="status">
                 <p className="flex items-center gap-1.5">
                   <CircleAlert className="size-3.5 shrink-0" aria-hidden />
-                  {t(`formula.problems.${check.problem.code}`, {
-                    token: check.problem.token ?? '',
-                    position: check.problem.position + 1,
-                    expected: check.problem.expected ?? 0,
-                    actual: check.problem.actual ?? 0,
-                  })}
+                  {formulaProblemMessage(t, check.issue)}
                 </p>
                 <pre className="overflow-x-auto rounded border border-danger/30 bg-danger/5 px-2 py-1 font-mono">
                   {source}
                   {'\n'}
-                  {' '.repeat(Math.min(check.problem.position, source.length))}^
+                  {' '.repeat(Math.min(check.issue.position, source.length))}^
                 </pre>
               </div>
             )}

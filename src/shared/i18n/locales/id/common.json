@@ -110,7 +110,8 @@
     "clear": "Bersihkan",
     "continue": "Lanjutkan",
     "goHome": "Ke beranda",
-    "learnMore": "Pelajari lebih lanjut"
+    "learnMore": "Pelajari lebih lanjut",
+    "copyValue": "Salin {{label}}"
   },
   "status": {
     "loading": "Memuat…",
@@ -187,7 +188,8 @@
       "percent": "%",
       "deg": "°",
       "gkwh": "g/kWh"
-    }
+    },
+    "ciiGradeNone": "Belum ada peringkat CII"
   },
   "method": {
     "trigger": "Sumber metode: {{name}}",

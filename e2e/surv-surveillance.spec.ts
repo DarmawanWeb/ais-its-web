@@ -27,9 +27,7 @@ test.describe('surveillance', () => {
     await expect(page.getByText('Antrean kandidat transhipment')).toBeVisible();
     await expect(page.getByRole('figure', { name: /Jumlah kejadian per jenis/ })).toBeVisible();
     // the overview entry is the only active link (sidebar and section navigation)
-    await expect(
-      page.locator('a[aria-current="page"]:not([href="/surveillance"])'),
-    ).toHaveCount(0);
+    await expect(page.locator('a[aria-current="page"]:not([href="/surveillance"])')).toHaveCount(0);
     await expect(
       page.locator('a[aria-current="page"][href="/surveillance"]').first(),
     ).toBeVisible();

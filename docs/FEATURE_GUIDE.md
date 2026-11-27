@@ -199,6 +199,12 @@ pagination={…} />` (see `src/shared/domain-ui/data-table`). CSV export: `downl
    (`@/shared/lib/csv`).
 7. Tenancy: the cache is cleared on logout and reset when the user, the active organization or
    the roles change — do not keep tenant data in Zustand/localStorage.
+8. Prefer the services' aggregates over browser-side joins: time series (`/ais/stats/series`,
+   `/alerts/stats/series`, `/surveillance/stats/series`), counts (`/safety/stats`,
+   `/organizations/stats`, `/notifications/deliveries/summary`, `/cii/fleet/fuel`), batch lookups
+   (`/ais/latest?mmsi=a,b,c`, `/vessels?mmsi=…`, `/users?ids=…`), streamed exports (`*.csv`) and
+   identities embedded in records (`vessel`, `actorName`, `vesselName`). A request per table row
+   or a client-side loop over list pages is a missing endpoint: report it as an API gap.
 
 ## 5. Permissions and session
 
@@ -347,12 +353,28 @@ A slot component renders in every page of the shell: keep it light (no heavy que
   "+N" toggle, `label`, `nameOf` for names the catalog lacks), `DataAttribution`.
 - Small shared helpers: `CopyButton` (`@/shared/ui/copy-button`: icon button with tooltip, or
   a text button with `children`; check icon and "Disalin" feedback, optional `successMessage`
-  toast, failure toast), `DateRangePicker label` (prefixes the trigger's name as hidden text, so
-  the name contains the visible range — no `aria-label` wrappers), `gradeClassName(grade)`
-  (`@/shared/theme/grade`: grade background with the text colour that passes AA), `useNow(ms)`
-  (`@/shared/hooks/use-now`: a "now" that advances per interval, for stable time-window query
-  keys), `nowMs()` / `currentYear()` (`@/shared/lib/clock`, keeps components pure),
-  `useMethodName(serviceMethods?)` (`@/shared/methodology`).
+  toast, failure toast), `CopyText` (`@/shared/ui/copy-text`: a monospace value — topic, URL,
+  command, JSON — in a keyboard-reachable scrolling box with a copy button; `multiline`,
+  `showLabel`), `DateRangePicker label` (prefixes the trigger's name as hidden text, so
+  the name contains the visible range — no `aria-label` wrappers), `YearSelect`
+  (`@/shared/domain-ui/year-select`: labelled year picker, `autoLabel` adds an "automatic"
+  entry reported as `null`), `CiiGradeBadge size="sm"…"xl"` (the A–E chip everywhere, also the
+  headline grade), `gradeClassName(grade)` (`@/shared/theme/grade`: grade background with the
+  text colour that passes AA), `useEmissionFormat()` (`@/shared/hooks/use-emission-format`: CII
+  2 dp, rating 3 dp, Z, percentages, USD, dates), `useNow(ms)` (`@/shared/hooks/use-now`: a
+  "now" that advances per interval, for stable time-window query keys), `nowMs()` /
+  `currentYear()` (`@/shared/lib/clock`, keeps components pure), `useMethodName(serviceMethods?)`
+  (`@/shared/methodology`).
+- Files the services stream (CSV exports such as `GET /alerts/export.csv`,
+  `/audit-logs.csv`, `/telemetry/vessels/:mmsi/readings.csv`, `Accept: text/csv` reports):
+  `downloadServerFile(url, params, fallbackName)` (`@/shared/api/download`) goes through the
+  shared axios instance (token, refresh, `ApiProblem` errors) and saves the file under the
+  server's `Content-Disposition` name — do not page a list endpoint into a CSV in the browser
+  when the service offers an export. Client-built CSVs keep `downloadCsv()`.
+- First fuel formulas (`fuel.first_formula`): `checkFuelFormula`, `evaluateFuelFormula`,
+  `previewFuelFormula` (`@/shared/lib/fuel-formula`) run the contracts grammar the fleet
+  service validates with, and report the problem as a code (`issue.code`, `position`, `text`)
+  for translated messages; never write a local parser.
 - **Methodology (spec §17)**: put `<MethodInfo methodId="cii.attained_accumulation" />` next to every
   computed figure (CII attained/required/rating/grade, SEEMP recommendation, EWS status,
   CPA/TCPA, transhipment score, fuel method). Ids come from `docs/references/methods.json`;
@@ -383,6 +405,8 @@ A slot component renders in every page of the shell: keep it light (no heavy que
   router with a signed-in user (`session: null` = anonymous); `renderWithProviders(ui)` for a
   single component; `server.use(http.get('*/api/v2/...', () => HttpResponse.json(…)))` (MSW 2)
   to mock your endpoints — unknown `/api/v2/*` requests answer 404 problem details;
+  `problemResponse(status, code, title?, extra?)` (`@/test/msw/problem`) answers RFC 9457
+  problem details;
   `makeAccessToken()` builds test tokens. Type MSW fixtures with the generated DTOs
   (`satisfies VesselDetailDto`) so contract changes fail the typecheck.
 - Do not render `<MapView>` in jsdom (no WebGL): test layer factories (`createVesselLayers`
@@ -461,6 +485,9 @@ export function reset() {
 
 Handlers get `{ url, params, claims, user, body(), send, problem, realtime }` (push
 `alert:updated` from an acknowledge handler with `realtime.alert(alert, { kind: 'updated' })`).
+`send(status, object)` answers JSON; a string body with a `Content-Type` header is sent as is
+(CSV exports: `send(200, csv, { 'Content-Type': 'text/csv; charset=utf-8',
+'Content-Disposition': 'attachment; filename="…"' })`).
 In specs, `e2e/fixtures.ts` drives the mock: `resetMockGateway()` (in `beforeEach` when you
 change mock data — one gateway serves the whole run), `waitForRealtimeRoom(/^tile:/)`,
 `pushRealtime({ kind: 'positions' | 'safety:states' | 'alert' | 'cii:updated' | 'emit', … })`,

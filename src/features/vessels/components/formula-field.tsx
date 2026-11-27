@@ -39,7 +39,7 @@ import {
   checkFuelFormula,
   evaluateFuelFormula,
   FUEL_FORMULA_MAX_LENGTH,
-} from '../lib/fuel-formula';
+} from '@/shared/lib/fuel-formula';
 import { formulaIssueMessage } from '../lib/fuel-formula-messages';
 import { problemSummary } from '@/shared/api/problem-copy';
 import { fleetProblemCopies } from '../lib/problems';

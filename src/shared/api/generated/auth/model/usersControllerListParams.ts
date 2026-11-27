@@ -3,12 +3,15 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Auth Service
  * Identity, organizations, memberships and roles, sessions, JWT signing keys and JWKS, API keys, MFA and the central audit log
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import type { UsersControllerListStatus } from './usersControllerListStatus';
 
 export type UsersControllerListParams = {
-  /** @minimum 1 */
+  /**
+   * @minimum 1
+   * @maximum 1000000
+   */
   page?: number;
   /**
    * @minimum 1
@@ -18,4 +21,8 @@ export type UsersControllerListParams = {
   /** Case-insensitive substring of the e-mail or name */
   search?: string;
   status?: UsersControllerListStatus;
+  /** Only these users: comma-separated ids, at most 100 (with pageSize=100 one page holds them all); unknown ids are skipped */
+  ids?: string;
+  /** Only members of this organization */
+  orgId?: string;
 };

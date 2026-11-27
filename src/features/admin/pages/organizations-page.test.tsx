@@ -21,7 +21,23 @@ function mockOrganizations(organizations: OrganizationDto[] = ORGANIZATIONS) {
     updated: [] as UpdateOrganizationDto[],
   };
   server.use(
-    http.get('*/api/v2/organizations', () => HttpResponse.json(page(state.organizations))),
+    http.get('*/api/v2/organizations/stats', () => {
+      const count = (kind: string) => state.organizations.filter((o) => o.kind === kind).length;
+      return HttpResponse.json({
+        total: state.organizations.length,
+        byKind: {
+          shipping_company: count('shipping_company'),
+          authority: count('authority'),
+          platform: count('platform'),
+          research: count('research'),
+        },
+      });
+    }),
+    http.get('*/api/v2/organizations', () =>
+      HttpResponse.json(
+        page(state.organizations.map((o) => ({ ...o, memberCount: 2, apiKeyCount: 1 }))),
+      ),
+    ),
     http.post('*/api/v2/organizations', async ({ request }) => {
       const body = (await request.json()) as CreateOrganizationDto;
       state.created.push(body);

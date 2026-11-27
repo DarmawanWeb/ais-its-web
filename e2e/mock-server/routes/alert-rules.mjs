@@ -505,6 +505,45 @@ export const routes = [
   },
   {
     method: 'GET',
+    path: '/api/v2/notifications/deliveries/summary',
+    permission: 'alert_rule:write',
+    handler: ({ claims, url, send }) => {
+      const to = url.searchParams.get('to') ? Date.parse(url.searchParams.get('to')) : Date.now();
+      const from = url.searchParams.get('from')
+        ? Date.parse(url.searchParams.get('from'))
+        : to - 30 * 86_400_000;
+      const ruleId = url.searchParams.get('ruleId');
+      const ownRules = new Set(
+        rules.filter((rule) => isAdmin(claims) || rule.orgId === claims.org).map((rule) => rule.id),
+      );
+      const items = deliveries.filter((d) => {
+        const at = Date.parse(d.createdAt);
+        return ownRules.has(d.ruleId) && (!ruleId || d.ruleId === ruleId) && at >= from && at <= to;
+      });
+      const count = (status) => items.filter((d) => d.status === status).length;
+      const sent = count('sent');
+      const failed = count('failed');
+      const lastDeliveredAt =
+        items
+          .filter((d) => d.status === 'sent' && d.sentAt)
+          .map((d) => d.sentAt)
+          .sort()
+          .at(-1) ?? null;
+      send(200, {
+        from: new Date(from).toISOString(),
+        to: new Date(to).toISOString(),
+        sent,
+        failed,
+        pending: count('pending'),
+        queued: count('queued'),
+        total: items.length,
+        lastDeliveredAt,
+        successRate: sent + failed > 0 ? sent / (sent + failed) : null,
+      });
+    },
+  },
+  {
+    method: 'GET',
     path: '/api/v2/notifications/deliveries',
     permission: 'alert_rule:write',
     handler: ({ claims, url, send }) => {

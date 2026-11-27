@@ -661,6 +661,7 @@ const invitationOf = (row) => ({
   name: row.name,
   role: row.role,
   invitedBy: row.invitedBy,
+  invitedByName: users.find((u) => u.id === row.invitedBy)?.name ?? null,
   createdAt: row.createdAt,
   expiresAt: row.expiresAt,
   expired: Date.parse(row.expiresAt) < Date.now(),
@@ -674,7 +675,37 @@ const directoryOf = (u) => ({
     .map(({ orgId, role }) => ({ orgId, role })),
 });
 
-const keyOf = (key) => ({ ...key });
+const keyOf = (key) => ({
+  expiresAt: null,
+  rotatedAt: null,
+  previousKeyExpiresAt: null,
+  ...key,
+  status: key.revokedAt
+    ? 'revoked'
+    : key.expiresAt && Date.parse(key.expiresAt) <= Date.now()
+      ? 'expired'
+      : 'active',
+});
+
+/** Audit record with the names auth 0.2 captures (actorName, actorEmail, orgName, targetLabel). */
+const auditOf = (row) => {
+  const actor = row.actorType === 'user' ? users.find((u) => u.id === row.actorId) : null;
+  const key = row.actorType === 'api_key' ? apiKeys.find((k) => k.id === row.actorId) : null;
+  const targetUser = row.targetType === 'user' ? users.find((u) => u.id === row.targetId) : null;
+  const targetOrg =
+    row.targetType === 'organization' ? orgs.find((o) => o.id === row.targetId) : null;
+  return {
+    ...row,
+    actorName: row.actorName ?? actor?.name ?? key?.name ?? null,
+    actorEmail: row.actorEmail ?? actor?.email ?? null,
+    orgName: row.orgName ?? orgs.find((o) => o.id === row.orgId)?.name ?? null,
+    targetLabel:
+      row.targetLabel ??
+      (targetUser
+        ? `${targetUser.name} <${targetUser.email}>`
+        : (targetOrg?.name ?? row.meta?.targetLabel ?? row.meta?.name ?? null)),
+  };
+};
 
 function assertRole(org, role) {
   if (!ROLES.includes(role))
@@ -964,9 +995,52 @@ function auditName(resource) {
 
 // --- routes ---------------------------------------------------------------------------------
 
+/** Audit records of the listing filters (spec: exact action, actorEmail, actionPrefix). */
+function auditRows(claims, url, { ignoreAction = false } = {}) {
+  const q = url.searchParams;
+  const orgId = isSuper(claims) ? q.get('orgId') : claims.org;
+  const to = q.get('to') ? Date.parse(q.get('to')) : Date.now() + 60_000;
+  const from = q.get('from') ? Date.parse(q.get('from')) : to - 30 * 1440 * 60_000;
+  if (Number.isNaN(from) || Number.isNaN(to) || from >= to) {
+    throw invalid([{ field: 'from', code: 'isBefore', message: 'from must be before to' }]);
+  }
+  const email = q.get('actorEmail')?.toLowerCase();
+  return audit.filter((r) => {
+    const at = Date.parse(r.at);
+    return (
+      at >= from &&
+      at < to &&
+      (!orgId || r.orgId === orgId) &&
+      (!q.get('actorId') || r.actorId === q.get('actorId')) &&
+      (ignoreAction || !q.get('action') || r.action === q.get('action')) &&
+      (!q.get('actionPrefix') || r.action.startsWith(q.get('actionPrefix'))) &&
+      (!email || (auditOf(r).actorEmail ?? '').toLowerCase() === email) &&
+      (!q.get('targetType') || r.targetType === q.get('targetType')) &&
+      (!q.get('targetId') || r.targetId === q.get('targetId'))
+    );
+  });
+}
+
 /** @type {import('../lib.mjs').MockRoute[]} */
 export const routes = [
   // Organizations (org:manage = super_admin).
+  {
+    method: 'GET',
+    path: '/api/v2/organizations/stats',
+    permission: 'org:manage',
+    handler: ({ url, send }) => {
+      const term = searchOf(url);
+      const rows = orgs.filter(
+        (o) => !term || o.name.toLowerCase().includes(term) || o.slug.includes(term),
+      );
+      send(200, {
+        total: rows.length,
+        byKind: Object.fromEntries(
+          ORG_KINDS.map((kind) => [kind, rows.filter((o) => o.kind === kind).length]),
+        ),
+      });
+    },
+  },
   {
     method: 'GET',
     path: '/api/v2/organizations',
@@ -983,7 +1057,18 @@ export const routes = [
             (!kind || o.kind === kind),
         )
         .sort((a, b) => a.name.localeCompare(b.name));
-      send(200, pageOf(rows, url));
+      send(
+        200,
+        pageOf(
+          rows.map((o) => ({
+            ...o,
+            memberCount: memberships.filter((m) => m.orgId === o.id).length,
+            apiKeyCount: apiKeys.filter((k) => k.orgId === o.id && keyOf(k).status === 'active')
+              .length,
+          })),
+          url,
+        ),
+      );
     },
   },
   {
@@ -1166,6 +1251,19 @@ export const routes = [
     },
   },
   {
+    method: 'POST',
+    path: '/api/v2/organizations/:id/invitations/:invitationId/resend',
+    handler: ({ claims, req, params, send }) => {
+      manageOrg(claims, params.id);
+      const found = invitations.find((i) => i.orgId === params.id && i.id === params.invitationId);
+      if (!found) throw new MockHttpError(404, 'INVITATION_NOT_FOUND', 'Invitation not found');
+      found.createdAt = nowIso();
+      found.expiresAt = new Date(Date.now() + 7 * 1440 * 60_000).toISOString();
+      record(claims, req, 'membership.invite.resend', params.id, 'membership_invitation', found.id);
+      send(200, { ...invitationOf(found), invitationSent: true });
+    },
+  },
+  {
     method: 'DELETE',
     path: '/api/v2/organizations/:id/invitations/:invitationId',
     handler: ({ claims, req, params, send }) => {
@@ -1335,6 +1433,34 @@ export const routes = [
     },
   },
   {
+    method: 'POST',
+    path: '/api/v2/api-keys/:id/rotate',
+    permission: 'api_key:manage',
+    handler: async ({ claims, req, params, body, send }) => {
+      const key = apiKeys.find(
+        (k) => k.id === params.id && (isSuper(claims) || k.orgId === claims.org),
+      );
+      if (!key) throw new MockHttpError(404, 'API_KEY_NOT_FOUND', 'API key not found');
+      if (keyOf(key).status !== 'active')
+        throw new MockHttpError(409, 'API_KEY_INACTIVE', 'API key is revoked or expired');
+      if (!isSuper(claims) && key.scopes.includes('ais:ingest'))
+        throw new MockHttpError(403, 'SCOPE_NOT_GRANTABLE', 'Scope not grantable');
+      const input = (await body()) ?? {};
+      const grace = input.gracePeriodMin ?? 1440;
+      if (!Number.isInteger(grace) || grace < 0 || grace > 7 * 1440)
+        throw invalid([{ field: 'gracePeriodMin', code: 'max', message: 'at most 10080' }]);
+      key.rotatedAt = nowIso();
+      key.previousKeyExpiresAt =
+        grace > 0 ? new Date(Date.now() + grace * 60_000).toISOString() : null;
+      record(claims, req, 'api_key.rotate', key.orgId, 'api_key', key.id, {
+        gracePeriodMin: grace,
+      });
+      send(200, {
+        apiKey: { ...keyOf(key), key: `${key.prefix}${randomBytes(18).toString('base64url')}` },
+      });
+    },
+  },
+  {
     method: 'DELETE',
     path: '/api/v2/api-keys/:id',
     permission: 'api_key:manage',
@@ -1352,29 +1478,71 @@ export const routes = [
   // Audit log (audit:read; own active organization, super_admin all or orgId; cursor pages).
   {
     method: 'GET',
+    path: '/api/v2/audit-logs/actions',
+    permission: 'audit:read',
+    handler: ({ claims, url, send }) => {
+      const counts = new Map();
+      for (const row of auditRows(claims, url, { ignoreAction: true })) {
+        const entry = counts.get(row.action) ?? { action: row.action, count: 0, lastAt: row.at };
+        entry.count += 1;
+        if (row.at > entry.lastAt) entry.lastAt = row.at;
+        counts.set(row.action, entry);
+      }
+      send(200, { data: [...counts.values()].sort((a, b) => a.action.localeCompare(b.action)) });
+    },
+  },
+  {
+    method: 'GET',
+    path: '/api/v2/audit-logs.csv',
+    permission: 'audit:read',
+    handler: ({ claims, url, send }) => {
+      const columns = [
+        'at',
+        'actorType',
+        'actorId',
+        'actorName',
+        'actorEmail',
+        'orgId',
+        'orgName',
+        'action',
+        'targetType',
+        'targetId',
+        'targetLabel',
+        'source',
+        'ip',
+        'meta',
+      ];
+      const cell = (value) => {
+        const text =
+          value === null || value === undefined
+            ? ''
+            : typeof value === 'object'
+              ? JSON.stringify(value)
+              : String(value);
+        const safe = /^[=+\-@]/.test(text) ? `'${text}` : text;
+        return /[",\r\n]/.test(safe) ? `"${safe.replaceAll('"', '""')}"` : safe;
+      };
+      const rows = auditRows(claims, url).map(auditOf);
+      const lines = [
+        columns.join(','),
+        ...rows.map((row) => columns.map((c) => cell(row[c])).join(',')),
+      ];
+      const scope = isSuper(claims) ? (url.searchParams.get('orgId') ?? 'all') : claims.org;
+      send(200, `${lines.join('\r\n')}\r\n`, {
+        'Content-Type': 'text/csv; charset=utf-8',
+        'Content-Disposition': `attachment; filename="audit-logs-${scope}.csv"`,
+        'Access-Control-Expose-Headers': 'Content-Disposition',
+        'Cache-Control': 'no-store',
+      });
+    },
+  },
+  {
+    method: 'GET',
     path: '/api/v2/audit-logs',
     permission: 'audit:read',
     handler: ({ claims, url, send }) => {
-      const q = url.searchParams;
-      const orgId = isSuper(claims) ? q.get('orgId') : claims.org;
-      const to = q.get('to') ? Date.parse(q.get('to')) : Date.now() + 60_000;
-      const from = q.get('from') ? Date.parse(q.get('from')) : to - 30 * 1440 * 60_000;
-      if (Number.isNaN(from) || Number.isNaN(to) || from >= to) {
-        throw invalid([{ field: 'from', code: 'isBefore', message: 'from must be before to' }]);
-      }
-      const rows = audit.filter((r) => {
-        const at = Date.parse(r.at);
-        return (
-          at >= from &&
-          at < to &&
-          (!orgId || r.orgId === orgId) &&
-          (!q.get('actorId') || r.actorId === q.get('actorId')) &&
-          (!q.get('action') || r.action === q.get('action')) &&
-          (!q.get('targetType') || r.targetType === q.get('targetType')) &&
-          (!q.get('targetId') || r.targetId === q.get('targetId'))
-        );
-      });
-      send(200, cursorPageOf(rows, url));
+      const rows = auditRows(claims, url);
+      send(200, cursorPageOf(rows.map(auditOf), url));
     },
   },
 
@@ -1402,14 +1570,36 @@ export const routes = [
               (d.serialNumber ?? '').toLowerCase().includes(term)),
         )
         .sort((a, b) => a.name.localeCompare(b.name));
-      send(200, pageOf(rows, url));
+      send(200, pageOf(rows.map(deviceOf), url));
+    },
+  },
+  {
+    method: 'GET',
+    path: '/api/v2/telemetry/devices/:id/connection',
+    permission: 'device:manage',
+    handler: ({ claims, params, send }) => {
+      const device = visibleDevice(claims, params.id);
+      if (device.kind !== 'mqtt')
+        throw new MockHttpError(409, 'DEVICE_NOT_MQTT', 'The device posts over HTTP');
+      send(200, {
+        deviceId: device.id,
+        brokerUrl: 'mqtts://mqtt.ais-its.local:8883',
+        host: 'mqtt.ais-its.local',
+        port: 8883,
+        tls: true,
+        protocolVersion: '3.1.1',
+        topic: device.mqttTopic ?? `aisits/telemetry/${device.id}`,
+        qos: 1,
+        authentication: 'password',
+        username: device.id,
+      });
     },
   },
   {
     method: 'GET',
     path: '/api/v2/telemetry/devices/:id',
     permission: 'device:manage',
-    handler: ({ claims, params, send }) => send(200, visibleDevice(claims, params.id)),
+    handler: ({ claims, params, send }) => send(200, deviceOf(visibleDevice(claims, params.id))),
   },
   {
     method: 'POST',
@@ -1436,7 +1626,7 @@ export const routes = [
         kind: created.kind,
         mmsi: created.mmsi,
       });
-      send(201, created);
+      send(201, deviceOf(created));
     },
   },
   {
@@ -1463,7 +1653,7 @@ export const routes = [
       record(claims, req, 'device.update', current.orgId, 'device', current.id, {
         fields: Object.keys(input),
       });
-      send(200, current);
+      send(200, deviceOf(current));
     },
   },
   {
@@ -1480,6 +1670,29 @@ export const routes = [
     },
   },
 ];
+
+/** Telemetry 0.2 device fields: vessel name, newest reading and the connection state. */
+function deviceOf(d) {
+  const lastReadingAt = d.lastSeenAt;
+  const age = lastReadingAt ? Date.now() - Date.parse(lastReadingAt) : null;
+  return {
+    ...d,
+    vesselName: VESSELS.find(([mmsi]) => mmsi === d.mmsi)?.[1] ?? null,
+    lastReadingAt,
+    connectionState:
+      d.status !== 'active'
+        ? 'inactive'
+        : age === null
+          ? 'never'
+          : age <= 15 * 60_000
+            ? 'online'
+            : age <= 1440 * 60_000
+              ? 'idle'
+              : 'offline',
+    activeWindowMin: 15,
+    offlineAfterMin: 1440,
+  };
+}
 
 function visibleDevice(claims, deviceId) {
   const found = devices.find(

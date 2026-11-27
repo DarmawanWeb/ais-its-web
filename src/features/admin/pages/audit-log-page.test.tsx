@@ -17,6 +17,11 @@ function mockAudit(records: AuditLogDto[] = AUDIT) {
   server.use(
     http.get('*/api/v2/organizations/:id', () => HttpResponse.json(ORGANIZATIONS[0])),
     http.get('*/api/v2/organizations/:id/members', () => HttpResponse.json(page(MEMBERS))),
+    http.get('*/api/v2/audit-logs/actions', () =>
+      HttpResponse.json({
+        data: [{ action: 'membership.update', count: 1, lastAt: '2026-11-22T08:00:00.000Z' }],
+      }),
+    ),
     http.get('*/api/v2/audit-logs', ({ request }) => {
       const query = new URL(request.url).searchParams;
       queries.push(query);
@@ -37,7 +42,10 @@ describe('audit log page', { timeout: 30_000 }, () => {
     const table = await screen.findByRole('table', { name: 'Catatan audit' }, APP);
     expect(within(table).getByText('Peran anggota diubah')).toBeInTheDocument();
     expect(within(table).getByText('membership.update')).toBeInTheDocument();
-    expect(await within(table).findByText('Dewi Admin')).toBeInTheDocument();
+    // Names captured by the auth service with the record (auth 0.2).
+    expect(await within(table).findByText('Siti Rahma')).toBeInTheDocument();
+    expect(within(table).getByText('siti.rahma@pelni.test')).toBeInTheDocument();
+    expect(within(table).getByText('Budi Santoso <budi.santoso@pelni.test>')).toBeInTheDocument();
     expect(within(table).getByText('Gagal masuk')).toBeInTheDocument();
     expect(within(table).getByText('Sistem')).toBeInTheDocument();
   });

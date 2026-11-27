@@ -1,11 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { KeyRound, Lock, ShieldAlert, TriangleAlert } from 'lucide-react';
+import { KeyRound, Lock, RotateCw, ShieldAlert, TriangleAlert } from 'lucide-react';
 import { useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import * as z from 'zod';
 
-import type { ApiKeyWithSecretDto } from '@/shared/api/generated/auth/model';
+import type { ApiKeyDto, ApiKeyWithSecretDto } from '@/shared/api/generated/auth/model';
 import { toApiProblem } from '@/shared/api/problem';
 import { cn } from '@/shared/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/shared/ui/alert';
@@ -22,9 +22,11 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/form';
 import { Input } from '@/shared/ui/input';
 import { Label } from '@/shared/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select';
+import { toast } from '@/shared/ui/sonner';
 import { Spinner } from '@/shared/ui/spinner';
 
-import { useCreateApiKey } from '../api/auth-admin';
+import { useCreateApiKey, useRotateApiKey } from '../api/auth-admin';
 import { API_KEY_SCOPES, type ApiKeyScope, grantableScopes } from '../lib/access';
 import { applyFieldErrors, problemMessage } from '@/shared/api/problem-copy';
 import { CopyButton } from '@/shared/ui/copy-button';
@@ -222,7 +224,7 @@ function CreateStep({
   );
 }
 
-function SecretStep({
+export function SecretStep({
   apiKey,
   stored,
   onStoredChange,
@@ -287,5 +289,92 @@ function SecretStep({
         </Button>
       </DialogFooter>
     </DialogContent>
+  );
+}
+
+/**
+ * Rotates a key (`POST /api-keys/:id/rotate`): a new secret for the same id and prefix, shown
+ * once; the replaced secret keeps working for the grace period so devices can switch.
+ */
+export function RotateApiKeyDialog({
+  apiKey,
+  onOpenChange,
+}: {
+  apiKey: ApiKeyDto | null;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const { t } = useTranslation('admin');
+  const rotate = useRotateApiKey();
+  const [grace, setGrace] = useState('1440');
+  const [rotated, setRotated] = useState<ApiKeyWithSecretDto | null>(null);
+  const [stored, setStored] = useState(false);
+  const close = (next: boolean) => {
+    if (!next && rotated && !stored) return;
+    if (!next) {
+      setRotated(null);
+      setStored(false);
+      setGrace('1440');
+    }
+    onOpenChange(next);
+  };
+  const confirm = () => {
+    if (!apiKey) return;
+    rotate.mutate(
+      { id: apiKey.id, gracePeriodMin: Number(grace) },
+      {
+        onSuccess: (result) => {
+          setRotated(result.apiKey);
+          toast.success(t('apiKeys.toasts.rotated', { name: apiKey.name }));
+        },
+        onError: (error) =>
+          toast.error(t('apiKeys.toasts.rotateFailed'), {
+            description: problemMessage(t, error),
+          }),
+      },
+    );
+  };
+  return (
+    <Dialog open={apiKey !== null} onOpenChange={close}>
+      {apiKey &&
+        (rotated ? (
+          <SecretStep
+            apiKey={rotated}
+            stored={stored}
+            onStoredChange={setStored}
+            onClose={() => close(false)}
+          />
+        ) : (
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle>{t('apiKeys.rotate.title', { name: apiKey.name })}</DialogTitle>
+              <DialogDescription>{t('apiKeys.rotate.description')}</DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-1.5">
+              <Label htmlFor="api-key-grace">{t('apiKeys.rotate.grace')}</Label>
+              <Select value={grace} onValueChange={setGrace}>
+                <SelectTrigger id="api-key-grace">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {['0', '60', '1440', '10080'].map((minutes) => (
+                    <SelectItem key={minutes} value={minutes}>
+                      {t(`apiKeys.rotate.graceOptions.${minutes}`)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">{t('apiKeys.rotate.graceHint')}</p>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => close(false)}>
+                {t('common:actions.cancel')}
+              </Button>
+              <Button onClick={confirm} disabled={rotate.isPending}>
+                <RotateCw /> {t('apiKeys.rotate.confirm')}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        ))}
+    </Dialog>
   );
 }

@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Auth Service
  * Identity, organizations, memberships and roles, sessions, JWT signing keys and JWKS, API keys, MFA and the central audit log
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import { useMutation, useQuery } from '@tanstack/react-query';
 import type {
@@ -237,7 +237,7 @@ export const useAuthControllerVerifyMfa = <
   return useMutation(getAuthControllerVerifyMfaMutationOptions(options), queryClient);
 };
 /**
- * Reads the refresh token from the HttpOnly cookie aisits_rt (Path=/api/v2/auth, SameSite=Strict; set by login, MFA verify and refresh). Browsers send it automatically; an Origin header, when present, must be one of CORS_ORIGINS or PUBLIC_BASE_URL.
+ * The refresh token cookie aisits_rt is set by login, MFA verify and refresh; browsers send it automatically. An Origin header, when present, must be one of CORS_ORIGINS or PUBLIC_BASE_URL (403 ORIGIN_NOT_ALLOWED).
  * @summary Rotate the refresh cookie and get a new access token
  */
 export const authControllerRefresh = (
@@ -293,7 +293,7 @@ export type AuthControllerRefreshMutationResult = NonNullable<
 export type AuthControllerRefreshMutationError = ErrorType<void | ProblemDetails>;
 
 /**
- * Reads the refresh token from the HttpOnly cookie aisits_rt (Path=/api/v2/auth, SameSite=Strict; set by login, MFA verify and refresh). Browsers send it automatically; an Origin header, when present, must be one of CORS_ORIGINS or PUBLIC_BASE_URL.
+ * The refresh token cookie aisits_rt is set by login, MFA verify and refresh; browsers send it automatically. An Origin header, when present, must be one of CORS_ORIGINS or PUBLIC_BASE_URL (403 ORIGIN_NOT_ALLOWED).
  * @summary Rotate the refresh cookie and get a new access token
  */
 export const useAuthControllerRefresh = <
@@ -314,7 +314,7 @@ export const useAuthControllerRefresh = <
   return useMutation(getAuthControllerRefreshMutationOptions(options), queryClient);
 };
 /**
- * Reads the refresh token from the HttpOnly cookie aisits_rt (Path=/api/v2/auth, SameSite=Strict; set by login, MFA verify and refresh). Browsers send it automatically; an Origin header, when present, must be one of CORS_ORIGINS or PUBLIC_BASE_URL.
+ * The refresh token cookie aisits_rt is set by login, MFA verify and refresh; browsers send it automatically. An Origin header, when present, must be one of CORS_ORIGINS or PUBLIC_BASE_URL (403 ORIGIN_NOT_ALLOWED).
  * @summary Sign out: revoke the session of the refresh cookie and clear it
  */
 export const authControllerLogout = (
@@ -367,7 +367,7 @@ export type AuthControllerLogoutMutationResult = NonNullable<
 export type AuthControllerLogoutMutationError = ErrorType<ProblemDetails>;
 
 /**
- * Reads the refresh token from the HttpOnly cookie aisits_rt (Path=/api/v2/auth, SameSite=Strict; set by login, MFA verify and refresh). Browsers send it automatically; an Origin header, when present, must be one of CORS_ORIGINS or PUBLIC_BASE_URL.
+ * The refresh token cookie aisits_rt is set by login, MFA verify and refresh; browsers send it automatically. An Origin header, when present, must be one of CORS_ORIGINS or PUBLIC_BASE_URL (403 ORIGIN_NOT_ALLOWED).
  * @summary Sign out: revoke the session of the refresh cookie and clear it
  */
 export const useAuthControllerLogout = <TError = ErrorType<ProblemDetails>, TContext = unknown>(

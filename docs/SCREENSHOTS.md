@@ -11,9 +11,9 @@ map tiles need internet access, so maps show the plain fallback background here.
 
 `/login`
 
-| Desktop                          |
-| -------------------------------- |
-| ![Login ](screenshots/login.png) |
+| Desktop                         | Mobile                                        |
+| ------------------------------- | --------------------------------------------- |
+| ![Login](screenshots/login.png) | ![Login mobile](screenshots/login-mobile.png) |
 
 ## Operations (Operasi)
 

@@ -882,6 +882,56 @@ export const routes = [
   },
   {
     method: 'GET',
+    path: '/api/v2/surveillance/stats/series',
+    permission: 'surveillance:read',
+    handler: ({ url, claims, send }) => {
+      const { from, to } = parseRange(url);
+      const bucket = url.searchParams.get('bucket') ?? 'day';
+      if (!['hour', 'day'].includes(bucket)) {
+        throw new MockHttpError(400, 'VALIDATION_FAILED', 'Validation failed', {
+          errors: [{ field: 'bucket', message: 'hour or day' }],
+        });
+      }
+      const timeZone = url.searchParams.get('tz') ?? 'UTC';
+      const size = bucket === 'hour' ? 3_600_000 : 86_400_000;
+      // Local boundaries of the time zone (whole-hour offsets are enough for the demo).
+      const offset =
+        new Date(new Date(from).toLocaleString('en-US', { timeZone })).getTime() -
+        new Date(new Date(from).toLocaleString('en-US', { timeZone: 'UTC' })).getTime();
+      const events = data.events.filter((event) => {
+        const time = Date.parse(event.time);
+        return (
+          visible(claims, event) &&
+          time >= from &&
+          time <= to &&
+          (!url.searchParams.get('type') || event.type === url.searchParams.get('type'))
+        );
+      });
+      const buckets = [];
+      for (
+        let start = Math.floor((from + offset) / size) * size - offset;
+        start < to;
+        start += size
+      ) {
+        const lower = Math.max(start, from);
+        const upper = Math.min(start + size, to);
+        const inside = events.filter((event) => {
+          const time = Date.parse(event.time);
+          return time >= lower && (upper === to ? time <= upper : time < upper);
+        });
+        buckets.push({
+          from: iso(lower),
+          to: iso(upper),
+          total: inside.length,
+          byType: countBy(inside, 'type'),
+          bySeverity: countBy(inside, 'currentSeverity'),
+        });
+      }
+      send(200, { from: iso(from), to: iso(to), bucket, timeZone, buckets });
+    },
+  },
+  {
+    method: 'GET',
     path: '/api/v2/surveillance/detectors',
     permission: 'surveillance:read',
     handler: ({ send }) => send(200, DETECTORS),

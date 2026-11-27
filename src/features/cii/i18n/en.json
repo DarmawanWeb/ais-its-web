@@ -1,10 +1,14 @@
 {
-  "nav": { "cii": "Emissions & CII" },
+  "nav": {
+    "cii": "Emissions & CII"
+  },
   "cii": {
     "title": "Emissions & CII",
     "description": "Annual Carbon Intensity Indicator (CII) of the fleet: attained against required CII, rating and A–E grade under MARPOL Annex VI regulation 28."
   },
-  "units": { "cii": "g CO₂/cap·nm" },
+  "units": {
+    "cii": "g CO₂/cap·nm"
+  },
   "subnav": {
     "label": "Emissions & CII navigation",
     "fleet": "Fleet summary",
@@ -12,7 +16,6 @@
   },
   "grade": {
     "none": "No grade yet",
-    "aria": "CII grade {{grade}} ({{label}})",
     "short": "Grade {{grade}}"
   },
   "gradeMeaning": {
@@ -35,7 +38,9 @@
     "none": "Not counted"
   },
   "methodsUsed": "Methods:",
-  "live": { "updated": "Updated {{time}}" },
+  "live": {
+    "updated": "Updated {{time}}"
+  },
   "problems": {
     "notAvailable": {
       "title": "No CII data for {{year}} yet",
@@ -168,7 +173,7 @@
     "required": "Required CII",
     "requiredShort": "Required",
     "zMissing": "No Z for this year yet",
-    "zOfYear": "Reduction factor Z {{year}} = {{z}}%",
+    "zOfYear": "Reduction factor Z {{year}} = {{z}}",
     "rating": "CII rating",
     "ratingDescription": "Attained ÷ required; lower is better",
     "scaleTitle": "Position on the rating scale",
@@ -342,7 +347,11 @@
     "jobTitle": "Recomputation job",
     "jobId": "Job id",
     "loading": "Loading the job status…",
-    "status": { "running": "Running", "succeeded": "Succeeded", "failed": "Failed" },
+    "status": {
+      "running": "Running",
+      "succeeded": "Succeeded",
+      "failed": "Failed"
+    },
     "range": "Range",
     "replayed": "Positions replayed",
     "segments": "Segments written",

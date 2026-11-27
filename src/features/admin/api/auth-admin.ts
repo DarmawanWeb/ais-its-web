@@ -3,10 +3,14 @@ import { keepPreviousData, useMutation, useQueryClient } from '@tanstack/react-q
 import {
   apiKeysControllerCreate,
   apiKeysControllerRevoke,
+  apiKeysControllerRotate,
   getApiKeysControllerListQueryKey,
   useApiKeysControllerList,
 } from '@/shared/api/generated/auth/api-keys/api-keys';
-import { useAuditLogsControllerList } from '@/shared/api/generated/auth/audit-logs/audit-logs';
+import {
+  useAuditLogsControllerActions,
+  useAuditLogsControllerList,
+} from '@/shared/api/generated/auth/audit-logs/audit-logs';
 import type {
   AuditLogsControllerListParams,
   CreateApiKeyDto,
@@ -24,6 +28,7 @@ import {
   getMembersControllerListQueryKey,
   getOrganizationsControllerListQueryKey,
   invitationsControllerCancel,
+  invitationsControllerResend,
   membersControllerInvite,
   membersControllerRemove,
   membersControllerUpdate,
@@ -34,6 +39,7 @@ import {
   useMembersControllerList,
   useOrganizationsControllerGet,
   useOrganizationsControllerList,
+  useOrganizationsControllerStats,
 } from '@/shared/api/generated/auth/organizations/organizations';
 import {
   getUsersControllerListQueryKey,
@@ -119,6 +125,13 @@ export function useDeleteOrganization() {
 
 // --- users directory ------------------------------------------------------------------------
 
+/** Organizations per kind over every page (`GET /organizations/stats`, `org:manage`). */
+export function useOrganizationStats(search: string) {
+  return useOrganizationsControllerStats(search ? { search } : undefined, {
+    query: { placeholderData: keepPreviousData },
+  });
+}
+
 export function useUserDirectory(params: {
   page: number;
   pageSize: number;
@@ -191,6 +204,16 @@ export function useInviteMember() {
   });
 }
 
+/** Sends a new invitation link (`POST …/invitations/:invitationId/resend`, at most 3 per hour). */
+export function useResendInvitation() {
+  const invalidate = useInvalidateMembers();
+  return useMutation({
+    mutationFn: ({ orgId, invitationId }: { orgId: string; invitationId: string }) =>
+      invitationsControllerResend(orgId, invitationId, {}),
+    onSuccess: (_data, { orgId }) => invalidate(orgId),
+  });
+}
+
 export function useUpdateMemberRole() {
   const invalidate = useInvalidateMembers();
   return useMutation({
@@ -256,6 +279,17 @@ export function useCreateApiKey() {
   });
 }
 
+/** New secret for a key (`POST /api-keys/:id/rotate`), the old one valid for the grace period. */
+export function useRotateApiKey() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, gracePeriodMin }: { id: string; gracePeriodMin: number }) =>
+      apiKeysControllerRotate(id, { gracePeriodMin }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: getApiKeysControllerListQueryKey() }),
+  });
+}
+
 export function useRevokeApiKey() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -274,4 +308,9 @@ export function useAuditLogs(params: AuditLogsControllerListParams) {
     { limit: AUDIT_PAGE_SIZE, ...params },
     { query: { placeholderData: keepPreviousData } },
   );
+}
+
+/** Distinct actions recorded in the range (`GET /audit-logs/actions`), for the filter. */
+export function useAuditActions(params: { orgId?: string; from?: string; to?: string }) {
+  return useAuditLogsControllerActions(params, { query: { staleTime: 5 * 60_000 } });
 }

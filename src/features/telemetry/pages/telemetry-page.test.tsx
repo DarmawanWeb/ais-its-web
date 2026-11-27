@@ -45,6 +45,20 @@ function mockTelemetry(
     http.get('*/api/v2/telemetry/vessels/:mmsi/readings', () =>
       HttpResponse.json({ data: POINTS, page: { nextCursor: null, limit: 500 } }),
     ),
+    http.get('*/api/v2/telemetry/vessels/:mmsi/devices', () =>
+      HttpResponse.json({
+        data: [
+          {
+            id: DEVICE.id,
+            name: DEVICE.name,
+            kind: DEVICE.kind,
+            status: DEVICE.status,
+            lastSeenAt: DEVICE.lastSeenAt,
+          },
+        ],
+        meta: { page: 1, pageSize: 20, total: 1 },
+      }),
+    ),
     http.get('*/api/v2/telemetry/devices', () =>
       HttpResponse.json({ data: [DEVICE], meta: { page: 1, pageSize: 20, total: 1 } }),
     ),
@@ -86,8 +100,10 @@ describe('TelemetryPage', { timeout: 40_000 }, () => {
     expect(within(table).getAllByRole('row')).toHaveLength(POINTS.length + 1);
     expect(screen.getByRole('button', { name: /Input manual/ })).toBeInTheDocument();
     expect(screen.getByText('aisits/telemetry/<deviceId>')).toBeInTheDocument();
-    // Fleet managers do not manage devices.
+    // Fleet managers see the vessel's devices read-only; admins manage them.
+    expect(await screen.findByText(DEVICE.name)).toBeInTheDocument();
     expect(screen.getByText(/Pendaftaran dan pengaturan perangkat/)).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /Kelola perangkat/ })).not.toBeInTheDocument();
   });
 
   it('lists the devices of the vessel for organization admins', async () => {

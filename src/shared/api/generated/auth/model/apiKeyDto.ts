@@ -3,9 +3,10 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Auth Service
  * Identity, organizations, memberships and roles, sessions, JWT signing keys and JWKS, API keys, MFA and the central audit log
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import type { ApiKeyDtoScopesItem } from './apiKeyDtoScopesItem';
+import type { ApiKeyDtoStatus } from './apiKeyDtoStatus';
 
 export interface ApiKeyDto {
   id: string;
@@ -20,5 +21,22 @@ export interface ApiKeyDto {
   lastUsedAt: string | null;
   /** @nullable */
   revokedAt: string | null;
+  /**
+   * The key is inactive from this time on (null: no expiry)
+   * @nullable
+   */
+  expiresAt: string | null;
+  /** active, expired (expiresAt passed) or revoked; only active keys pass introspection */
+  status: ApiKeyDtoStatus;
+  /**
+   * Last secret rotation (POST /api-keys/:id/rotate)
+   * @nullable
+   */
+  rotatedAt: string | null;
+  /**
+   * While a rotation grace period runs: when the replaced secret stops working (else null)
+   * @nullable
+   */
+  previousKeyExpiresAt: string | null;
   createdAt: string;
 }

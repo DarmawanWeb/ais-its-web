@@ -16,7 +16,10 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 
-import { useAlertsControllerGet } from '@/shared/api/generated/notification/alerts/alerts';
+import {
+  useAlertsControllerGet,
+  useAlertsControllerOccurrences,
+} from '@/shared/api/generated/notification/alerts/alerts';
 import type { AlertDto, DeliveryDto } from '@/shared/api/generated/notification/model';
 import { useNotificationsControllerDeliveries } from '@/shared/api/generated/notification/notifications/notifications';
 import { Can } from '@/shared/auth/guards';
@@ -139,44 +142,116 @@ function TimelineItem({
   );
 }
 
+/** Occurrences read for the timeline (newest first, `GET /alerts/:id/occurrences`). */
+const OCCURRENCE_LIMIT = 20;
+
 function AlertTimeline({ alert }: { alert: AlertDto }) {
   const { t } = useTranslation('alerts');
   const who = useWho();
-  return (
-    <ol className="relative before:absolute before:top-2 before:bottom-2 before:left-3.5 before:w-px before:bg-border">
-      <TimelineItem
-        icon={BellRing}
-        tone="warning"
-        title={t('detail.timeline.raised')}
-        time={alert.occurredAt}
-      />
-      {(alert.occurrences > 1 || alert.lastOccurredAt !== alert.occurredAt) && (
+  const occurrences = useAlertsControllerOccurrences(
+    alert.id,
+    { limit: OCCURRENCE_LIMIT },
+    { query: { staleTime: 30_000 } },
+  );
+  const history = occurrences.data?.data ?? [];
+  const more = Boolean(occurrences.data?.page.nextCursor);
+  const events: { key: string; at: string; node: ReactNode }[] = [];
+  if (history.length > 0) {
+    for (const occurrence of history) {
+      events.push({
+        key: occurrence.eventId,
+        at: occurrence.occurredAt,
+        node: (
+          <TimelineItem
+            key={occurrence.eventId}
+            icon={occurrence.outcome === 'merged' ? Repeat : BellRing}
+            tone="warning"
+            title={
+              <span className="inline-flex flex-wrap items-center gap-2">
+                {t(`detail.timeline.outcome.${occurrence.outcome}`)}
+                <SeverityBadge severity={occurrence.severity} />
+              </span>
+            }
+            time={occurrence.occurredAt}
+          />
+        ),
+      });
+    }
+  } else {
+    // Before the history loads (or when it is unavailable): what the alert itself records.
+    events.push({
+      key: 'raised',
+      at: alert.occurredAt,
+      node: (
         <TimelineItem
-          icon={Repeat}
+          key="raised"
+          icon={BellRing}
           tone="warning"
-          title={t('detail.timeline.recurred', { count: alert.occurrences })}
-          time={alert.lastOccurredAt}
+          title={t('detail.timeline.raised')}
+          time={alert.occurredAt}
         />
-      )}
-      {alert.acknowledgedAt && (
+      ),
+    });
+    if (alert.occurrences > 1 || alert.lastOccurredAt !== alert.occurredAt) {
+      events.push({
+        key: 'recurred',
+        at: alert.lastOccurredAt,
+        node: (
+          <TimelineItem
+            key="recurred"
+            icon={Repeat}
+            tone="warning"
+            title={t('detail.timeline.recurred', { count: alert.occurrences })}
+            time={alert.lastOccurredAt}
+          />
+        ),
+      });
+    }
+  }
+  if (alert.acknowledgedAt) {
+    events.push({
+      key: 'acknowledged',
+      at: alert.acknowledgedAt,
+      node: (
         <TimelineItem
+          key="acknowledged"
           icon={Eye}
           tone="info"
           title={t('detail.timeline.acknowledged')}
           time={alert.acknowledgedAt}
           detail={alert.acknowledgedBy ? t('detail.by', { who: who(alert.acknowledgedBy) }) : null}
         />
-      )}
-      {alert.resolvedAt && (
+      ),
+    });
+  }
+  if (alert.resolvedAt) {
+    events.push({
+      key: 'resolved',
+      at: alert.resolvedAt,
+      node: (
         <TimelineItem
+          key="resolved"
           icon={CheckCheck}
           tone="success"
           title={t('detail.timeline.resolved')}
           time={alert.resolvedAt}
           detail={alert.resolvedBy ? t('detail.by', { who: who(alert.resolvedBy) }) : null}
         />
+      ),
+    });
+  }
+  events.sort((a, b) => a.at.localeCompare(b.at));
+  return (
+    <>
+      <ol className="relative before:absolute before:top-2 before:bottom-2 before:left-3.5 before:w-px before:bg-border">
+        {events.map((event) => event.node)}
+      </ol>
+      {more && (
+        <p className="text-xs text-muted-foreground">
+          {t('detail.timeline.more', { count: alert.occurrences - history.length })}
+        </p>
       )}
-    </ol>
+    </>
   );
 }
 

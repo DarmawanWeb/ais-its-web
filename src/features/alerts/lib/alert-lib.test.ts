@@ -16,7 +16,7 @@ import {
   restoreAlertCaches,
   snapshotAlertCaches,
 } from './alert-cache';
-import { alertCsvRows, csvSafeText, exportFileName } from './alert-csv';
+import { csvDataRows, exportFileName } from './alert-csv';
 import { dataEntries } from './alert-data';
 import {
   activeFilterCount,
@@ -181,18 +181,10 @@ describe('detector data', () => {
 });
 
 describe('CSV export', () => {
-  it('writes translated headers and labels and neutralises formulas', () => {
-    const rows = alertCsvRows([{ ...ALERT, title: '=HYPERLINK("x")' }], 'en');
-    expect(rows[0]).toMatchObject({
-      Type: 'Pipeline early warning',
-      Severity: 'Critical',
-      Status: 'Open',
-      MMSI: 525005223,
-    });
-    expect(rows[0]?.Title).toBe(`'=HYPERLINK("x")`);
-    expect(alertCsvRows([ALERT], 'id')[0]).toHaveProperty('Judul', ALERT.title);
-    expect(csvSafeText('+1')).toBe("'+1");
-    expect(csvSafeText('Kapal')).toBe('Kapal');
+  it('counts the data rows of the service export and names the fallback file', () => {
+    expect(csvDataRows('ID,Judul\r\n1,"Bahaya\r\ndekat pipa"\r\n2,Kapal\r\n')).toBe(2);
+    expect(csvDataRows('ID,Judul\r\n')).toBe(0);
+    expect(csvDataRows('')).toBe(0);
     expect(exportFileName(new Date(2026, 10, 22, 9, 5))).toBe('alerts-20261122-0905.csv');
   });
 });

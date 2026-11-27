@@ -662,6 +662,53 @@ function number(value, field, { min = 0, positive = false, optional = false } = 
 export const routes = [
   {
     method: 'GET',
+    path: '/api/v2/cii/fleet/fuel',
+    permission: 'cii:read',
+    handler: ({ url, claims, send }) => {
+      const year = parseYear(url);
+      const now = new Date();
+      const month = Number(url.searchParams.get('month') ?? now.getUTCMonth() + 1);
+      const admin = isSuperAdmin(claims);
+      const orgId = admin ? url.searchParams.get('orgId') : (claims?.org ?? null);
+      const vessels = !orgId || orgId === FLEET_ORG_ID ? fleetItems() : [];
+      const period = (from, to) => {
+        const totals = { fuelMeTon: 0, fuelAeTon: 0, co2Ton: 0, vesselsWithData: 0 };
+        for (const [mmsi] of vessels) {
+          const points = dailySeries(mmsi, year).filter((point) => {
+            const day = Date.parse(point.day);
+            return day >= from && day < to;
+          });
+          if (points.length === 0) continue;
+          totals.vesselsWithData += 1;
+          for (const point of points) {
+            totals.fuelMeTon += point.fuelMeTon;
+            totals.fuelAeTon += point.fuelAeTon;
+            totals.co2Ton += point.co2Ton;
+          }
+        }
+        return {
+          from: new Date(from).toISOString(),
+          to: new Date(to).toISOString(),
+          fuelMeTon: round(totals.fuelMeTon, 3),
+          fuelAeTon: round(totals.fuelAeTon, 3),
+          totalFuelTon: round(totals.fuelMeTon + totals.fuelAeTon, 3),
+          co2Ton: round(totals.co2Ton, 3),
+          vesselsWithData: totals.vesselsWithData,
+          manualVessels: 0,
+          methods: { telemetry: 0, firstFormula: totals.vesselsWithData, holtrop: 0 },
+        };
+      };
+      send(200, {
+        orgId: admin ? (url.searchParams.get('orgId') ?? null) : (claims?.org ?? null),
+        vessels: vessels.length,
+        year: period(Date.UTC(year, 0, 1), Date.UTC(year + 1, 0, 1)),
+        month: period(Date.UTC(year, month - 1, 1), Date.UTC(year, month, 1)),
+        methodIds: ['fuel.method_selection', 'cii.attained_accumulation'],
+      });
+    },
+  },
+  {
+    method: 'GET',
     path: '/api/v2/cii/fleet/summary',
     permission: 'cii:read',
     handler: ({ url, claims, send }) => {

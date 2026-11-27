@@ -330,6 +330,36 @@ export const realtime = {
 export const routes = [
   {
     method: 'GET',
+    path: '/api/v2/safety/stats',
+    permission: 'safety:read',
+    handler: ({ url, send }) => {
+      const box = bboxParam(url);
+      const at = Date.now();
+      const since = url.searchParams.get('since')
+        ? Date.parse(url.searchParams.get('since'))
+        : at - 24 * 60 * MINUTE;
+      const states = safetyStates().filter(
+        (s) => inBox(box, s.lat, s.lon) && Date.parse(s.time) >= since,
+      );
+      const count = (test) => states.filter(test).length;
+      send(200, {
+        ews: {
+          danger: count((s) => s.ewsStatus === 0),
+          warning: count((s) => s.ewsStatus === 1),
+          methodId: 'ews.pipeline_distance_status',
+        },
+        collision: {
+          high: count((s) => s.collisionRisk === 'high'),
+          medium: count((s) => s.collisionRisk === 'medium'),
+          methodId: 'collision.cpa_tcpa',
+        },
+        since: new Date(since).toISOString(),
+        at: new Date(at).toISOString(),
+      });
+    },
+  },
+  {
+    method: 'GET',
     path: '/api/v2/safety/vessels',
     permission: 'safety:read',
     handler: ({ url, send }) => {

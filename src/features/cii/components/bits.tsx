@@ -17,10 +17,9 @@ import { NavLink } from 'react-router';
 
 import { EmptyState, ErrorState } from '@/shared/domain-ui/feedback';
 import { MethodChips as SharedMethodChips } from '@/shared/domain-ui/method-chips';
+import { YearSelect as SharedYearSelect } from '@/shared/domain-ui/year-select';
 import { cn } from '@/shared/lib/utils';
 import { Badge } from '@/shared/ui/badge';
-import { Label } from '@/shared/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select';
 import { useEmissionMethodName } from '@/shared/methodology';
 
 import { useCiiFormat } from '../hooks/use-cii-format';
@@ -64,40 +63,12 @@ export function CiiSubnav({ className }: { className?: string }) {
 }
 
 /** Year picker (calendar years, UTC). */
+/** The year picker of the CII pages (shared `YearSelect`, default id `cii-year`). */
 export function YearSelect({
-  value,
-  years,
-  onChange,
-  label,
-  className,
   id = 'cii-year',
-}: {
-  value: number;
-  years: readonly number[];
-  onChange: (year: number) => void;
-  label: string;
-  className?: string;
-  id?: string;
-}) {
-  return (
-    <div className={cn('flex items-center gap-2', className)}>
-      <Label htmlFor={id} className="text-xs whitespace-nowrap text-muted-foreground">
-        {label}
-      </Label>
-      <Select value={String(value)} onValueChange={(next) => onChange(Number(next))}>
-        <SelectTrigger id={id} size="sm" className="w-24 font-mono tabular-nums">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {years.map((year) => (
-            <SelectItem key={year} value={String(year)} className="font-mono tabular-nums">
-              {year}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
-  );
+  ...props
+}: Omit<Parameters<typeof SharedYearSelect>[0], 'id' | 'autoLabel'> & { id?: string }) {
+  return <SharedYearSelect id={id} {...props} />;
 }
 
 /** Where the figures of a year come from: voyage segments, or the manual / imported record. */

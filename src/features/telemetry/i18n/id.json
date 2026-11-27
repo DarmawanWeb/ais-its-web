@@ -1,5 +1,7 @@
 {
-  "nav": { "telemetry": "Telemetri" },
+  "nav": {
+    "telemetry": "Telemetri"
+  },
   "telemetry": {
     "title": "Telemetri Bahan Bakar",
     "description": "Pembacaan konsumsi bahan bakar mesin utama dan bantu dari perangkat MQTT/HTTP, API dan input manual."
@@ -120,18 +122,14 @@
     "description_one": "{{count}} perangkat terdaftar pada kapal ini.",
     "description_other": "{{count}} perangkat terdaftar pada kapal ini.",
     "manage": "Kelola perangkat",
-    "noPermission": "Pendaftaran dan pengaturan perangkat dilakukan admin organisasi di halaman Perangkat.",
     "empty": "Belum ada perangkat",
     "emptyHint": "Daftarkan alat ukur MQTT atau HTTP agar telemetri mengalir otomatis.",
     "register": "Daftarkan perangkat",
     "lastSeen": "Terakhir mengirim {{time}}",
     "neverSeen": "Belum pernah mengirim data",
     "serial": "No. seri {{serial}}",
-    "topic": "Topik MQTT perangkat"
-  },
-  "copy": {
-    "copied": "Disalin",
-    "copy": "Salin {{label}}"
+    "topic": "Topik MQTT perangkat",
+    "readOnly": "Pendaftaran dan pengaturan perangkat (kunci API, topik MQTT) dilakukan admin organisasi di halaman Perangkat."
   },
   "mqtt": {
     "title": "Cara perangkat mengirim data",
@@ -154,7 +152,6 @@
     "running": "Mengekspor…",
     "done_one": "{{count}} baris diekspor",
     "done_other": "{{count}} baris diekspor",
-    "truncated": "Ekspor dibatasi {{count}} baris; persempit rentang untuk sisanya.",
     "failed": "Ekspor gagal"
   },
   "problems": {

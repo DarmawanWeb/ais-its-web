@@ -1,10 +1,14 @@
 {
-  "nav": { "cii": "Emisi & CII" },
+  "nav": {
+    "cii": "Emisi & CII"
+  },
   "cii": {
     "title": "Emisi & CII",
     "description": "Carbon Intensity Indicator (CII) tahunan armada: CII tercapai terhadap CII yang disyaratkan, rasio dan peringkat A–E sesuai MARPOL Annex VI peraturan 28."
   },
-  "units": { "cii": "g CO₂/kap·nm" },
+  "units": {
+    "cii": "g CO₂/kap·nm"
+  },
   "subnav": {
     "label": "Navigasi Emisi & CII",
     "fleet": "Ringkasan armada",
@@ -12,7 +16,6 @@
   },
   "grade": {
     "none": "Belum ada peringkat",
-    "aria": "Peringkat CII {{grade}} ({{label}})",
     "short": "Peringkat {{grade}}"
   },
   "gradeMeaning": {
@@ -35,7 +38,9 @@
     "none": "Tidak dihitung"
   },
   "methodsUsed": "Metode:",
-  "live": { "updated": "Diperbarui {{time}}" },
+  "live": {
+    "updated": "Diperbarui {{time}}"
+  },
   "problems": {
     "notAvailable": {
       "title": "Belum ada data CII untuk {{year}}",
@@ -165,7 +170,7 @@
     "required": "CII disyaratkan",
     "requiredShort": "Disyaratkan",
     "zMissing": "Faktor Z tahun ini belum ada",
-    "zOfYear": "Faktor reduksi Z {{year}} = {{z}}%",
+    "zOfYear": "Faktor reduksi Z {{year}} = {{z}}",
     "rating": "Rasio CII",
     "ratingDescription": "Tercapai ÷ disyaratkan; makin kecil makin baik",
     "scaleTitle": "Posisi pada skala peringkat",
@@ -337,7 +342,11 @@
     "jobTitle": "Pekerjaan hitung ulang",
     "jobId": "ID pekerjaan",
     "loading": "Memuat status pekerjaan…",
-    "status": { "running": "Berjalan", "succeeded": "Berhasil", "failed": "Gagal" },
+    "status": {
+      "running": "Berjalan",
+      "succeeded": "Berhasil",
+      "failed": "Gagal"
+    },
     "range": "Rentang",
     "replayed": "Posisi diputar ulang",
     "segments": "Segmen ditulis",

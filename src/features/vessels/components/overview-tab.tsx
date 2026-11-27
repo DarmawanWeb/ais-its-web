@@ -11,7 +11,7 @@ import { MmsiText, UnitValue } from '@/shared/domain-ui/values';
 import { formatDateTime, formatNumber } from '@/shared/lib/format';
 import { Badge } from '@/shared/ui/badge';
 
-import { evaluateFuelFormula } from '../lib/fuel-formula';
+import { evaluateFuelFormula } from '@/shared/lib/fuel-formula';
 import { type AnyVessel, isDetailView } from '../lib/vessel';
 import { FlagText } from './flag-text';
 import { VesselStatusBadge } from './vessel-status-badge';

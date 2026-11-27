@@ -9,6 +9,7 @@ import type {
   CreateAlertRuleDto,
   DeliveryDto,
   DeliveryPageDto,
+  DeliverySummaryDto,
   UpdateAlertRuleDto,
 } from '@/shared/api/generated/notification/model';
 import { server } from '@/test/msw/server';
@@ -189,6 +190,19 @@ function mockRules({
       );
       return HttpResponse.json(state.rules.find((rule) => rule.id === params.id));
     }),
+    http.get('*/api/v2/notifications/deliveries/summary', () =>
+      HttpResponse.json({
+        from: '2026-10-24T00:00:00.000Z',
+        to: '2026-11-23T00:00:00.000Z',
+        sent: 1,
+        failed: 1,
+        pending: 0,
+        queued: 0,
+        total: 2,
+        lastDeliveredAt: '2026-11-22T08:00:00.000Z',
+        successRate: 0.5,
+      } satisfies DeliverySummaryDto),
+    ),
     http.get('*/api/v2/notifications/deliveries', ({ request }) => {
       const url = new URL(request.url);
       state.deliveryParams.push(url.searchParams);
@@ -225,8 +239,8 @@ describe('alert rules page', { timeout: 30_000 }, () => {
     expect(second.getByText('Semua kapal')).toBeInTheDocument();
     expect(second.getByRole('switch')).toBeDisabled();
     expect(second.getByText('Hanya otoritas')).toBeInTheDocument();
-    // Delivery stats of the latest deliveries (1 sent, 1 failed).
-    expect(await screen.findByText('2 pengiriman terakhir · 1 gagal')).toBeInTheDocument();
+    // Delivery stats counted by the service over 30 days (1 sent, 1 failed).
+    expect(await screen.findByText('2 pengiriman 30 hari terakhir · 1 gagal')).toBeInTheDocument();
     expect(screen.getByText('50')).toBeInTheDocument();
   });
 

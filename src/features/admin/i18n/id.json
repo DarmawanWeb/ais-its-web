@@ -61,7 +61,8 @@
       "name": "Organisasi",
       "kind": "Jenis",
       "created": "Dibuat",
-      "updated": "Diperbarui"
+      "updated": "Diperbarui",
+      "members": "Anggota"
     },
     "actions": "Aksi untuk {{name}}",
     "viewMembers": "Lihat anggota",
@@ -104,7 +105,9 @@
       "description": "Keanggotaan dan kunci API-nya dihapus, dan semua sesi di dalamnya diakhiri. Kapal dan data layanan lain tidak ikut dihapus. Tindakan ini tidak dapat dibatalkan.",
       "typeSlug": "Ketik {{slug}} untuk mengonfirmasi",
       "confirm": "Hapus organisasi"
-    }
+    },
+    "apiKeys_one": "{{count}} kunci API",
+    "apiKeys_other": "{{count}} kunci API"
   },
   "users": {
     "tableLabel": "Direktori pengguna",
@@ -253,7 +256,7 @@
     "guide": {
       "title": "Cakupan",
       "description": "Berikan setiap kunci hanya cakupan yang dibutuhkan sistemnya.",
-      "header": "Sistem mengirim kunci di header X-API-Key. Kunci tidak kedaluwarsa: cabut kunci segera setelah perangkat atau mitra tidak membutuhkannya lagi."
+      "header": "Sistem mengirim kunci di header X-API-Key. Kunci berlaku sampai dicabut atau sampai tanggal kedaluwarsanya; rotasi membuat rahasia baru dan rahasia lama tetap berlaku selama masa tenggang. Cabut kunci segera setelah perangkat atau mitra tidak membutuhkannya lagi."
     },
     "revokeConfirm": {
       "title": "Cabut {{name}}?",
@@ -283,7 +286,26 @@
     },
     "toasts": {
       "revoked": "Kunci {{name}} dicabut",
-      "revokeFailed": "Kunci tidak dapat dicabut"
+      "revokeFailed": "Kunci tidak dapat dicabut",
+      "rotated": "Kunci {{name}} dirotasi",
+      "rotateFailed": "Kunci tidak dapat dirotasi"
+    },
+    "expired": "Kedaluwarsa",
+    "expiresOn": "Berlaku s.d. {{date}}",
+    "previousUntil": "Kunci lama berlaku s.d. {{date}}",
+    "rotate": {
+      "action": "Rotasi",
+      "title": "Rotasi kunci {{name}}",
+      "description": "Rahasia baru dibuat untuk kunci yang sama (id dan prefiks tetap) dan ditampilkan sekali. Perangkat yang memakai rahasia lama tetap berfungsi selama masa tenggang.",
+      "grace": "Masa tenggang rahasia lama",
+      "graceHint": "Setelah masa tenggang, hanya rahasia baru yang diterima.",
+      "graceOptions": {
+        "0": "Tanpa masa tenggang (langsung berhenti)",
+        "60": "1 jam",
+        "1440": "24 jam",
+        "10080": "7 hari"
+      },
+      "confirm": "Rotasi sekarang"
     }
   },
   "referenceData": {
@@ -432,13 +454,17 @@
     "flow": "Aliran bahan bakar (L/menit)",
     "problems": {
       "empty": "Masukkan rumus",
-      "tooLong": "Maksimal 500 karakter",
-      "tooDeep": "Terlalu bertingkat di sekitar karakter {{position}} (maksimal 32 tingkat)",
+      "tooLong": "Maksimal {{max}} karakter",
+      "tooManyTokens": "Rumus lebih dari {{max}} token (karakter {{position}})",
+      "tooDeep": "Terlalu bertingkat di sekitar karakter {{position}} (maksimal {{max}} tingkat)",
       "unexpectedEnd": "Rumus berakhir terlalu cepat (karakter {{position}})",
       "unexpectedToken": "“{{token}}” tidak terduga pada karakter {{position}}",
-      "unknownName": "Nama “{{token}}” tidak dikenal pada karakter {{position}}: gunakan speedKnot atau exp, log, ln, sqrt, pow, abs, min, max",
-      "badNumber": "Angka “{{token}}” tidak valid pada karakter {{position}}",
-      "arity": "{{token}} memerlukan {{expected}} argumen, diberi {{actual}} (karakter {{position}})"
+      "unexpectedCharacter": "Karakter “{{token}}” tidak diizinkan pada karakter {{position}}",
+      "expected": "Diharapkan “{{token}}” pada karakter {{position}}",
+      "unknownIdentifier": "Nama “{{token}}” tidak dikenal pada karakter {{position}}: gunakan speedKnot atau exp, log, ln, sqrt, pow, abs, min, max",
+      "numberOutOfRange": "Angka “{{token}}” di luar jangkauan pada karakter {{position}}",
+      "arity": "{{token}} memerlukan {{expected}} argumen, diberi {{actual}} (karakter {{position}})",
+      "syntax": "Rumus tidak valid pada karakter {{position}}: {{token}}"
     }
   },
   "devices": {
@@ -531,9 +557,8 @@
     "connection": {
       "title": "Panduan koneksi",
       "description": "Cara {{name}} mengirim pembacaan bahan bakar {{vessel}}.",
-      "copy": "Salin {{what}}",
       "mqtt": {
-        "broker": "Hubungkan ke broker MQTT platform dengan kredensial dari administrator Anda (TLS).",
+        "broker": "Hubungkan ke broker MQTT platform di bawah ini sebagai pengguna broker perangkat; kata sandinya disiapkan operator platform.",
         "topic": "Terbitkan ke topik perangkat di bawah ini dengan QoS 1.",
         "payload": "Kirim satu pembacaan sebagai JSON, atau larik berisi hingga 1000 pembacaan; kapalnya adalah kapal perangkat."
       },
@@ -552,7 +577,13 @@
         "time": "time adalah akhir periode pengukuran dalam UTC (ISO 8601); periodStart opsional.",
         "unique": "Satu pembacaan per kapal dan waktu: pengulangan yang sama persis diabaikan, nilai berbeda pada waktu yang sama ditolak.",
         "active": "Hanya perangkat aktif yang boleh mengirim; nonaktifkan perangkat alih-alih menghapusnya untuk menjedanya."
-      }
+      },
+      "broker": "Broker",
+      "security": "Koneksi",
+      "tls": "TLS · MQTT {{version}} · QoS {{qos}}",
+      "plain": "Tanpa TLS · MQTT {{version}} · QoS {{qos}}",
+      "username": "Pengguna broker",
+      "anonymous": "Tanpa autentikasi (pengembangan)"
     },
     "toasts": {
       "created": "Perangkat {{name}} didaftarkan",
@@ -634,7 +665,8 @@
       "fields": "Kolom yang berubah:",
       "raw": "Data mentah (JSON)",
       "copyRaw": "Salin JSON"
-    }
+    },
+    "exportFailed": "Ekspor log audit gagal"
   },
   "audit": {
     "actions": {

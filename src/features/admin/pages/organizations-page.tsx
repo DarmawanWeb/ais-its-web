@@ -16,6 +16,7 @@ import { Link } from 'react-router';
 
 import type {
   OrganizationDto,
+  OrganizationListItemDto,
   OrganizationsControllerListKind,
 } from '@/shared/api/generated/auth/model';
 import { DataTable, usePageState } from '@/shared/domain-ui/data-table';
@@ -36,7 +37,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs';
 
-import { useAllOrganizations, useOrganizationList } from '../api/auth-admin';
+import { useAllOrganizations, useOrganizationList, useOrganizationStats } from '../api/auth-admin';
 import { SearchInput } from '../components/common';
 import {
   DeleteOrganizationDialog,
@@ -65,16 +66,14 @@ export function OrganizationsPage() {
   const [form, setForm] = useState<{ organization?: OrganizationDto } | null>(null);
   const [deleting, setDeleting] = useState<OrganizationDto | null>(null);
 
-  const counts = useMemo(() => {
-    const list = all.data?.data ?? [];
-    const by = (value: string) => list.filter((org) => org.kind === value).length;
-    return {
-      total: all.data?.meta.total ?? 0,
-      shipping: by('shipping_company'),
-      authority: by('authority'),
-      research: by('research'),
-    };
-  }, [all.data]);
+  // Counts over every page (`GET /organizations/stats`), not only the first 100 rows.
+  const stats = useOrganizationStats('');
+  const counts = {
+    total: stats.data?.total ?? 0,
+    shipping: stats.data?.byKind.shipping_company ?? 0,
+    authority: stats.data?.byKind.authority ?? 0,
+    research: stats.data?.byKind.research ?? 0,
+  };
   const orgNames = useMemo(
     () => new Map((all.data?.data ?? []).map((org) => [org.id, org.name])),
     [all.data],
@@ -104,6 +103,24 @@ export function OrganizationsPage() {
         id: 'kind',
         header: t('organizations.columns.kind'),
         cell: ({ row }) => <OrgKindBadge kind={row.original.kind} />,
+      },
+      {
+        id: 'members',
+        header: t('organizations.columns.members'),
+        meta: { className: 'text-right' },
+        cell: ({ row }) => {
+          const item = row.original as Partial<OrganizationListItemDto>;
+          return (
+            <div className="text-right whitespace-nowrap">
+              <p className="font-mono tabular-nums">
+                {formatNumber(item.memberCount ?? null, i18n.language)}
+              </p>
+              <p className="text-[11px] text-muted-foreground">
+                {t('organizations.apiKeys', { count: item.apiKeyCount ?? 0 })}
+              </p>
+            </div>
+          );
+        },
       },
       {
         id: 'created',
@@ -180,25 +197,25 @@ export function OrganizationsPage() {
           value={formatNumber(counts.total, i18n.language)}
           icon={Building2}
           tone="primary"
-          loading={all.isPending}
+          loading={stats.isPending}
         />
         <StatCard
           label={t('orgKinds.shipping_company')}
           value={formatNumber(counts.shipping, i18n.language)}
           icon={Ship}
-          loading={all.isPending}
+          loading={stats.isPending}
         />
         <StatCard
           label={t('orgKinds.authority')}
           value={formatNumber(counts.authority, i18n.language)}
           icon={Landmark}
-          loading={all.isPending}
+          loading={stats.isPending}
         />
         <StatCard
           label={t('orgKinds.research')}
           value={formatNumber(counts.research, i18n.language)}
           icon={FlaskConical}
-          loading={all.isPending}
+          loading={stats.isPending}
         />
       </section>
       <Tabs defaultValue="organizations" className="gap-4">

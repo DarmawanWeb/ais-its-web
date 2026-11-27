@@ -8,7 +8,7 @@
 
 export interface ValidateFuelFormulaDto {
   /**
-   * A main- or auxiliary-engine formula. Up to 2000 characters are checked (the grammar itself allows 500: longer ones report FORMULA_TOO_LONG).
+   * A main- or auxiliary-engine formula. Up to 2000 characters are accepted; surrounding whitespace is removed before the check, as POST and PATCH do (the grammar itself allows 500 characters after that: longer ones report FORMULA_TOO_LONG). Positions refer to the text as sent.
    * @maxLength 2000
    */
   formula: string;

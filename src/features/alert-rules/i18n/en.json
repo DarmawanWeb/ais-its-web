@@ -30,7 +30,7 @@
     "channels": "Notification channels",
     "channelsBreakdown": "{{email}} e-mail · {{telegram}} Telegram · {{webhook}} webhook",
     "successRate": "Delivery success",
-    "successSample": "Last {{count}} deliveries · {{failed}} failed",
+    "successSample": "{{count}} deliveries in the last 30 days · {{failed}} failed",
     "noDeliveries": "No deliveries yet",
     "lastDelivery": "Last delivery",
     "lastDeliveryHint": "Updated in real time"

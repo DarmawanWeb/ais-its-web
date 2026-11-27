@@ -26,6 +26,34 @@ All notable changes to this project are documented in this file. The format foll
   `useAppLanguage`, `CopyButton`, `MethodChips`, `useMethodName`, `gradeClassName`, `useNow`,
   `nowMs` / `currentYear`, `MAP_FONT`, and `NavItem.end` for section overviews.
 - `docs/SCREENSHOTS.md`: gallery of every page by menu section (dark, light, phone).
+- Pages use the aggregate endpoints of the services' 0.2 releases instead of browser-side
+  workarounds: dashboard `GET /ais/stats/series` (6-hour AIS rate history instead of samples
+  taken while the page is open), `GET /alerts/stats/series` (7 local days, no 500-alert cap),
+  `GET /safety/stats` (no 5 000-state list), `GET /cii/fleet/fuel` (one request instead of one
+  per vessel, no 50-vessel cap); telemetry `readings.csv` (streamed export instead of 40 pages),
+  `order=desc` for the newest readings of a vessel, `GET /telemetry/vessels/:mmsi/devices`
+  (fleet managers see the vessel's devices read-only); administration: audit names captured by
+  auth (`actorName`, `actorEmail`, `orgName`, `targetLabel`), action suggestions
+  (`GET /audit-logs/actions`) and the streamed `GET /audit-logs.csv`, per-kind organization
+  counts (`GET /organizations/stats`) with member and API key counts per row, invitation resend
+  (`POST …/invitations/:id/resend`), API key status, expiry and rotation with a grace period
+  (`POST /api-keys/:id/rotate`, the new secret shown once), devices with the server's
+  `connectionState`, `vesselName` and broker details (`GET /telemetry/devices/:id/connection`);
+  alerts: the streamed `GET /alerts/export.csv` (every matching alert, headers in the UI language,
+  `X-Truncated` reported) instead of paging 5 000 alerts in the browser, and the occurrence
+  history of an alert (`GET /alerts/:id/occurrences`: raised, escalated, merged with their
+  severity) in the detail timeline; vessels: "last seen" of the fleet list in one
+  `GET /ais/latest?mmsi=…` per 100 vessels instead of one request per row; surveillance overview:
+  one `GET /surveillance/stats/series` (local hours or days) instead of one `GET /stats` per
+  bucket; alert rules: delivery success rate and last delivery from
+  `GET /notifications/deliveries/summary` (30 days) instead of the latest 50 deliveries.
+- Shared: `downloadServerFile` / `saveTextFile` / `attachmentFilename` (`@/shared/api/download`,
+  service CSV exports through the axios instance), `@/shared/lib/fuel-formula` (the contracts
+  0.4 grammar with translatable issue codes), `CopyText` (`@/shared/ui/copy-text`),
+  `YearSelect` (`@/shared/domain-ui/year-select`), `CiiGradeBadge size="xl"`,
+  `useEmissionFormat` (`@/shared/hooks/use-emission-format`), `problemResponse`
+  (`@/test/msw/problem`); the mock gateway's `send` passes a string body with a `Content-Type`
+  through (CSV routes).
 
 ### Added (foundation, before the features)
 
@@ -47,6 +75,11 @@ All notable changes to this project are documented in this file. The format foll
 
 ### Changed
 
+- API clients regenerated again (auth 0.2, safety `GET /safety/stats`, telemetry device fields,
+  fleet `POST /fuel-formulas/validate`); `pnpm api:generate` shows no drift against the current
+  documents.
+- Problem details of text responses (CSV downloads) are parsed, so their codes reach
+  `ApiProblem`.
 - API clients regenerated from the services' upgraded documents (geo, safety, surveillance,
   emission, telemetry, ais-pipeline, fleet, notification 0.2): MMSI path parameters are strings,
   surveillance events are a union typed by `type` (the nullable-field casts are gone), and the
@@ -68,6 +101,11 @@ All notable changes to this project are documented in this file. The format foll
 
 ### Removed
 
+- The two local first-fuel-formula parsers (vessels and admin, which disagreed on functions and
+  error codes), the CII and SEEMP copies of the grade chip, year picker and number formatters,
+  the telemetry `CopyText` and admin `Snippet`, three MSW problem helpers, the dashboard's
+  rate sampler and per-vessel fuel queries, and the empty `.gitkeep` placeholders of filled
+  feature folders.
 - `PlaceholderPage`, `UnderConstruction` and the placeholder alerts bell (every module is
   built; the `topbar.alerts` slot renders nothing without an owner), and the feature copies of
   the shared helpers above (five `localizeProblem`, three `problemMessage`, six contracts
@@ -76,6 +114,15 @@ All notable changes to this project are documented in this file. The format foll
 
 ### Fixed
 
+- Dialogs reopened while closing (e.g. the command palette right after a selection) rendered
+  under their own overlay: the overlay faded out faster than the content, so its portal was
+  re-appended after the content; overlays of dialogs, alert dialogs and sheets now use the
+  content's duration (the role walkthrough failed on it intermittently).
+- `pnpm perf:map` imported `playwright`, which the app does not depend on (now
+  `@playwright/test`), and read the JS heap before enabling the CDP `Performance` domain (0 MB).
+- CII vessel summary showed the reduction factor as "11%%"; the SEEMP year pickers rendered
+  "Otomatis" in the monospace font; the API key guide still said keys never expire.
+- The surveillance overview labelled daily buckets with times when the range started mid-day.
 - A full page load no longer restores the scroll position of a different page
   (`ScrollRestoration getKey`).
 - CII grade badges use near-black text on B, C and D (white failed WCAG AA on those colours).

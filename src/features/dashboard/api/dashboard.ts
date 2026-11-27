@@ -1,28 +1,24 @@
-import { useQueries, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
-
 import {
-  getStatsControllerDescribeQueryKey,
   useStatsControllerDescribe,
+  useStatsControllerSeries,
 } from '@/shared/api/generated/ais-processor/ais/ais';
-import type { AisStatsDto } from '@/shared/api/generated/ais-processor/model';
 import {
-  ciiControllerDaily,
+  useCiiControllerFleetFuel,
   useCiiControllerFleetSummary,
 } from '@/shared/api/generated/emission/cii/cii';
-import type { DailyCiiDto, FleetVesselCiiDto } from '@/shared/api/generated/emission/model';
 import {
   useAlertsControllerList,
+  useAlertsControllerSeries,
   useAlertsControllerSummary,
 } from '@/shared/api/generated/notification/alerts/alerts';
+import { useSafetyStatsControllerStats } from '@/shared/api/generated/safety/stats/stats';
 import { useVesselStatesControllerList } from '@/shared/api/generated/safety/vessels/vessels';
 import { useStatisticsControllerStats } from '@/shared/api/generated/surveillance/statistics/statistics';
-import { isApiProblem } from '@/shared/api/problem';
-import { serviceKeys } from '@/shared/api/query-keys';
 
-import { fuelTotals, pushSample, rateSample, type RateSample } from '../lib/dashboard';
+import { rateSeries } from '../lib/dashboard';
 
 const DAY = 86_400_000;
+const HOUR = 3_600_000;
 
 /** Platform AIS statistics (`GET /ais/stats`), refreshed every 15 s. */
 export function useAisStats(enabled: boolean) {
@@ -31,28 +27,21 @@ export function useAisStats(enabled: boolean) {
   });
 }
 
-/**
- * Rolling history of the message rate per source while the page is open: one sample per
- * successful `GET /ais/stats` (the processor keeps no time series of its rates).
- */
-export function useRateHistory(stats: AisStatsDto | undefined, updatedAt: number) {
-  const queryClient = useQueryClient();
-  const [history, setHistory] = useState<RateSample[]>(() =>
-    stats ? [rateSample(stats, updatedAt)] : [],
+/** Message rate per source over the last 6 hours (`GET /ais/stats/series`, 5-minute buckets). */
+export function useRateSeries(enabled: boolean, anchor: number) {
+  return useStatsControllerSeries(
+    { from: new Date(anchor - 6 * HOUR).toISOString(), bucket: '5m' },
+    { query: { enabled, staleTime: 60_000, refetchInterval: 300_000, select: rateSeries } },
   );
-  useEffect(() => {
-    const key = JSON.stringify(getStatsControllerDescribeQueryKey());
-    return queryClient.getQueryCache().subscribe((event) => {
-      if (event.type !== 'updated' || event.action.type !== 'success') return;
-      if (JSON.stringify(event.query.queryKey) !== key) return;
-      const data = event.query.state.data as AisStatsDto | undefined;
-      if (data)
-        setHistory((current) =>
-          pushSample(current, rateSample(data, event.query.state.dataUpdatedAt)),
-        );
-    });
-  }, [queryClient]);
-  return stats && history.length === 0 ? [rateSample(stats, updatedAt)] : history;
+}
+
+/** The browser's IANA time zone, for local day buckets (`UTC` when unknown). */
+export function browserTimeZone(): string {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+  } catch {
+    return 'UTC';
+  }
 }
 
 /** Open alerts by severity, domain and type (`GET /alerts/summary`). */
@@ -60,11 +49,14 @@ export function useAlertSummary(enabled: boolean) {
   return useAlertsControllerSummary({ query: { enabled, refetchInterval: 60_000 } });
 }
 
-/** Alerts of the last 7 days (newest first, at most 500) for the timeline chart. */
-export function useAlertWindow(enabled: boolean, anchor: number) {
-  return useAlertsControllerList(
-    { from: new Date(anchor - 7 * DAY).toISOString(), limit: 500 },
-    { query: { enabled, staleTime: 60_000 } },
+/** Alerts per local day and severity over the last 7 days (`GET /alerts/stats/series`). */
+export function useAlertSeries(enabled: boolean, anchor: number) {
+  const from = new Date(anchor);
+  from.setHours(0, 0, 0, 0);
+  from.setDate(from.getDate() - 6);
+  return useAlertsControllerSeries(
+    { from: from.toISOString(), bucket: '1d', groupBy: 'severity', tz: browserTimeZone() },
+    { query: { enabled, staleTime: 60_000, refetchInterval: 300_000 } },
   );
 }
 
@@ -73,10 +65,17 @@ export function useRecentAlerts(enabled: boolean) {
   return useAlertsControllerList({ limit: 6 }, { query: { enabled, refetchInterval: 60_000 } });
 }
 
-/** Vessels in EWS danger or warning (`GET /safety/vessels?ewsStatus=0,1`). */
-export function useEwsStates(enabled: boolean) {
+/** Vessels in EWS danger / warning and at collision risk (`GET /safety/stats`, last 24 h). */
+export function useSafetyStats(enabled: boolean) {
+  return useSafetyStatsControllerStats(undefined, {
+    query: { enabled, refetchInterval: 30_000 },
+  });
+}
+
+/** The first vessels in EWS danger, named on the card (`GET /safety/vessels?ewsStatus=0`). */
+export function useEwsDangerVessels(enabled: boolean) {
   return useVesselStatesControllerList(
-    { ewsStatus: '0,1', limit: 5000 },
+    { ewsStatus: '0', limit: 3 },
     { query: { enabled, refetchInterval: 30_000 } },
   );
 }
@@ -97,50 +96,10 @@ export function useFleetCii(enabled: boolean, year: number) {
   );
 }
 
-/** Vessels whose daily CII points are summed for the fuel figure (one request each). */
-export const FUEL_MAX_VESSELS = 50;
-const dailyKeys = serviceKeys('emission').resource('fleet-fuel');
-
-/**
- * Fuel consumed this month and this year over the fleet (ME + AE from the daily CII points of
- * each vessel since 1 January: the emission service has no fleet fuel total).
- */
-export function useFleetFuel(
-  enabled: boolean,
-  vessels: readonly FleetVesselCiiDto[],
-  year: number,
-) {
-  const chosen = vessels.filter((vessel) => vessel.grade !== null).slice(0, FUEL_MAX_VESSELS);
-  return useQueries({
-    queries: chosen.map((vessel) => ({
-      queryKey: dailyKeys.sub('daily', { mmsi: vessel.mmsi, year }),
-      queryFn: async ({ signal }: { signal: AbortSignal }): Promise<DailyCiiDto | null> => {
-        try {
-          return await ciiControllerDaily(
-            String(vessel.mmsi),
-            { from: `${year}-01-01T00:00:00.000Z` },
-            undefined,
-            signal,
-          );
-        } catch (error) {
-          if (isApiProblem(error) && error.status === 404) return null;
-          throw error;
-        }
-      },
-      enabled,
-      staleTime: 600_000,
-      retry: false,
-    })),
-    combine: (results) => ({
-      pending: results.some((result) => result.isPending),
-      error: results.find((result) => result.error)?.error ?? null,
-      points: results.flatMap((result) => result.data?.points ?? []),
-      vessels: results.length,
-    }),
-  });
-}
-
-/** Month / year totals of {@link useFleetFuel} points. */
-export function fuelOf(points: Parameters<typeof fuelTotals>[0], now: number) {
-  return fuelTotals(points, now);
+/** Fuel and CO2 of the fleet this month and this year (`GET /cii/fleet/fuel`). */
+export function useFleetFuel(enabled: boolean, year: number) {
+  return useCiiControllerFleetFuel(
+    { year },
+    { query: { enabled, staleTime: 120_000, refetchInterval: 300_000, retry: false } },
+  );
 }

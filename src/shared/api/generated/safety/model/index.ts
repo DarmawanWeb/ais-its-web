@@ -7,6 +7,7 @@
  */
 
 export * from './closestEncounterDto';
+export * from './collisionStatsDto';
 export * from './cpaPositionsDto';
 export * from './cursorPageInfoDto';
 export * from './detectorDescriptionDto';
@@ -25,6 +26,7 @@ export * from './eventsControllerList200';
 export * from './eventsControllerListParams';
 export * from './eventsControllerListSeverity';
 export * from './eventsControllerListStatus';
+export * from './ewsStatsDto';
 export * from './latLonDto';
 export * from './localizedTextDto';
 export * from './methodologyDto';
@@ -42,6 +44,8 @@ export * from './safetyEventDtoDomain';
 export * from './safetyEventDtoResolution';
 export * from './safetyEventDtoSeverity';
 export * from './safetyEventDtoStatus';
+export * from './safetyStatsControllerStatsParams';
+export * from './safetyStatsDto';
 export * from './safetyVesselIdentityDto';
 export * from './safetyVesselStateDto';
 export * from './safetyVesselStateDtoCollisionRisk';

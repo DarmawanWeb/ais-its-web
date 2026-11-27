@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Auth Service
  * Identity, organizations, memberships and roles, sessions, JWT signing keys and JWKS, API keys, MFA and the central audit log
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import type { SentInvitationDtoRole } from './sentInvitationDtoRole';
 
@@ -19,6 +19,11 @@ export interface SentInvitationDto {
    * @nullable
    */
   invitedBy: string | null;
+  /**
+   * Display name of the inviting admin (current; null once that account is deleted)
+   * @nullable
+   */
+  invitedByName: string | null;
   createdAt: string;
   /** The link stops working at this time (send it again to renew) */
   expiresAt: string;

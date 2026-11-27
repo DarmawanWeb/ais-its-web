@@ -24,9 +24,12 @@ const GRADE_BG: Record<CiiGrade, string> = {
 export function EmissionsCard({
   summary,
   fuel,
+  fuelError,
 }: {
   summary: FleetSummaryDto;
-  fuel: { month: number; year: number; pending: boolean; vessels: number; truncated: boolean };
+  /** Totals of `GET /cii/fleet/fuel` (t); `vessels` = vessels with data this year. */
+  fuel: { month: number; year: number; pending: boolean; vessels: number };
+  fuelError?: unknown;
 }) {
   const { t, i18n } = useTranslation('dashboard');
   const { rated, shares } = gradeShares(summary.grades);
@@ -81,6 +84,8 @@ export function EmissionsCard({
             </p>
             {fuel.pending ? (
               <Skeleton className="mt-2 h-7 w-24" />
+            ) : fuelError ? (
+              <p className="mt-1 text-xs text-muted-foreground">{t('stats.unavailable')}</p>
             ) : (
               <p className="mt-1 font-mono text-xl font-semibold tabular-nums">
                 {n(value, 1)}{' '}
@@ -93,7 +98,6 @@ export function EmissionsCard({
       <div className="flex flex-col gap-1">
         <p className="text-[11px] text-muted-foreground">
           {t('emissions.fuelNote', { count: fuel.vessels })}
-          {fuel.truncated && ` ${t('emissions.fuelTruncated')}`}
         </p>
         <DataAttribution provider="open-meteo" />
       </div>

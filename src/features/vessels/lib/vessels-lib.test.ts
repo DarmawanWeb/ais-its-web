@@ -4,7 +4,11 @@ import { describe, expect, it } from 'vitest';
 import type { RegistryParticularsDto } from '@/shared/api/generated/fleet/model';
 
 import { VESSEL_DETAIL } from '../test/fixtures';
-import { checkFuelFormula, evaluateFuelFormula, FUEL_FORMULA_MAX_DEPTH } from './fuel-formula';
+import {
+  checkFuelFormula,
+  evaluateFuelFormula,
+  FUEL_FORMULA_MAX_DEPTH,
+} from '@/shared/lib/fuel-formula';
 import { applyPrefill, matchVesselType, registryPrefill } from './registry';
 import { LATEST_WINDOW_HOURS, latestReadingsWindow } from './telemetry';
 import { flagName, mapLinkOf, parseMmsiParam, positionFreshness } from './vessel';
@@ -246,9 +250,10 @@ describe('vessel helpers', () => {
 });
 
 describe('latestReadingsWindow', () => {
-  it('reads the hours before the newest reading, including it', () => {
+  it('reads the 30 days before the newest reading, including it', () => {
+    expect(LATEST_WINDOW_HOURS).toBe(720);
     expect(latestReadingsWindow('2026-11-22T10:00:00.000Z')).toEqual({
-      from: `2026-11-22T0${10 - LATEST_WINDOW_HOURS}:00:00.000Z`,
+      from: '2026-10-23T10:00:00.000Z',
       to: '2026-11-22T10:00:01.000Z',
     });
   });

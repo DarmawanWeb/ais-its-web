@@ -1,5 +1,5 @@
 import type { ColumnDef } from '@tanstack/react-table';
-import { Ban, KeyRound, Plus, Radio, Satellite, Gauge } from 'lucide-react';
+import { Ban, Gauge, KeyRound, Plus, Radio, RotateCw, Satellite } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -18,7 +18,7 @@ import { Switch } from '@/shared/ui/switch';
 
 import { useAllMembers, useApiKeys, useRevokeApiKey } from '../api/auth-admin';
 import { OrgContextPicker } from '../components/common';
-import { CreateApiKeyDialog } from '../components/create-api-key-dialog';
+import { CreateApiKeyDialog, RotateApiKeyDialog } from '../components/create-api-key-dialog';
 import { useOrgContext } from '../hooks/use-org-context';
 import { problemMessage } from '@/shared/api/problem-copy';
 
@@ -45,6 +45,7 @@ export function ApiKeysPage() {
   const revoke = useRevokeApiKey();
   const [creating, setCreating] = useState(false);
   const [revoking, setRevoking] = useState<ApiKeyDto | null>(null);
+  const [rotating, setRotating] = useState<ApiKeyDto | null>(null);
   const memberNames = useMemo(
     () => new Map((members.data?.data ?? []).map((m) => [m.userId, m.name || m.email])),
     [members.data],
@@ -111,16 +112,41 @@ export function ApiKeysPage() {
       {
         id: 'status',
         header: t('apiKeys.columns.status'),
-        cell: ({ row }) =>
-          row.original.revokedAt ? (
-            <Badge variant="muted" title={formatDateTime(row.original.revokedAt, i18n.language)}>
-              {t('apiKeys.revokedOn', {
-                date: formatDateTime(row.original.revokedAt, i18n.language, 'dd MMM yyyy'),
-              })}
-            </Badge>
-          ) : (
-            <Badge variant="success">{t('apiKeys.active')}</Badge>
-          ),
+        cell: ({ row }) => {
+          const key = row.original;
+          if (key.status === 'revoked' || key.revokedAt) {
+            return (
+              <Badge variant="muted" title={formatDateTime(key.revokedAt, i18n.language)}>
+                {t('apiKeys.revokedOn', {
+                  date: formatDateTime(key.revokedAt, i18n.language, 'dd MMM yyyy'),
+                })}
+              </Badge>
+            );
+          }
+          return (
+            <div className="grid justify-items-start gap-1">
+              {key.status === 'expired' ? (
+                <Badge variant="warning">{t('apiKeys.expired')}</Badge>
+              ) : (
+                <Badge variant="success">{t('apiKeys.active')}</Badge>
+              )}
+              {key.expiresAt && (
+                <span className="text-[11px] whitespace-nowrap text-muted-foreground">
+                  {t('apiKeys.expiresOn', {
+                    date: formatDateTime(key.expiresAt, i18n.language, 'dd MMM yyyy'),
+                  })}
+                </span>
+              )}
+              {key.previousKeyExpiresAt && Date.parse(key.previousKeyExpiresAt) > Date.now() && (
+                <span className="text-[11px] whitespace-nowrap text-muted-foreground">
+                  {t('apiKeys.previousUntil', {
+                    date: formatDateTime(key.previousKeyExpiresAt, i18n.language, 'dd MMM HH:mm'),
+                  })}
+                </span>
+              )}
+            </div>
+          );
+        },
       },
       {
         id: 'actions',
@@ -128,15 +154,23 @@ export function ApiKeysPage() {
         meta: { className: 'text-right', alwaysVisible: true },
         cell: ({ row }) =>
           row.original.revokedAt ? null : (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-danger hover:bg-danger/10 hover:text-danger"
-              onClick={() => setRevoking(row.original)}
-            >
-              <Ban /> {t('apiKeys.revoke')}
-              <span className="sr-only">: {row.original.name}</span>
-            </Button>
+            <div className="flex justify-end gap-1">
+              {row.original.status !== 'expired' && (
+                <Button variant="ghost" size="sm" onClick={() => setRotating(row.original)}>
+                  <RotateCw /> {t('apiKeys.rotate.action')}
+                  <span className="sr-only">: {row.original.name}</span>
+                </Button>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-danger hover:bg-danger/10 hover:text-danger"
+                onClick={() => setRevoking(row.original)}
+              >
+                <Ban /> {t('apiKeys.revoke')}
+                <span className="sr-only">: {row.original.name}</span>
+              </Button>
+            </div>
           ),
       },
     ],
@@ -244,6 +278,7 @@ export function ApiKeysPage() {
         orgName={context.orgName}
         isPlatformAdmin={context.isPlatformAdmin}
       />
+      <RotateApiKeyDialog apiKey={rotating} onOpenChange={(open) => !open && setRotating(null)} />
       <ConfirmDialog
         open={revoking !== null}
         onOpenChange={(open) => !open && setRevoking(null)}

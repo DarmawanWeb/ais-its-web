@@ -8,11 +8,14 @@
 import type { AlertSeriesBucketDtoCounts } from './alertSeriesBucketDtoCounts';
 
 export interface AlertSeriesBucketDto {
-  /** Start (inclusive) */
+  /** Start (inclusive): the local hour or day start; the request `from` for the first bucket */
   from: string;
-  /** End (exclusive) */
+  /** End (exclusive): the next bucket start; the request `to` (inclusive, like the filter) for the last bucket */
   to: string;
-  /** @minimum 0 */
+  /**
+   * Alerts whose first occurrence is in `from`–`to`
+   * @minimum 0
+   */
   total: number;
   /** Count per key of `keys` (0 included) */
   counts: AlertSeriesBucketDtoCounts;

@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Auth Service
  * Identity, organizations, memberships and roles, sessions, JWT signing keys and JWKS, API keys, MFA and the central audit log
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import { useMutation, useQuery } from '@tanstack/react-query';
 import type {
@@ -50,7 +50,8 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
 };
 
 /**
- * @summary Search the users of the platform
+ * Filters: search (e-mail or name), status, ids (batch lookup of up to 100 ids, e.g. the actors of a page of audit records), orgId (members of an organization).
+ * @summary Search the users of the platform (super admins)
  */
 export const usersControllerList = (
   params?: UsersControllerListParams,
@@ -98,7 +99,10 @@ export type UsersControllerListQueryResult = NonNullable<
 >;
 export type UsersControllerListQueryError = ErrorType<ProblemDetails>;
 
-/** @summary Search the users of the platform */
+/**
+ * Filters: search (e-mail or name), status, ids (batch lookup of up to 100 ids, e.g. the actors of a page of audit records), orgId (members of an organization).
+ * @summary Search the users of the platform (super admins)
+ */
 export function useUsersControllerList<
   TData = Awaited<ReturnType<typeof usersControllerList>>,
   TError = ErrorType<ProblemDetails>,
@@ -120,7 +124,10 @@ export function useUsersControllerList<
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-/** @summary Search the users of the platform */
+/**
+ * Filters: search (e-mail or name), status, ids (batch lookup of up to 100 ids, e.g. the actors of a page of audit records), orgId (members of an organization).
+ * @summary Search the users of the platform (super admins)
+ */
 export function useUsersControllerList<
   TData = Awaited<ReturnType<typeof usersControllerList>>,
   TError = ErrorType<ProblemDetails>,
@@ -142,7 +149,10 @@ export function useUsersControllerList<
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-/** @summary Search the users of the platform */
+/**
+ * Filters: search (e-mail or name), status, ids (batch lookup of up to 100 ids, e.g. the actors of a page of audit records), orgId (members of an organization).
+ * @summary Search the users of the platform (super admins)
+ */
 export function useUsersControllerList<
   TData = Awaited<ReturnType<typeof usersControllerList>>,
   TError = ErrorType<ProblemDetails>,
@@ -156,7 +166,10 @@ export function useUsersControllerList<
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-/** @summary Search the users of the platform */
+/**
+ * Filters: search (e-mail or name), status, ids (batch lookup of up to 100 ids, e.g. the actors of a page of audit records), orgId (members of an organization).
+ * @summary Search the users of the platform (super admins)
+ */
 export function useUsersControllerList<
   TData = Awaited<ReturnType<typeof usersControllerList>>,
   TError = ErrorType<ProblemDetails>,

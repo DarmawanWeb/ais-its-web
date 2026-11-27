@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Auth Service
  * Identity, organizations, memberships and roles, sessions, JWT signing keys and JWKS, API keys, MFA and the central audit log
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import { useMutation, useQuery } from '@tanstack/react-query';
 import type {
@@ -27,6 +27,7 @@ import type {
   CreateApiKeyDto,
   CreatedApiKeyDto,
   ProblemDetails,
+  RotateApiKeyDto,
 } from '../model';
 
 import { apiClient } from '../../../mutator';
@@ -180,7 +181,7 @@ export function useApiKeysControllerList<
 }
 
 /**
- * org_admins create keys in their active organization with the scopes telemetry:ingest and ais:read; ais:ingest (the AIS feed shared by every tenant) is granted by super admins only.
+ * org_admins create keys in their active organization with the scopes telemetry:ingest and ais:read; ais:ingest (the AIS feed shared by every tenant) is granted by super admins only. An optional expiresAt (in the future) ends the key: introspection treats it as inactive from then on (status expired).
  * @summary Create an API key (the key is returned once)
  */
 export const apiKeysControllerCreate = (
@@ -246,7 +247,7 @@ export type ApiKeysControllerCreateMutationError = ErrorType<void | ProblemDetai
 export type ApiKeysControllerCreateMutationVariables = { data: BodyType<CreateApiKeyDto> };
 
 /**
- * org_admins create keys in their active organization with the scopes telemetry:ingest and ais:read; ais:ingest (the AIS feed shared by every tenant) is granted by super admins only.
+ * org_admins create keys in their active organization with the scopes telemetry:ingest and ais:read; ais:ingest (the AIS feed shared by every tenant) is granted by super admins only. An optional expiresAt (in the future) ends the key: introspection treats it as inactive from then on (status expired).
  * @summary Create an API key (the key is returned once)
  */
 export const useApiKeysControllerCreate = <
@@ -270,6 +271,102 @@ export const useApiKeysControllerCreate = <
   TContext
 > => {
   return useMutation(getApiKeysControllerCreateMutationOptions(options), queryClient);
+};
+/**
+ * The key keeps its id, prefix, name, scopes and expiry, so only the secret changes on the device. The replaced secret keeps working for gracePeriodMin minutes (default 1440 = 24 h, 0 = stops at once; previousKeyExpiresAt in the answer); rotating again during a grace period ends the older secret at once. Other services cache an active key for up to 60 s, so the replaced secret may still pass there for that long after its grace period. A key with a scope the caller could not grant (ais:ingest for org_admins) cannot be rotated by them.
+ * @summary Give an API key a new secret (returned once)
+ */
+export const apiKeysControllerRotate = (
+  id: string,
+  rotateApiKeyDto?: BodyType<RotateApiKeyDto>,
+  options?: SecondParameter<typeof apiClient>,
+  signal?: AbortSignal,
+) => {
+  return apiClient<CreatedApiKeyDto>(
+    {
+      url: `/api/v2/api-keys/${id}/rotate`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      data: rotateApiKeyDto,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getApiKeysControllerRotateMutationKey = () => ['apiKeysControllerRotate'] as const;
+
+export const getApiKeysControllerRotateMutationOptions = <
+  TError = ErrorType<void | ProblemDetails>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof apiKeysControllerRotate>>,
+    TError,
+    ApiKeysControllerRotateMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof apiClient>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof apiKeysControllerRotate>>,
+  TError,
+  ApiKeysControllerRotateMutationVariables,
+  TContext
+> => {
+  const mutationKey = getApiKeysControllerRotateMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof apiKeysControllerRotate>>,
+    ApiKeysControllerRotateMutationVariables
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return apiKeysControllerRotate(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ApiKeysControllerRotateMutationResult = NonNullable<
+  Awaited<ReturnType<typeof apiKeysControllerRotate>>
+>;
+export type ApiKeysControllerRotateMutationBody = BodyType<RotateApiKeyDto> | undefined;
+export type ApiKeysControllerRotateMutationError = ErrorType<void | ProblemDetails>;
+export type ApiKeysControllerRotateMutationVariables = {
+  id: string;
+  data?: BodyType<RotateApiKeyDto>;
+};
+
+/**
+ * The key keeps its id, prefix, name, scopes and expiry, so only the secret changes on the device. The replaced secret keeps working for gracePeriodMin minutes (default 1440 = 24 h, 0 = stops at once; previousKeyExpiresAt in the answer); rotating again during a grace period ends the older secret at once. Other services cache an active key for up to 60 s, so the replaced secret may still pass there for that long after its grace period. A key with a scope the caller could not grant (ais:ingest for org_admins) cannot be rotated by them.
+ * @summary Give an API key a new secret (returned once)
+ */
+export const useApiKeysControllerRotate = <
+  TError = ErrorType<void | ProblemDetails>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof apiKeysControllerRotate>>,
+      TError,
+      ApiKeysControllerRotateMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof apiKeysControllerRotate>>,
+  TError,
+  ApiKeysControllerRotateMutationVariables,
+  TContext
+> => {
+  return useMutation(getApiKeysControllerRotateMutationOptions(options), queryClient);
 };
 /**
  * @summary Revoke an API key

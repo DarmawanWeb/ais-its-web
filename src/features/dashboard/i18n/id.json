@@ -1,5 +1,7 @@
 {
-  "nav": { "dashboard": "Dashboard" },
+  "nav": {
+    "dashboard": "Dashboard"
+  },
   "title": "Dashboard Armada",
   "description": "Ringkasan operasi: lalu lintas AIS, alert, keselamatan pipa, pengawasan 24 jam serta emisi dan bahan bakar armada Anda.",
   "refresh": "Perbarui",
@@ -40,12 +42,11 @@
   },
   "alertsChart": {
     "title": "Alert 7 hari terakhir",
-    "description": "Jumlah alert per hari (UTC) menurut tingkat, dari kejadian pertama.",
+    "description": "Jumlah alert per hari (waktu lokal) menurut tingkat, dari kejadian pertama.",
     "total": "Total",
     "legend": "Keterangan tingkat alert",
     "caption": "Grafik jumlah alert per hari menurut tingkat",
-    "day": "Hari",
-    "truncated": "Menampilkan 500 alert terbaru; buka kotak masuk untuk riwayat lengkap."
+    "day": "Hari"
   },
   "surveillance": {
     "title": "Pengawasan 24 jam",
@@ -79,9 +80,8 @@
       "month": "Bahan bakar bulan ini",
       "year": "Bahan bakar tahun ini"
     },
-    "fuelNote_one": "ME + AE dari segmen pelayaran {{count}} kapal (telemetri, formula pertama atau Holtrop).",
-    "fuelNote_other": "ME + AE dari segmen pelayaran {{count}} kapal (telemetri, formula pertama atau Holtrop).",
-    "fuelTruncated": "Dibatasi 50 kapal pertama.",
+    "fuelNote_one": "ME + AE segmen pelayaran {{count}} kapal tahun ini (telemetri, formula pertama atau Holtrop).",
+    "fuelNote_other": "ME + AE segmen pelayaran {{count}} kapal tahun ini (telemetri, formula pertama atau Holtrop).",
     "empty": "Belum ada kapal dengan data CII",
     "emptyHint": "Peringkat muncul setelah kapal armada berlayar dan segmen bahan bakarnya dihitung."
   },
@@ -91,8 +91,8 @@
     "perMinute": "/mnt",
     "vessels_one": "{{count}} kapal",
     "vessels_other": "{{count}} kapal",
-    "caption": "Riwayat pesan AIS per menit menurut sumber sejak halaman dibuka",
-    "collecting": "Riwayat laju dikumpulkan selama halaman terbuka (setiap 15 detik)."
+    "caption": "Pesan AIS per menit menurut sumber selama 6 jam terakhir",
+    "collecting": "Belum ada riwayat laju untuk 6 jam terakhir."
   },
   "sources": {
     "primary": "Penerima utama",

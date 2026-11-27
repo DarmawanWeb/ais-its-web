@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Auth Service
  * Identity, organizations, memberships and roles, sessions, JWT signing keys and JWKS, API keys, MFA and the central audit log
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 
 /**
@@ -15,5 +15,6 @@ export type MethodSummaryDtoStatus =
 export const MethodSummaryDtoStatus = {
   implemented: 'implemented',
   planned: 'planned',
+  not_implemented: 'not_implemented',
   deprecated: 'deprecated',
 } as const;

@@ -15,7 +15,6 @@ import {
   useCiiControllerSegments,
 } from '@/shared/api/generated/emission/cii/cii';
 import {
-  dcsControllerSummary,
   getDcsControllerSummaryQueryKey,
   useDcsControllerSummary,
 } from '@/shared/api/generated/emission/emission/emission';
@@ -25,6 +24,7 @@ import type {
 } from '@/shared/api/generated/emission/model';
 import { useReductionFactorsControllerList } from '@/shared/api/generated/emission/reduction-factors/reduction-factors';
 import { useVesselsControllerList } from '@/shared/api/generated/fleet/vessels/vessels';
+import { downloadServerFile } from '@/shared/api/download';
 import { claimsCanAccessOrg, useSessionStore } from '@/shared/auth';
 import { useCiiUpdates } from '@/shared/realtime';
 
@@ -108,21 +108,11 @@ export function useVesselIdentity(mmsi: number) {
 
 /** Downloads the DCS summary as CSV (`Accept: text/csv`, RFC 4180 from the service). */
 export async function downloadDcsCsv(mmsi: number, year: number): Promise<void> {
-  const csv = (await dcsControllerSummary(
-    String(mmsi),
+  await downloadServerFile(
+    `/api/v2/emission/vessels/${mmsi}/dcs`,
     { year },
-    { headers: { Accept: 'text/csv' }, responseType: 'text' },
-  )) as unknown;
-  const text = typeof csv === 'string' ? csv : JSON.stringify(csv);
-  const blob = new Blob([text], { type: 'text/csv;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = `dcs-${mmsi}-${year}.csv`;
-  document.body.append(link);
-  link.click();
-  link.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1_000);
+    `dcs-${mmsi}-${year}.csv`,
+  );
 }
 
 /** Every cached emission query of one vessel (after a manual record, a recomputation…). */

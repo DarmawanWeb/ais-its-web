@@ -186,7 +186,9 @@
       "numberOutOfRange": "Angka {{text}} di luar jangkauan (posisi {{position}})",
       "expected": "Diharapkan \"{{text}}\" pada posisi {{position}}",
       "unexpectedToken": "\"{{text}}\" tidak diharapkan pada posisi {{position}}",
-      "unexpectedEnd": "Formula berakhir terlalu cepat (posisi {{position}})"
+      "unexpectedEnd": "Formula berakhir terlalu cepat (posisi {{position}})",
+      "tooManyTokens": "Formula lebih dari {{max}} token (posisi {{position}})",
+      "syntax": "Formula tidak valid pada posisi {{position}}: {{text}}"
     }
   },
   "live": {

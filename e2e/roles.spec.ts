@@ -144,6 +144,9 @@ test.describe('role walkthrough', () => {
 
       await test.step('command palette', async () => {
         const openPalette = async () => {
+          // The previous palette must be gone (its exit animation included): pressing the
+          // shortcut while it still closes toggles it instead of opening a fresh one.
+          await expect(page.locator('[data-slot="dialog-overlay"]')).toHaveCount(0);
           await page.keyboard.press('ControlOrMeta+k');
           await expect(page.getByRole('dialog')).toBeVisible();
           return page.getByRole('dialog');

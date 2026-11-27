@@ -8,19 +8,27 @@ import { telemetryMqttTopic } from '@darmawanweb/ais-its-contracts';
  */
 export type ConnectionState = 'online' | 'idle' | 'offline' | 'never' | 'inactive';
 
-const ONLINE_MS = 15 * 60_000;
-const IDLE_MS = 24 * 60 * 60_000;
-
-/** Connection state of a device from its status and last reading. */
+/**
+ * Connection state of a device: the service's `connectionState` (telemetry 0.2: newest reading
+ * against `activeWindowMin` / `offlineAfterMin`), derived from `lastSeenAt` with the same
+ * default thresholds when a record does not carry it.
+ */
 export function connectionState(
-  device: { status: string; lastSeenAt: string | null },
+  device: {
+    status: string;
+    lastSeenAt: string | null;
+    connectionState?: ConnectionState | null;
+    activeWindowMin?: number;
+    offlineAfterMin?: number;
+  },
   now = Date.now(),
 ): ConnectionState {
+  if (device.connectionState) return device.connectionState;
   if (device.status !== 'active') return 'inactive';
   if (!device.lastSeenAt) return 'never';
   const age = now - Date.parse(device.lastSeenAt);
-  if (age <= ONLINE_MS) return 'online';
-  if (age <= IDLE_MS) return 'idle';
+  if (age <= (device.activeWindowMin ?? 15) * 60_000) return 'online';
+  if (age <= (device.offlineAfterMin ?? 24 * 60) * 60_000) return 'idle';
   return 'offline';
 }
 
@@ -57,8 +65,22 @@ export function httpRequestExample(origin: string, mmsi: number, now = new Date(
   ].join('\n');
 }
 
-/** `mosquitto_pub` command publishing one reading on the device topic. */
-export function mqttCommandExample(topic: string, now = new Date()): string {
+/**
+ * `mosquitto_pub` command publishing one reading on the device topic; with the connection
+ * details of `GET /telemetry/devices/:id/connection` it names the broker, TLS and broker user.
+ */
+export function mqttCommandExample(
+  topic: string,
+  now = new Date(),
+  broker?: { host: string; port: number; tls: boolean; username: string | null } | null,
+): string {
   const payload = JSON.stringify(JSON.parse(mqttPayloadExample(now)));
-  return `mosquitto_pub -q 1 -t "${topic}" -m '${payload}'`;
+  const target = broker
+    ? [
+        `-h ${broker.host} -p ${broker.port}`,
+        ...(broker.tls ? ['--tls-use-os-certs'] : []),
+        ...(broker.username ? [`-u "${broker.username}" -P "<password>"`] : []),
+      ].join(' ') + ' '
+    : '';
+  return `mosquitto_pub ${target}-V mqttv311 -q 1 -t "${topic}" -m '${payload}'`;
 }

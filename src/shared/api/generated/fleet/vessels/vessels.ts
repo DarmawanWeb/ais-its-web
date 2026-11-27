@@ -1183,7 +1183,7 @@ export const useVesselsControllerRemovePhoto = <
   return useMutation(getVesselsControllerRemovePhotoMutationOptions(options), queryClient);
 };
 /**
- * Enqueues one fleet.vessel.upserted.v1 with the current data; the relay publishes it asynchronously.
+ * Enqueues one fleet.vessel.upserted.v1 with the current data; the relay publishes it asynchronously. Access tokens only: no fleet route accepts API keys, so a request with X-API-Key gets 401 INVALID_API_KEY before the administrator check (the note below applies to API keys only on routes that accept them).
  *
  * Requires a platform administrator (super_admin); other users and API keys get 403 PLATFORM_ADMIN_REQUIRED.
  * @summary Re-enqueue the snapshot of a vessel (super_admin)
@@ -1246,7 +1246,7 @@ export type VesselsControllerRepublishMutationError = ErrorType<ProblemDetails>;
 export type VesselsControllerRepublishMutationVariables = { id: string };
 
 /**
- * Enqueues one fleet.vessel.upserted.v1 with the current data; the relay publishes it asynchronously.
+ * Enqueues one fleet.vessel.upserted.v1 with the current data; the relay publishes it asynchronously. Access tokens only: no fleet route accepts API keys, so a request with X-API-Key gets 401 INVALID_API_KEY before the administrator check (the note below applies to API keys only on routes that accept them).
  *
  * Requires a platform administrator (super_admin); other users and API keys get 403 PLATFORM_ADMIN_REQUIRED.
  * @summary Re-enqueue the snapshot of a vessel (super_admin)

@@ -30,7 +30,7 @@
     "channels": "Kanal notifikasi",
     "channelsBreakdown": "{{email}} email · {{telegram}} Telegram · {{webhook}} webhook",
     "successRate": "Keberhasilan pengiriman",
-    "successSample": "{{count}} pengiriman terakhir · {{failed}} gagal",
+    "successSample": "{{count}} pengiriman 30 hari terakhir · {{failed}} gagal",
     "noDeliveries": "Belum ada pengiriman",
     "lastDelivery": "Pengiriman terakhir",
     "lastDeliveryHint": "Diperbarui otomatis secara realtime"

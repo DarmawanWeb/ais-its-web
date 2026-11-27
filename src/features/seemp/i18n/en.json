@@ -16,8 +16,6 @@
     "cii": "g CO₂/cap·nm"
   },
   "grade": {
-    "none": "No grade yet",
-    "aria": "CII grade {{grade}} ({{label}})",
     "to": "becomes",
     "up_one": "up {{count}} grade",
     "up_other": "up {{count}} grades",

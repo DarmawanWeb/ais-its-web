@@ -186,7 +186,9 @@
       "numberOutOfRange": "Number {{text}} is out of range (position {{position}})",
       "expected": "Expected \"{{text}}\" at position {{position}}",
       "unexpectedToken": "Unexpected \"{{text}}\" at position {{position}}",
-      "unexpectedEnd": "The formula ends too early (position {{position}})"
+      "unexpectedEnd": "The formula ends too early (position {{position}})",
+      "tooManyTokens": "The formula has more than {{max}} tokens (position {{position}})",
+      "syntax": "Invalid formula at position {{position}}: {{text}}"
     }
   },
   "live": {

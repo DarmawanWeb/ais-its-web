@@ -1,5 +1,7 @@
 {
-  "nav": { "telemetry": "Telemetry" },
+  "nav": {
+    "telemetry": "Telemetry"
+  },
   "telemetry": {
     "title": "Fuel Telemetry",
     "description": "Fuel consumption readings of the main and auxiliary engines from MQTT/HTTP devices, APIs and manual entry."
@@ -120,18 +122,14 @@
     "description_one": "{{count}} device registered on this vessel.",
     "description_other": "{{count}} devices registered on this vessel.",
     "manage": "Manage devices",
-    "noPermission": "Organization admins register and configure devices on the Devices page.",
     "empty": "No devices yet",
     "emptyHint": "Register an MQTT or HTTP fuel meter so telemetry flows automatically.",
     "register": "Register a device",
     "lastSeen": "Last sent {{time}}",
     "neverSeen": "Has not sent data yet",
     "serial": "Serial {{serial}}",
-    "topic": "Device MQTT topic"
-  },
-  "copy": {
-    "copied": "Copied",
-    "copy": "Copy {{label}}"
+    "topic": "Device MQTT topic",
+    "readOnly": "Device registration and settings (API keys, MQTT topics) are managed by organization admins on the Devices page."
   },
   "mqtt": {
     "title": "How devices report",
@@ -152,9 +150,8 @@
   },
   "export": {
     "running": "Exporting…",
-    "done_one": "{{count}} row exported",
-    "done_other": "{{count}} rows exported",
-    "truncated": "The export is limited to {{count}} rows; narrow the range for the rest.",
+    "done_one": "Exported {{count}} row",
+    "done_other": "Exported {{count}} rows",
     "failed": "Export failed"
   },
   "problems": {

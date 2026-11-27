@@ -269,12 +269,7 @@ export const VESSEL: VesselSummaryDto = {
   updatedAt: new Date().toISOString(),
 };
 
-export function problemResponse(status: number, code: string, title = code) {
-  return HttpResponse.json(
-    { type: `urn:ais-its:problem:${code.toLowerCase()}`, title, status, code },
-    { status, headers: { 'Content-Type': 'application/problem+json' } },
-  );
-}
+export { problemResponse } from '@/test/msw/problem';
 
 /** The emission + fleet endpoints of the CII pages; `overrides` replace single handlers. */
 export function mockCii(

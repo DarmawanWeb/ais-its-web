@@ -1,11 +1,11 @@
 const HOUR = 3_600_000;
 
-/** Hours of raw readings read before the newest reading to list the latest ones. */
-export const LATEST_WINDOW_HOURS = 6;
+/** Hours of raw readings before the newest reading searched for the latest ones (raw ≤ 31 d). */
+export const LATEST_WINDOW_HOURS = 30 * 24;
 
 /**
- * Time window `[newest − 6 h, newest + 1 s)` of the raw series holding the newest readings
- * (the readings API pages ascending only); `null` without a reading or with an invalid time.
+ * Time window `[newest − 30 d, newest + 1 s)` of the raw series read newest first
+ * (`order=desc`) for the latest readings; `null` without a reading or with an invalid time.
  */
 export function latestReadingsWindow(
   lastReadingAt: string | null | undefined,

@@ -113,14 +113,17 @@ describe('vessel detail', { timeout: 30_000 }, () => {
       };
     };
     server.use(
-      http.get('*/api/v2/telemetry/vessels/:mmsi/readings', ({ request }) =>
-        new URL(request.url).searchParams.get('bucket') === 'raw'
-          ? HttpResponse.json({
-              data: [reading(24, 0.031), reading(14, 0.032), reading(4, 0.033)],
-              page: { nextCursor: null, limit: 500 },
-            })
-          : HttpResponse.json({ data: [], page: { nextCursor: null, limit: 60 } }),
-      ),
+      http.get('*/api/v2/telemetry/vessels/:mmsi/readings', ({ request }) => {
+        const params = new URL(request.url).searchParams;
+        if (params.get('bucket') !== 'raw')
+          return HttpResponse.json({ data: [], page: { nextCursor: null, limit: 60 } });
+        // The tab asks for one newest-first page (order=desc).
+        expect(params.get('order')).toBe('desc');
+        return HttpResponse.json({
+          data: [reading(4, 0.033), reading(14, 0.032), reading(24, 0.031)],
+          page: { nextCursor: null, limit: Number(params.get('limit')) },
+        });
+      }),
     );
     const user = userEvent.setup();
     renderApp({ route: `/vessels/${VESSEL_DETAIL.mmsi}` });

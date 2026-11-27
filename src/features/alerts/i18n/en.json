@@ -130,7 +130,14 @@
       "raised": "Alert raised",
       "recurred": "Latest occurrence ({{count}}×)",
       "acknowledged": "Acknowledged",
-      "resolved": "Resolved"
+      "resolved": "Resolved",
+      "outcome": {
+        "raised": "Alert raised",
+        "escalated": "Severity raised",
+        "merged": "Repeated"
+      },
+      "more_one": "{{count}} older occurrence not shown",
+      "more_other": "{{count}} older occurrences not shown"
     },
     "deliveries": {
       "title": "Notification deliveries",

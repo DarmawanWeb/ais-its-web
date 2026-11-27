@@ -1,65 +1,14 @@
-import { CII_GRADE_LABELS } from '@darmawanweb/ais-its-contracts/domain';
-import { useTranslation } from 'react-i18next';
-
 import type { DdVectorDto } from '@/shared/api/generated/emission/model';
+import { CiiGradeBadge } from '@/shared/domain-ui/badges';
 import { cn } from '@/shared/lib/utils';
 
-import {
-  type CiiGrade,
-  domainBands,
-  domainPosition,
-  markerLayout,
-  scaleDomain,
-} from '../lib/grades';
+import { domainBands, domainPosition, markerLayout, scaleDomain } from '../lib/grades';
 import { useCiiFormat } from '../hooks/use-cii-format';
 import { gradeClassName } from '@/shared/theme/grade';
 
-function useLocale(): 'id' | 'en' {
-  const { i18n } = useTranslation();
-  return i18n.language === 'en' ? 'en' : 'id';
-}
-
 /** CII grade letter on its IMO colour, with the label (contracts) as accessible text. */
-export function GradeChip({
-  grade,
-  size = 'md',
-  showLabel = false,
-  className,
-}: {
-  grade: CiiGrade | null | undefined;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
-  showLabel?: boolean;
-  className?: string;
-}) {
-  const { t } = useTranslation('cii');
-  const locale = useLocale();
-  if (!grade) {
-    return (
-      <span className={cn('text-muted-foreground', className)}>
-        —<span className="sr-only">{t('grade.none')}</span>
-      </span>
-    );
-  }
-  const label = CII_GRADE_LABELS[grade][locale];
-  return (
-    <span className={cn('inline-flex items-center gap-2', className)} title={label}>
-      <span
-        className={cn(
-          'inline-flex shrink-0 items-center justify-center rounded-md font-bold shadow-xs ring-1 ring-black/10 ring-inset',
-          gradeClassName(grade),
-          size === 'sm' && 'size-5 text-[11px]',
-          size === 'md' && 'size-7 text-sm',
-          size === 'lg' && 'size-11 text-xl',
-          size === 'xl' && 'size-16 rounded-xl text-3xl',
-        )}
-      >
-        <span aria-hidden>{grade}</span>
-        <span className="sr-only">{t('grade.aria', { grade, label })}</span>
-      </span>
-      {showLabel && <span className="text-sm text-muted-foreground">{label}</span>}
-    </span>
-  );
-}
+/** The CII grade chip of the emission pages: the shared badge (sizes up to `xl`). */
+export const GradeChip = CiiGradeBadge;
 
 export interface ScaleMarker {
   value: number;

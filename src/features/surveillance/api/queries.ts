@@ -25,8 +25,8 @@ import type {
 } from '@/shared/api/generated/surveillance/model';
 import {
   getStatisticsControllerStatsQueryKey,
-  getStatisticsControllerStatsQueryOptions,
   useStatisticsControllerHeatmap,
+  useStatisticsControllerSeries,
   useStatisticsControllerStats,
 } from '@/shared/api/generated/surveillance/statistics/statistics';
 import {
@@ -37,7 +37,6 @@ import {
 
 import type { SurveillanceEvent } from '../lib/dto';
 import { collectCursorPages, collectPages } from '../lib/export';
-import type { TimeBucket } from '../lib/time-buckets';
 
 /** Lists refresh in the background; realtime alerts invalidate them (useSurveillanceLive). */
 const LIST_STALE_MS = 15_000;
@@ -129,16 +128,24 @@ export function useSurveillanceStats(params: { from?: string; to?: string }) {
 }
 
 /**
- * Counts per bucket for the overview time series: one `GET /surveillance/stats` per bucket
- * (the service offers counts per range but no time series).
+ * Counts per hour or local day for the overview time series (`GET /surveillance/stats/series`,
+ * one request; empty buckets included). Ranges up to 48 hours use hours.
  */
-export function useStatsSeries(buckets: readonly TimeBucket[]) {
-  return useQueries({
-    queries: buckets.map((bucket) => ({
-      ...getStatisticsControllerStatsQueryOptions({ from: bucket.from, to: bucket.to }),
-      staleTime: 60_000,
-    })),
-  });
+export function useStatsSeries(from: string, to: string) {
+  const span = Date.parse(to) - Date.parse(from);
+  return useStatisticsControllerSeries(
+    { from, to, bucket: span <= 48 * 3_600_000 ? 'hour' : 'day', tz: browserTimeZone() },
+    { query: { staleTime: 60_000 } },
+  );
+}
+
+/** The browser's IANA time zone for local buckets (`UTC` when unknown). */
+function browserTimeZone(): string {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+  } catch {
+    return 'UTC';
+  }
 }
 
 /** `GET /surveillance/detectors`: enabled detectors, method ids and active thresholds. */

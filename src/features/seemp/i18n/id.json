@@ -16,8 +16,6 @@
     "cii": "g CO₂/kap·nm"
   },
   "grade": {
-    "none": "Belum ada peringkat",
-    "aria": "Peringkat CII {{grade}} ({{label}})",
     "to": "menjadi",
     "up": "naik {{count}} peringkat",
     "down": "turun {{count}} peringkat"

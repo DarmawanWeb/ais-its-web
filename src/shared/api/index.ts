@@ -1,3 +1,10 @@
+export {
+  attachmentFilename,
+  downloadServerFile,
+  fetchServerFile,
+  saveTextFile,
+  type ServerFile,
+} from './download';
 export { http, setAuthBridge, type AuthBridge } from './http';
 export { apiClient, type BodyType, type ErrorType } from './mutator';
 export {

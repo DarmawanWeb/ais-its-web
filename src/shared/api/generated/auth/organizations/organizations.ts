@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Auth Service
  * Identity, organizations, memberships and roles, sessions, JWT signing keys and JWKS, API keys, MFA and the central audit log
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import { useMutation, useQuery } from '@tanstack/react-query';
 import type {
@@ -30,9 +30,12 @@ import type {
   MembersControllerList200,
   MembersControllerListParams,
   OrganizationDto,
+  OrganizationStatsDto,
   OrganizationsControllerList200,
   OrganizationsControllerListParams,
+  OrganizationsControllerStatsParams,
   ProblemDetails,
+  ResendInvitationDto,
   SentInvitationDto,
   UpdateMemberDto,
   UpdateOrganizationDto,
@@ -59,7 +62,7 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
 };
 
 /**
- * @summary List organizations (super admins)
+ * @summary List organizations with their member and API key counts (super admins)
  */
 export const organizationsControllerList = (
   params?: OrganizationsControllerListParams,
@@ -110,7 +113,7 @@ export type OrganizationsControllerListQueryResult = NonNullable<
 >;
 export type OrganizationsControllerListQueryError = ErrorType<ProblemDetails>;
 
-/** @summary List organizations (super admins) */
+/** @summary List organizations with their member and API key counts (super admins) */
 export function useOrganizationsControllerList<
   TData = Awaited<ReturnType<typeof organizationsControllerList>>,
   TError = ErrorType<ProblemDetails>,
@@ -132,7 +135,7 @@ export function useOrganizationsControllerList<
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-/** @summary List organizations (super admins) */
+/** @summary List organizations with their member and API key counts (super admins) */
 export function useOrganizationsControllerList<
   TData = Awaited<ReturnType<typeof organizationsControllerList>>,
   TError = ErrorType<ProblemDetails>,
@@ -154,7 +157,7 @@ export function useOrganizationsControllerList<
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-/** @summary List organizations (super admins) */
+/** @summary List organizations with their member and API key counts (super admins) */
 export function useOrganizationsControllerList<
   TData = Awaited<ReturnType<typeof organizationsControllerList>>,
   TError = ErrorType<ProblemDetails>,
@@ -168,7 +171,7 @@ export function useOrganizationsControllerList<
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-/** @summary List organizations (super admins) */
+/** @summary List organizations with their member and API key counts (super admins) */
 export function useOrganizationsControllerList<
   TData = Awaited<ReturnType<typeof organizationsControllerList>>,
   TError = ErrorType<ProblemDetails>,
@@ -282,6 +285,152 @@ export const useOrganizationsControllerCreate = <
 > => {
   return useMutation(getOrganizationsControllerCreateMutationOptions(options), queryClient);
 };
+/**
+ * The counts of the GET /organizations header: total and per kind (every kind listed, 0 included), optionally of the organizations matching search.
+ * @summary Organizations per kind over every page (super admins)
+ */
+export const organizationsControllerStats = (
+  params?: OrganizationsControllerStatsParams,
+  options?: SecondParameter<typeof apiClient>,
+  signal?: AbortSignal,
+) => {
+  return apiClient<OrganizationStatsDto>(
+    { url: `/api/v2/organizations/stats`, method: 'GET', params, signal },
+    options,
+  );
+};
+
+export const getOrganizationsControllerStatsQueryKey = (
+  params?: OrganizationsControllerStatsParams,
+) => {
+  return [`/api/v2/organizations/stats`, ...(params ? [params] : [])] as const;
+};
+
+export const getOrganizationsControllerStatsQueryOptions = <
+  TData = Awaited<ReturnType<typeof organizationsControllerStats>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: OrganizationsControllerStatsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof organizationsControllerStats>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getOrganizationsControllerStatsQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof organizationsControllerStats>>> = ({
+    signal,
+  }) => organizationsControllerStats(params, requestOptions, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof organizationsControllerStats>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type OrganizationsControllerStatsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof organizationsControllerStats>>
+>;
+export type OrganizationsControllerStatsQueryError = ErrorType<ProblemDetails>;
+
+/**
+ * The counts of the GET /organizations header: total and per kind (every kind listed, 0 included), optionally of the organizations matching search.
+ * @summary Organizations per kind over every page (super admins)
+ */
+export function useOrganizationsControllerStats<
+  TData = Awaited<ReturnType<typeof organizationsControllerStats>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params: undefined | OrganizationsControllerStatsParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof organizationsControllerStats>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof organizationsControllerStats>>,
+          TError,
+          Awaited<ReturnType<typeof organizationsControllerStats>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * The counts of the GET /organizations header: total and per kind (every kind listed, 0 included), optionally of the organizations matching search.
+ * @summary Organizations per kind over every page (super admins)
+ */
+export function useOrganizationsControllerStats<
+  TData = Awaited<ReturnType<typeof organizationsControllerStats>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: OrganizationsControllerStatsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof organizationsControllerStats>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof organizationsControllerStats>>,
+          TError,
+          Awaited<ReturnType<typeof organizationsControllerStats>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * The counts of the GET /organizations header: total and per kind (every kind listed, 0 included), optionally of the organizations matching search.
+ * @summary Organizations per kind over every page (super admins)
+ */
+export function useOrganizationsControllerStats<
+  TData = Awaited<ReturnType<typeof organizationsControllerStats>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: OrganizationsControllerStatsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof organizationsControllerStats>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * The counts of the GET /organizations header: total and per kind (every kind listed, 0 included), optionally of the organizations matching search.
+ * @summary Organizations per kind over every page (super admins)
+ */
+export function useOrganizationsControllerStats<
+  TData = Awaited<ReturnType<typeof organizationsControllerStats>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: OrganizationsControllerStatsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof organizationsControllerStats>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getOrganizationsControllerStatsQueryOptions(params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
 /**
  * @summary Get an organization (super admins, or its members)
  */
@@ -732,7 +881,7 @@ export function useMembersControllerList<
 }
 
 /**
- * Creates an invited account for unknown addresses and e-mails an invitation link (accepted with POST /auth/password/reset). Existing accounts are never attached directly, and the answer is the same for new and existing addresses. Inviting a pending address again renews its link.
+ * Creates an invited account for unknown addresses and e-mails an invitation link (accepted with POST /auth/password/reset). Existing accounts are never attached directly, and the answer is the same for new and existing addresses. Inviting a pending address again renews its link. At most 4 invitation e-mails per address and organization and hour: the invitation and 3 more, whether resent, renewed by inviting the pending address again, or sent anew after a withdrawal (429 RATE_LIMITED with Retry-After beyond).
  * @summary Invite an address to the organization (it joins on acceptance)
  */
 export const membersControllerInvite = (
@@ -802,7 +951,7 @@ export type MembersControllerInviteMutationVariables = {
 };
 
 /**
- * Creates an invited account for unknown addresses and e-mails an invitation link (accepted with POST /auth/password/reset). Existing accounts are never attached directly, and the answer is the same for new and existing addresses. Inviting a pending address again renews its link.
+ * Creates an invited account for unknown addresses and e-mails an invitation link (accepted with POST /auth/password/reset). Existing accounts are never attached directly, and the answer is the same for new and existing addresses. Inviting a pending address again renews its link. At most 4 invitation e-mails per address and organization and hour: the invitation and 3 more, whether resent, renewed by inviting the pending address again, or sent anew after a withdrawal (429 RATE_LIMITED with Retry-After beyond).
  * @summary Invite an address to the organization (it joins on acceptance)
  */
 export const useMembersControllerInvite = <
@@ -1141,6 +1290,105 @@ export function useInvitationsControllerList<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+/**
+ * Renews a pending or expired invitation: a new link valid INVITE_TTL_HOURS replaces the previous one (which stops working), role and name stay, the sender becomes the inviter. The role is checked again against the kind of the organization. The body may be omitted. At most 4 invitation e-mails per address and organization and hour: the invitation and 3 more, whether resent, renewed by inviting the pending address again, or sent anew after a withdrawal (429 RATE_LIMITED with Retry-After beyond).
+ * @summary Send an invitation again with a new link
+ */
+export const invitationsControllerResend = (
+  id: string,
+  invitationId: string,
+  resendInvitationDto?: BodyType<ResendInvitationDto>,
+  options?: SecondParameter<typeof apiClient>,
+  signal?: AbortSignal,
+) => {
+  return apiClient<SentInvitationDto>(
+    {
+      url: `/api/v2/organizations/${id}/invitations/${invitationId}/resend`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      data: resendInvitationDto,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getInvitationsControllerResendMutationKey = () =>
+  ['invitationsControllerResend'] as const;
+
+export const getInvitationsControllerResendMutationOptions = <
+  TError = ErrorType<void | ProblemDetails>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof invitationsControllerResend>>,
+    TError,
+    InvitationsControllerResendMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof apiClient>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof invitationsControllerResend>>,
+  TError,
+  InvitationsControllerResendMutationVariables,
+  TContext
+> => {
+  const mutationKey = getInvitationsControllerResendMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof invitationsControllerResend>>,
+    InvitationsControllerResendMutationVariables
+  > = (props) => {
+    const { id, invitationId, data } = props ?? {};
+
+    return invitationsControllerResend(id, invitationId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type InvitationsControllerResendMutationResult = NonNullable<
+  Awaited<ReturnType<typeof invitationsControllerResend>>
+>;
+export type InvitationsControllerResendMutationBody = BodyType<ResendInvitationDto> | undefined;
+export type InvitationsControllerResendMutationError = ErrorType<void | ProblemDetails>;
+export type InvitationsControllerResendMutationVariables = {
+  id: string;
+  invitationId: string;
+  data?: BodyType<ResendInvitationDto>;
+};
+
+/**
+ * Renews a pending or expired invitation: a new link valid INVITE_TTL_HOURS replaces the previous one (which stops working), role and name stay, the sender becomes the inviter. The role is checked again against the kind of the organization. The body may be omitted. At most 4 invitation e-mails per address and organization and hour: the invitation and 3 more, whether resent, renewed by inviting the pending address again, or sent anew after a withdrawal (429 RATE_LIMITED with Retry-After beyond).
+ * @summary Send an invitation again with a new link
+ */
+export const useInvitationsControllerResend = <
+  TError = ErrorType<void | ProblemDetails>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof invitationsControllerResend>>,
+      TError,
+      InvitationsControllerResendMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof invitationsControllerResend>>,
+  TError,
+  InvitationsControllerResendMutationVariables,
+  TContext
+> => {
+  return useMutation(getInvitationsControllerResendMutationOptions(options), queryClient);
+};
 /**
  * @summary Withdraw an invitation (its link stops working)
  */

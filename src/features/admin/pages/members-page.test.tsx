@@ -35,6 +35,7 @@ function mockMembers(members: MemberDto[] = MEMBERS) {
           name: body.name,
           role: body.role,
           invitedBy: TEST_IDS.user,
+          invitedByName: 'Siti Rahma',
           createdAt: '2026-11-23T00:00:00.000Z',
           expiresAt: '2026-11-30T00:00:00.000Z',
           expired: false,

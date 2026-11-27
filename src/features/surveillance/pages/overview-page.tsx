@@ -54,7 +54,7 @@ import { useSurveillanceLive } from '../hooks/use-surveillance-live';
 import type { SurveillanceEvent } from '../lib/dto';
 import { exportFileName, toCsvRows } from '../lib/export';
 import { RANGE_PRESETS, type RangePreset, rangeStart } from '../lib/filters';
-import { buildSeries, type SeriesRow } from '../lib/series';
+import { buildSeries, groupSeriesBuckets, type SeriesRow } from '../lib/series';
 import { buildBuckets, isDailyBucket } from '../lib/time-buckets';
 import { useEventText } from '../hooks/use-event-text';
 import {
@@ -125,18 +125,17 @@ export function OverviewPage() {
   const [anchor, setAnchor] = useState(() => Date.now());
   const from = rangeStart(range, anchor);
   const to = useMemo(() => new Date(Math.floor(anchor / 60_000) * 60_000).toISOString(), [anchor]);
-  const buckets = useMemo(() => buildBuckets(new Date(from), new Date(to), 12), [from, to]);
-
   const stats = useSurveillanceStats({ from, to });
-  const series = useStatsSeries(buckets);
-  const rows = useMemo(
-    () =>
-      buildSeries(
-        buckets,
-        series.map((query) => query.data),
-      ),
-    [buckets, series],
-  );
+  const series = useStatsSeries(from, to);
+  // One series request; while it loads, the placeholder buckets keep the chart's time axis.
+  const { buckets, rows } = useMemo(() => {
+    if (!series.data) {
+      const placeholder = buildBuckets(new Date(from), new Date(to), 12);
+      return { buckets: placeholder, rows: buildSeries(placeholder, []) };
+    }
+    const grouped = groupSeriesBuckets(series.data.buckets, series.data.bucket, 12);
+    return { buckets: grouped.buckets, rows: buildSeries(grouped.buckets, grouped.stats) };
+  }, [series.data, from, to]);
   const detectors = useDetectors();
   const recent = useSurveillanceEvents({ from, limit: 8 });
   const [selected, setSelected] = useState<SurveillanceEvent | null>(null);
@@ -276,18 +275,10 @@ export function OverviewPage() {
           title={t('overview.trendTitle')}
           description={t('overview.trendDescription', { count: buckets.length })}
         >
-          {series.every((query) => query.isError) && series.length > 0 ? (
-            <ErrorState
-              error={series[0]?.error}
-              onRetry={() => series.forEach((query) => void query.refetch())}
-              size="sm"
-            />
+          {series.isError ? (
+            <ErrorState error={series.error} onRetry={() => void series.refetch()} size="sm" />
           ) : (
-            <TypeTrendChart
-              rows={rows}
-              loading={series.some((query) => query.isPending)}
-              daily={daily}
-            />
+            <TypeTrendChart rows={rows} loading={series.isPending} daily={daily} />
           )}
         </Section>
         <Section

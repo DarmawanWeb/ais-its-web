@@ -224,10 +224,17 @@ export const nowIso = () => new Date().toISOString();
 
 // --- responses ------------------------------------------------------------------------------
 
+/**
+ * Writes a response: JSON for objects, or a string body as is when `headers` set its
+ * `Content-Type` (CSV exports: `send(200, csv, { 'Content-Type': 'text/csv; charset=utf-8' })`).
+ */
 export function send(res, status, body, headers = {}) {
-  const payload = body === undefined ? '' : JSON.stringify(body);
+  const raw =
+    typeof body === 'string' &&
+    Object.keys(headers).some((h) => h.toLowerCase() === 'content-type');
+  const payload = body === undefined ? '' : raw ? body : JSON.stringify(body);
   res.writeHead(status, {
-    ...(body === undefined
+    ...(body === undefined || raw
       ? {}
       : { 'Content-Type': status >= 400 ? 'application/problem+json' : 'application/json' }),
     'X-Request-Id': randomUUID(),

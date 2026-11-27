@@ -13,6 +13,7 @@ import {
 
 import type { AisStatsDto } from '@/shared/api/generated/ais-processor/model';
 import { formatDateTime, formatNumber } from '@/shared/lib/format';
+import { Skeleton } from '@/shared/ui/skeleton';
 
 import type { RateSample } from '../lib/dashboard';
 
@@ -22,13 +23,15 @@ const COLORS = {
   pusher: 'var(--chart-4)',
 } as const;
 
-/** Messages per minute by AIS source: current split and the history sampled on this page. */
+/** Messages per minute by AIS source: current split and the last hours (`GET /ais/stats/series`). */
 export function RateChart({
   stats,
   history,
+  pending = false,
 }: {
   stats: AisStatsDto;
   history: readonly RateSample[];
+  pending?: boolean;
 }) {
   const { t, i18n } = useTranslation('dashboard');
   const id = useId();
@@ -79,7 +82,7 @@ export function RateChart({
                 dataKey="at"
                 type="number"
                 domain={['dataMin', 'dataMax']}
-                tickFormatter={(at: number) => formatDateTime(at, i18n.language, 'HH:mm:ss')}
+                tickFormatter={(at: number) => formatDateTime(at, i18n.language, 'HH:mm')}
                 tickLine={false}
                 axisLine={false}
                 minTickGap={36}
@@ -100,7 +103,7 @@ export function RateChart({
                   fontSize: 12,
                 }}
                 labelFormatter={(at) =>
-                  typeof at === 'number' ? formatDateTime(at, i18n.language, 'HH:mm:ss') : ''
+                  typeof at === 'number' ? formatDateTime(at, i18n.language, 'HH:mm') : ''
                 }
                 formatter={(value, name) => [
                   formatNumber(Number(value), i18n.language),
@@ -122,6 +125,8 @@ export function RateChart({
             </AreaChart>
           </ResponsiveContainer>
         </figure>
+      ) : pending ? (
+        <Skeleton className="h-40 w-full" />
       ) : (
         <p className="rounded-lg border border-dashed px-3 py-4 text-center text-xs text-muted-foreground">
           {t('rate.collecting')}

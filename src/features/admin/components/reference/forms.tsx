@@ -34,7 +34,9 @@ import {
   usePortMutations,
   useVesselTypeMutations,
 } from '../../api/fleet-admin';
-import { checkFormula } from '../../lib/fuel-formula';
+import { checkFuelFormula } from '@/shared/lib/fuel-formula';
+
+import { formulaProblemMessage } from '../../lib/formula-messages';
 import { problemMessage } from '@/shared/api/problem-copy';
 import { FormulaField, NumberField, SelectField, SourceField, TextField } from './fields';
 
@@ -91,16 +93,11 @@ function useSchemas() {
     .string()
     .max(500, t('common.tooLong', { max: 500 }))
     .superRefine((value, ctx) => {
-      const check = checkFormula(value);
+      const check = checkFuelFormula(value);
       if (!check.valid) {
         ctx.addIssue({
           code: 'custom',
-          message: t(`formula.problems.${check.problem.code}`, {
-            token: check.problem.token ?? '',
-            position: check.problem.position + 1,
-            expected: check.problem.expected ?? 0,
-            actual: check.problem.actual ?? 0,
-          }),
+          message: formulaProblemMessage(t, check.issue),
         });
       }
     });

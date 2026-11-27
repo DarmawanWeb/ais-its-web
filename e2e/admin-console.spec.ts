@@ -164,7 +164,7 @@ test.describe('admin console', () => {
     await dialog.getByRole('textbox', { name: 'Nama', exact: true }).fill('KM Kepri Indah');
     const main = dialog.getByRole('textbox', { name: 'Rumus mesin induk' });
     await main.fill('speedKnot * 2;');
-    await expect(dialog.getByText('“;” tidak terduga pada karakter 14')).toBeVisible();
+    await expect(dialog.getByText('Karakter “;” tidak diizinkan pada karakter 14')).toBeVisible();
     await main.fill('-0.041 * speedKnot ^ 2 + 0.912 * speedKnot - 0.02');
     await dialog
       .getByRole('textbox', { name: 'Rumus mesin bantu' })

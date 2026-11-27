@@ -158,7 +158,9 @@ export function DevicesPage() {
         header: t('devices.columns.vessel'),
         cell: ({ row }) => (
           <div className="min-w-0">
-            <p className="truncate">{vesselNames.get(row.original.mmsi) ?? '—'}</p>
+            <p className="truncate">
+              {row.original.vesselName ?? vesselNames.get(row.original.mmsi) ?? '—'}
+            </p>
             <MmsiText mmsi={row.original.mmsi} className="text-xs text-muted-foreground" />
           </div>
         ),
@@ -454,7 +456,9 @@ export function DevicesPage() {
       />
       <ConnectionSheet
         device={connecting}
-        vesselName={connecting ? (vesselNames.get(connecting.mmsi) ?? null) : null}
+        vesselName={
+          connecting ? (connecting.vesselName ?? vesselNames.get(connecting.mmsi) ?? null) : null
+        }
         onOpenChange={(open) => !open && setConnecting(null)}
       />
       <ConfirmDialog

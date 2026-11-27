@@ -3,12 +3,15 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Auth Service
  * Identity, organizations, memberships and roles, sessions, JWT signing keys and JWKS, API keys, MFA and the central audit log
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import type { OrganizationsControllerListKind } from './organizationsControllerListKind';
 
 export type OrganizationsControllerListParams = {
-  /** @minimum 1 */
+  /**
+   * @minimum 1
+   * @maximum 1000000
+   */
   page?: number;
   /**
    * @minimum 1

@@ -5,6 +5,7 @@
  * Fuel consumption telemetry: readings ingest over REST and MQTT, device registry, queries and status; publishes fuel.reading.recorded.v1
  * OpenAPI spec version: 0.2.0
  */
+import type { DeviceDtoConnectionState } from './deviceDtoConnectionState';
 import type { DeviceDtoKind } from './deviceDtoKind';
 import type { DeviceDtoStatus } from './deviceDtoStatus';
 
@@ -14,6 +15,11 @@ export interface DeviceDto {
   orgId: string;
   /** Vessel the device is installed on */
   mmsi: number;
+  /**
+   * Name of the vessel (FLEET projection); null while the MMSI is not a live vessel of the fleet
+   * @nullable
+   */
+  vesselName: string | null;
   name: string;
   kind: DeviceDtoKind;
   /**
@@ -30,10 +36,21 @@ export interface DeviceDto {
    */
   mqttTopic: string | null;
   /**
-   * Last readings received from the device (minute resolution)
+   * When the device last delivered readings (receipt time, minute resolution)
    * @nullable
    */
   lastSeenAt: string | null;
+  /**
+   * Measurement time of the newest reading stored as the device’s on its current vessel (minute resolution, written with lastSeenAt; never moves back; null again after a move to another vessel, until the first reading there)
+   * @nullable
+   */
+  lastReadingAt: string | null;
+  /** inactive: switched off (readings refused); never: no reading on its current vessel yet; online: newest reading at most activeWindowMin old (the vessel telemetry "active" rule, method fuel.method_selection: its vessel’s telemetry is active); idle: older, up to offlineAfterMin; offline: older than offlineAfterMin */
+  connectionState: DeviceDtoConnectionState;
+  /** Age of the newest reading up to which the device is online, minutes (TELEMETRY_ACTIVE_WINDOW_MIN) */
+  activeWindowMin: number;
+  /** Age of the newest reading beyond which the device is offline, minutes (TELEMETRY_DEVICE_OFFLINE_AFTER_MIN) */
+  offlineAfterMin: number;
   /** @nullable */
   createdBy: string | null;
   createdAt: string;

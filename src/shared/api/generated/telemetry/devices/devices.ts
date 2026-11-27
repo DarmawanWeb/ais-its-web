@@ -23,6 +23,7 @@ import type {
 
 import type {
   CreateDeviceDto,
+  DeviceConnectionDto,
   DeviceDto,
   DevicesControllerList200,
   DevicesControllerListParams,
@@ -138,6 +139,7 @@ export const useDevicesControllerCreate = <TError = ErrorType<ProblemDetails>, T
   return useMutation(getDevicesControllerCreateMutationOptions(options), queryClient);
 };
 /**
+ * Each device with the name of its vessel (FLEET projection), lastSeenAt (receipt) and lastReadingAt (measurement time of its newest reading), and its connectionState with the thresholds that define it (activeWindowMin, offlineAfterMin).
  * @summary List devices by vessel and name
  */
 export const devicesControllerList = (
@@ -186,7 +188,10 @@ export type DevicesControllerListQueryResult = NonNullable<
 >;
 export type DevicesControllerListQueryError = ErrorType<ProblemDetails>;
 
-/** @summary List devices by vessel and name */
+/**
+ * Each device with the name of its vessel (FLEET projection), lastSeenAt (receipt) and lastReadingAt (measurement time of its newest reading), and its connectionState with the thresholds that define it (activeWindowMin, offlineAfterMin).
+ * @summary List devices by vessel and name
+ */
 export function useDevicesControllerList<
   TData = Awaited<ReturnType<typeof devicesControllerList>>,
   TError = ErrorType<ProblemDetails>,
@@ -208,7 +213,10 @@ export function useDevicesControllerList<
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-/** @summary List devices by vessel and name */
+/**
+ * Each device with the name of its vessel (FLEET projection), lastSeenAt (receipt) and lastReadingAt (measurement time of its newest reading), and its connectionState with the thresholds that define it (activeWindowMin, offlineAfterMin).
+ * @summary List devices by vessel and name
+ */
 export function useDevicesControllerList<
   TData = Awaited<ReturnType<typeof devicesControllerList>>,
   TError = ErrorType<ProblemDetails>,
@@ -230,7 +238,10 @@ export function useDevicesControllerList<
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-/** @summary List devices by vessel and name */
+/**
+ * Each device with the name of its vessel (FLEET projection), lastSeenAt (receipt) and lastReadingAt (measurement time of its newest reading), and its connectionState with the thresholds that define it (activeWindowMin, offlineAfterMin).
+ * @summary List devices by vessel and name
+ */
 export function useDevicesControllerList<
   TData = Awaited<ReturnType<typeof devicesControllerList>>,
   TError = ErrorType<ProblemDetails>,
@@ -244,7 +255,10 @@ export function useDevicesControllerList<
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-/** @summary List devices by vessel and name */
+/**
+ * Each device with the name of its vessel (FLEET projection), lastSeenAt (receipt) and lastReadingAt (measurement time of its newest reading), and its connectionState with the thresholds that define it (activeWindowMin, offlineAfterMin).
+ * @summary List devices by vessel and name
+ */
 export function useDevicesControllerList<
   TData = Awaited<ReturnType<typeof devicesControllerList>>,
   TError = ErrorType<ProblemDetails>,
@@ -572,6 +586,153 @@ export const useDevicesControllerRemove = <TError = ErrorType<ProblemDetails>, T
 > => {
   return useMutation(getDevicesControllerRemoveMutationOptions(options), queryClient);
 };
+/**
+ * How the device connects to the platform broker (TELEMETRY_MQTT_URL: URL, host, port, TLS, MQTT 3.1.1) and publishes (its own topic, QoS 1), and how the broker authenticates it (TELEMETRY_MQTT_AUTH): without authentication any client may publish; with password authentication the device logs in as its own broker user (username = device id), whose password the platform operator provisions with the broker. No secret is issued or returned. 404 for devices of other organizations; 409 DEVICE_NOT_MQTT for http devices, which post with their API key.
+ * @summary MQTT connection of an mqtt device
+ */
+export const devicesControllerConnection = (
+  id: string,
+  options?: SecondParameter<typeof apiClient>,
+  signal?: AbortSignal,
+) => {
+  return apiClient<DeviceConnectionDto>(
+    { url: `/api/v2/telemetry/devices/${id}/connection`, method: 'GET', signal },
+    options,
+  );
+};
+
+export const getDevicesControllerConnectionQueryKey = (id: string) => {
+  return [`/api/v2/telemetry/devices/${id}/connection`] as const;
+};
+
+export const getDevicesControllerConnectionQueryOptions = <
+  TData = Awaited<ReturnType<typeof devicesControllerConnection>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof devicesControllerConnection>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getDevicesControllerConnectionQueryKey(id);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof devicesControllerConnection>>> = ({
+    signal,
+  }) => devicesControllerConnection(id, requestOptions, signal);
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: id !== null && id !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<Awaited<ReturnType<typeof devicesControllerConnection>>, TError, TData> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+};
+
+export type DevicesControllerConnectionQueryResult = NonNullable<
+  Awaited<ReturnType<typeof devicesControllerConnection>>
+>;
+export type DevicesControllerConnectionQueryError = ErrorType<ProblemDetails>;
+
+/**
+ * How the device connects to the platform broker (TELEMETRY_MQTT_URL: URL, host, port, TLS, MQTT 3.1.1) and publishes (its own topic, QoS 1), and how the broker authenticates it (TELEMETRY_MQTT_AUTH): without authentication any client may publish; with password authentication the device logs in as its own broker user (username = device id), whose password the platform operator provisions with the broker. No secret is issued or returned. 404 for devices of other organizations; 409 DEVICE_NOT_MQTT for http devices, which post with their API key.
+ * @summary MQTT connection of an mqtt device
+ */
+export function useDevicesControllerConnection<
+  TData = Awaited<ReturnType<typeof devicesControllerConnection>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  id: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof devicesControllerConnection>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof devicesControllerConnection>>,
+          TError,
+          Awaited<ReturnType<typeof devicesControllerConnection>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * How the device connects to the platform broker (TELEMETRY_MQTT_URL: URL, host, port, TLS, MQTT 3.1.1) and publishes (its own topic, QoS 1), and how the broker authenticates it (TELEMETRY_MQTT_AUTH): without authentication any client may publish; with password authentication the device logs in as its own broker user (username = device id), whose password the platform operator provisions with the broker. No secret is issued or returned. 404 for devices of other organizations; 409 DEVICE_NOT_MQTT for http devices, which post with their API key.
+ * @summary MQTT connection of an mqtt device
+ */
+export function useDevicesControllerConnection<
+  TData = Awaited<ReturnType<typeof devicesControllerConnection>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof devicesControllerConnection>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof devicesControllerConnection>>,
+          TError,
+          Awaited<ReturnType<typeof devicesControllerConnection>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * How the device connects to the platform broker (TELEMETRY_MQTT_URL: URL, host, port, TLS, MQTT 3.1.1) and publishes (its own topic, QoS 1), and how the broker authenticates it (TELEMETRY_MQTT_AUTH): without authentication any client may publish; with password authentication the device logs in as its own broker user (username = device id), whose password the platform operator provisions with the broker. No secret is issued or returned. 404 for devices of other organizations; 409 DEVICE_NOT_MQTT for http devices, which post with their API key.
+ * @summary MQTT connection of an mqtt device
+ */
+export function useDevicesControllerConnection<
+  TData = Awaited<ReturnType<typeof devicesControllerConnection>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof devicesControllerConnection>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * How the device connects to the platform broker (TELEMETRY_MQTT_URL: URL, host, port, TLS, MQTT 3.1.1) and publishes (its own topic, QoS 1), and how the broker authenticates it (TELEMETRY_MQTT_AUTH): without authentication any client may publish; with password authentication the device logs in as its own broker user (username = device id), whose password the platform operator provisions with the broker. No secret is issued or returned. 404 for devices of other organizations; 409 DEVICE_NOT_MQTT for http devices, which post with their API key.
+ * @summary MQTT connection of an mqtt device
+ */
+export function useDevicesControllerConnection<
+  TData = Awaited<ReturnType<typeof devicesControllerConnection>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof devicesControllerConnection>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getDevicesControllerConnectionQueryOptions(id, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
 /**
  * The devices the vessel’s organization registered on it, by name: id, name, kind, status and lastSeenAt, never credentials. The vessel must belong to the caller’s organization (platform administrators: any); the devices are those counted by GET /telemetry/vessels.
  * @summary Devices of a vessel (read-only)

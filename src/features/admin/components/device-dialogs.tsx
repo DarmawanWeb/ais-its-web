@@ -5,7 +5,9 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import * as z from 'zod';
 
+import { useDevicesControllerConnection } from '@/shared/api/generated/telemetry/devices/devices';
 import type { DeviceDto } from '@/shared/api/generated/telemetry/model';
+import { KeyValueList } from '@/shared/domain-ui/key-value-list';
 import { toApiProblem } from '@/shared/api/problem';
 import { cn } from '@/shared/lib/utils';
 import { Button } from '@/shared/ui/button';
@@ -31,6 +33,7 @@ import { Label } from '@/shared/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/shared/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/shared/ui/sheet';
+import { CopyText } from '@/shared/ui/copy-text';
 import { Spinner } from '@/shared/ui/spinner';
 import { Switch } from '@/shared/ui/switch';
 import { toast } from '@/shared/ui/sonner';
@@ -45,7 +48,6 @@ import {
   mqttTopicOf,
 } from '../lib/devices';
 import { applyFieldErrors, problemMessage } from '@/shared/api/problem-copy';
-import { CopyButton } from '@/shared/ui/copy-button';
 
 const NONE = '__none__';
 
@@ -385,21 +387,6 @@ function DeviceForm({
   );
 }
 
-function Snippet({ label, value }: { label: string; value: string }) {
-  const { t } = useTranslation('admin');
-  return (
-    <div className="space-y-1.5">
-      <div className="flex items-center justify-between gap-2">
-        <p className="text-xs font-medium text-muted-foreground">{label}</p>
-        <CopyButton value={value} label={t('devices.connection.copy', { what: label })} />
-      </div>
-      <pre className="overflow-x-auto rounded-lg border bg-background/70 p-3 font-mono text-xs leading-relaxed whitespace-pre">
-        {value}
-      </pre>
-    </div>
-  );
-}
-
 /** How a device sends readings: MQTT topic and payload, or the HTTP request with its API key. */
 export function ConnectionSheet({
   device,
@@ -412,6 +399,11 @@ export function ConnectionSheet({
 }) {
   const { t } = useTranslation('admin');
   const origin = typeof window === 'undefined' ? '' : window.location.origin;
+  // Broker, TLS, QoS and the broker user of an MQTT device (`GET /devices/:id/connection`).
+  const connection = useDevicesControllerConnection(device?.id ?? '', {
+    query: { enabled: device?.kind === 'mqtt', staleTime: 5 * 60_000 },
+  });
+  const broker = connection.data;
   return (
     <Sheet open={device !== null} onOpenChange={onOpenChange}>
       <SheetContent className="w-full gap-0 p-0 sm:max-w-xl" closeLabel={t('common:actions.close')}>
@@ -437,14 +429,56 @@ export function ConnectionSheet({
                   <li>{t('devices.connection.mqtt.topic')}</li>
                   <li>{t('devices.connection.mqtt.payload')}</li>
                 </ol>
-                <Snippet label={t('devices.connection.topic')} value={mqttTopicOf(device)} />
-                <Snippet
+                {broker && (
+                  <KeyValueList
+                    items={[
+                      {
+                        label: t('devices.connection.broker'),
+                        value: broker.brokerUrl,
+                        mono: true,
+                      },
+                      {
+                        label: t('devices.connection.security'),
+                        value: t(
+                          broker.tls ? 'devices.connection.tls' : 'devices.connection.plain',
+                          {
+                            version: broker.protocolVersion,
+                            qos: broker.qos,
+                          },
+                        ),
+                      },
+                      {
+                        label: t('devices.connection.username'),
+                        value:
+                          broker.authentication === 'password' && broker.username
+                            ? broker.username
+                            : t('devices.connection.anonymous'),
+                        mono: broker.authentication === 'password',
+                      },
+                    ]}
+                  />
+                )}
+                <CopyText
+                  showLabel
+                  multiline
+                  label={t('devices.connection.topic')}
+                  value={broker?.topic ?? mqttTopicOf(device)}
+                />
+                <CopyText
+                  showLabel
+                  multiline
                   label={t('devices.connection.payloadLabel')}
                   value={mqttPayloadExample()}
                 />
-                <Snippet
+                <CopyText
+                  showLabel
+                  multiline
                   label={t('devices.connection.command')}
-                  value={mqttCommandExample(mqttTopicOf(device))}
+                  value={mqttCommandExample(
+                    broker?.topic ?? mqttTopicOf(device),
+                    new Date(),
+                    broker,
+                  )}
                 />
               </>
             ) : (
@@ -454,7 +488,9 @@ export function ConnectionSheet({
                   <li>{t('devices.connection.http.request')}</li>
                   <li>{t('devices.connection.http.vessel')}</li>
                 </ol>
-                <Snippet
+                <CopyText
+                  showLabel
+                  multiline
                   label={t('devices.connection.request')}
                   value={httpRequestExample(origin, device.mmsi)}
                 />

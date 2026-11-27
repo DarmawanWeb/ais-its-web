@@ -27,17 +27,7 @@ export const APP = { timeout: 10_000 };
 const AT = '2026-11-01T00:00:00.000Z';
 export const OTHER_ORG = '0192f0c8-7d3a-7c2e-9a1b-000000000009';
 
-export function problem(
-  status: number,
-  code: string,
-  title: string,
-  extra: Record<string, unknown> = {},
-) {
-  return HttpResponse.json(
-    { type: `urn:ais-its:problem:${code.toLowerCase()}`, status, code, title, ...extra },
-    { status, headers: { 'Content-Type': 'application/problem+json' } },
-  );
-}
+export { problemResponse as problem } from '@/test/msw/problem';
 
 export const page = <T>(data: T[]) => ({
   data,
@@ -101,6 +91,7 @@ export const INVITATIONS: InvitationDto[] = [
     name: 'Yusuf Maulana',
     role: 'fleet_manager',
     invitedBy: TEST_IDS.user,
+    invitedByName: 'Siti Rahma',
     createdAt: '2026-11-20T08:00:00.000Z',
     expiresAt: '2099-11-27T08:00:00.000Z',
     expired: false,
@@ -118,6 +109,10 @@ export const API_KEYS: ApiKeyDto[] = [
     lastUsedAt: '2026-11-22T08:00:00.000Z',
     revokedAt: null,
     createdAt: AT,
+    expiresAt: null,
+    status: 'active',
+    rotatedAt: null,
+    previousKeyExpiresAt: null,
   },
 ];
 
@@ -143,10 +138,14 @@ export const AUDIT: AuditLogDto[] = [
     source: 'auth',
     actorType: 'user',
     actorId: TEST_IDS.user,
+    actorName: 'Siti Rahma',
+    actorEmail: 'siti.rahma@pelni.test',
     orgId: TEST_IDS.orgA,
+    orgName: 'PT Pelni',
     action: 'membership.update',
     targetType: 'user',
     targetId: '0192f0c8-7d3a-7c2e-9a31-000000000002',
+    targetLabel: 'Budi Santoso <budi.santoso@pelni.test>',
     ip: '36.85.110.4',
     userAgent: 'Mozilla/5.0',
     meta: { from: 'viewer', to: 'fleet_manager' },
@@ -157,10 +156,14 @@ export const AUDIT: AuditLogDto[] = [
     source: 'auth',
     actorType: 'system',
     actorId: null,
+    actorName: null,
+    actorEmail: null,
     orgId: TEST_IDS.orgA,
+    orgName: 'PT Pelni',
     action: 'auth.login.failed',
     targetType: 'user',
     targetId: null,
+    targetLabel: null,
     ip: null,
     userAgent: null,
     meta: { reason: 'INVALID_CREDENTIALS' },
@@ -172,6 +175,7 @@ export const DEVICES: DeviceDto[] = [
     id: '0192f0c8-7d3a-7c2e-9a34-000000000001',
     orgId: TEST_IDS.orgA,
     mmsi: 525005223,
+    vesselName: 'KM Bahari Nusantara',
     name: 'Flow meter ME KM Bahari Nusantara',
     kind: 'http',
     apiKeyId: API_KEYS[0]!.id,
@@ -179,6 +183,10 @@ export const DEVICES: DeviceDto[] = [
     serialNumber: 'FM-2207-0042',
     mqttTopic: null,
     lastSeenAt: new Date(Date.now() - 2 * 60_000).toISOString(),
+    lastReadingAt: new Date(Date.now() - 2 * 60_000).toISOString(),
+    connectionState: 'online',
+    activeWindowMin: 15,
+    offlineAfterMin: 1440,
     createdBy: TEST_IDS.user,
     createdAt: AT,
     updatedAt: AT,
@@ -187,6 +195,7 @@ export const DEVICES: DeviceDto[] = [
     id: '0192f0c8-7d3a-7c2e-9a34-000000000002',
     orgId: TEST_IDS.orgA,
     mmsi: 525019001,
+    vesselName: 'MV Batam Express',
     name: 'Gateway MQTT MV Batam Express',
     kind: 'mqtt',
     apiKeyId: null,
@@ -194,6 +203,10 @@ export const DEVICES: DeviceDto[] = [
     serialNumber: null,
     mqttTopic: 'aisits/telemetry/0192f0c8-7d3a-7c2e-9a34-000000000002',
     lastSeenAt: null,
+    lastReadingAt: null,
+    connectionState: 'inactive',
+    activeWindowMin: 15,
+    offlineAfterMin: 1440,
     createdBy: TEST_IDS.user,
     createdAt: AT,
     updatedAt: AT,

@@ -1,5 +1,7 @@
 {
-  "nav": { "dashboard": "Dashboard" },
+  "nav": {
+    "dashboard": "Dashboard"
+  },
   "title": "Fleet Dashboard",
   "description": "Operations overview: AIS traffic, alerts, pipeline safety, 24-hour surveillance and your fleet's emissions and fuel.",
   "refresh": "Refresh",
@@ -40,12 +42,11 @@
   },
   "alertsChart": {
     "title": "Alerts in the last 7 days",
-    "description": "Alerts per day (UTC) by severity, by first occurrence.",
+    "description": "Alerts per day (local time) by severity, by first occurrence.",
     "total": "Total",
     "legend": "Alert severity legend",
     "caption": "Chart of alerts per day by severity",
-    "day": "Day",
-    "truncated": "Showing the latest 500 alerts; open the inbox for the full history."
+    "day": "Day"
   },
   "surveillance": {
     "title": "Surveillance, 24 hours",
@@ -79,9 +80,8 @@
       "month": "Fuel this month",
       "year": "Fuel this year"
     },
-    "fuelNote_one": "ME + AE of the voyage segments of {{count}} vessel (telemetry, first formula or Holtrop).",
-    "fuelNote_other": "ME + AE of the voyage segments of {{count}} vessels (telemetry, first formula or Holtrop).",
-    "fuelTruncated": "Limited to the first 50 vessels.",
+    "fuelNote_one": "ME + AE of the voyage segments of {{count}} vessel this year (telemetry, first formula or Holtrop).",
+    "fuelNote_other": "ME + AE of the voyage segments of {{count}} vessels this year (telemetry, first formula or Holtrop).",
     "empty": "No vessels with CII data yet",
     "emptyHint": "Ratings appear once fleet vessels sail and their segment fuel is computed."
   },
@@ -91,8 +91,8 @@
     "perMinute": "/min",
     "vessels_one": "{{count}} vessel",
     "vessels_other": "{{count}} vessels",
-    "caption": "History of AIS messages per minute by source since the page was opened",
-    "collecting": "The rate history is collected while the page is open (every 15 seconds)."
+    "caption": "AIS messages per minute by source over the last 6 hours",
+    "collecting": "No rate history for the last 6 hours yet."
   },
   "sources": {
     "primary": "Primary receiver",

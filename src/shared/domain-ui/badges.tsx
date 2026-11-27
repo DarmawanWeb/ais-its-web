@@ -33,12 +33,19 @@ export function CiiGradeBadge({
 }: {
   grade: CiiGrade | null | undefined;
   showLabel?: boolean;
-  size?: 'sm' | 'md' | 'lg';
+  /** `xl` is the headline grade of a vessel page. */
+  size?: 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
 }) {
   const { t } = useTranslation();
   const locale = useLocale();
-  if (!grade) return <span className="text-muted-foreground">—</span>;
+  if (!grade) {
+    return (
+      <span className={cn('text-muted-foreground', className)}>
+        —<span className="sr-only">{t('domain.ciiGradeNone')}</span>
+      </span>
+    );
+  }
   const label = CII_GRADE_LABELS[grade][locale];
   return (
     <span
@@ -48,11 +55,12 @@ export function CiiGradeBadge({
       <span
         aria-label={t('domain.ciiGrade', { grade })}
         className={cn(
-          'inline-flex items-center justify-center rounded-md font-bold shadow-xs ring-1 ring-black/10 ring-inset',
+          'inline-flex shrink-0 items-center justify-center rounded-md font-bold shadow-xs ring-1 ring-black/10 ring-inset',
           gradeClassName(grade),
           size === 'sm' && 'size-5 text-[11px]',
           size === 'md' && 'size-7 text-sm',
           size === 'lg' && 'size-11 text-xl',
+          size === 'xl' && 'size-16 rounded-xl text-3xl',
         )}
       >
         {grade}

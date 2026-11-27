@@ -26,6 +26,7 @@ import {
   getNotificationsControllerDeliveriesQueryKey,
   notificationsControllerTest,
   useNotificationsControllerDeliveries,
+  useNotificationsControllerDeliverySummary,
 } from '@/shared/api/generated/notification/notifications/notifications';
 
 /** Rules of an organization are few: one page holds them (the API caps pages at 100). */
@@ -150,6 +151,13 @@ export function useDeliveries(params: {
     },
     { query: { enabled: params.enabled ?? true, placeholderData: keepPreviousData } },
   );
+}
+
+/** Delivery counts of the last 30 days (`GET /notifications/deliveries/summary`). */
+export function useDeliverySummary() {
+  return useNotificationsControllerDeliverySummary(undefined, {
+    query: { staleTime: 30_000, refetchInterval: 60_000 },
+  });
 }
 
 /** Organizations for the platform administrator's filter and owner choice. */

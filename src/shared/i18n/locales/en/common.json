@@ -110,7 +110,8 @@
     "clear": "Clear",
     "continue": "Continue",
     "goHome": "Go home",
-    "learnMore": "Learn more"
+    "learnMore": "Learn more",
+    "copyValue": "Copy {{label}}"
   },
   "status": {
     "loading": "Loading…",
@@ -187,7 +188,8 @@
       "percent": "%",
       "deg": "°",
       "gkwh": "g/kWh"
-    }
+    },
+    "ciiGradeNone": "No CII rating yet"
   },
   "method": {
     "trigger": "Method source: {{name}}",

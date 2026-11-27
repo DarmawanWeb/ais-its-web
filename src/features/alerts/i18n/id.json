@@ -128,7 +128,13 @@
       "raised": "Alert muncul",
       "recurred": "Kejadian terakhir ({{count}}×)",
       "acknowledged": "Diterima",
-      "resolved": "Diselesaikan"
+      "resolved": "Diselesaikan",
+      "outcome": {
+        "raised": "Alert muncul",
+        "escalated": "Tingkat naik",
+        "merged": "Kejadian berulang"
+      },
+      "more_other": "{{count}} kejadian lebih lama tidak ditampilkan"
     },
     "deliveries": {
       "title": "Pengiriman notifikasi",

@@ -43,3 +43,31 @@ export function totalsByType(rows: readonly SeriesRow[]): Record<SurveillanceTyp
 export function share(value: number, total: number): number {
   return total > 0 ? (value / total) * 100 : 0;
 }
+
+/**
+ * Groups the buckets of `GET /surveillance/stats/series` (hours or local days, in order) into at
+ * most `maxRows` consecutive groups for the chart, summing the counts per type.
+ */
+export function groupSeriesBuckets(
+  buckets: readonly { from: string; to: string; byType: Record<string, number> }[],
+  bucket: 'hour' | 'day',
+  maxRows = 14,
+): { buckets: TimeBucket[]; stats: { byType: Record<string, number> }[] } {
+  const nominal = bucket === 'day' ? 86_400_000 : 3_600_000;
+  const per = Math.max(1, Math.ceil(buckets.length / Math.max(1, maxRows)));
+  const grouped: TimeBucket[] = [];
+  const stats: { byType: Record<string, number> }[] = [];
+  for (let index = 0; index < buckets.length; index += per) {
+    const slice = buckets.slice(index, index + per);
+    const first = slice[0]!;
+    const last = slice.at(-1)!;
+    const byType: Record<string, number> = {};
+    for (const bucket of slice)
+      for (const [type, count] of Object.entries(bucket.byType))
+        byType[type] = (byType[type] ?? 0) + count;
+    // The nominal size (a clipped first or last bucket is shorter): daily groups show dates.
+    grouped.push({ from: first.from, to: last.to, sizeMs: slice.length * nominal });
+    stats.push({ byType });
+  }
+  return { buckets: grouped, stats };
+}

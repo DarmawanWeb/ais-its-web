@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Auth Service
  * Identity, organizations, memberships and roles, sessions, JWT signing keys and JWKS, API keys, MFA and the central audit log
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import type { CreateApiKeyDtoScopesItem } from './createApiKeyDtoScopesItem';
 
@@ -20,4 +20,6 @@ export interface CreateApiKeyDto {
   scopes: CreateApiKeyDtoScopesItem[];
   /** Owning organization (super admins); others create keys in their active organization */
   orgId?: string;
+  /** The key stops working at this time: an ISO-8601 UTC timestamp (Z suffix) in the future; absent: no expiry (null is refused) */
+  expiresAt?: string;
 }

@@ -60,6 +60,30 @@ function useApi({ events = [], results = [], stats = makeStats() }: Api = {}) {
     http.get('*/api/v2/surveillance/stats', () =>
       stats === 'error' ? problem(500, 'INTERNAL_ERROR') : HttpResponse.json(stats),
     ),
+    http.get('*/api/v2/surveillance/stats/series', ({ request }) => {
+      if (stats === 'error') return problem(500, 'INTERNAL_ERROR');
+      const url = new URL(request.url);
+      const from = Date.parse(url.searchParams.get('from') ?? '');
+      const to = Date.parse(url.searchParams.get('to') ?? '');
+      const day = 86_400_000;
+      const buckets = [];
+      for (let start = from; start < to; start += day) {
+        buckets.push({
+          from: new Date(start).toISOString(),
+          to: new Date(Math.min(start + day, to)).toISOString(),
+          total: stats.total,
+          byType: stats.byType,
+          bySeverity: stats.bySeverity,
+        });
+      }
+      return HttpResponse.json({
+        from: new Date(from).toISOString(),
+        to: new Date(to).toISOString(),
+        bucket: 'day',
+        timeZone: 'Asia/Jakarta',
+        buckets,
+      });
+    }),
     http.get('*/api/v2/surveillance/detectors', () => HttpResponse.json(DETECTORS)),
     http.get('*/api/v2/surveillance/heatmap', () => HttpResponse.json(HEATMAP)),
     http.get('*/api/v2/surveillance/fishing-violations', ({ request }) => {

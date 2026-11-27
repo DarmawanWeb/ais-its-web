@@ -176,6 +176,11 @@ const devicesOf = (vessel) =>
           serialNumber: `FM-${String(vessel.mmsi).slice(-5)}`,
           mqttTopic: `aisits/telemetry/${deviceIdOf(vessel.mmsi)}`,
           lastSeenAt: new Date(Math.floor(Date.now() / 60_000) * 60_000).toISOString(),
+          vesselName: vessel.name,
+          lastReadingAt: statusOf(vessel).lastReadingAt,
+          connectionState: statusOf(vessel).active ? 'online' : 'idle',
+          activeWindowMin: ACTIVE_WINDOW_MIN,
+          offlineAfterMin: 1440,
           createdBy: null,
           createdAt: '2026-11-01T00:00:00.000Z',
           updatedAt: '2026-11-01T00:00:00.000Z',
@@ -269,7 +274,76 @@ export const routes = [
       const raw = rawReadings(vessel, from, to);
       const series =
         bucket === 'raw' ? raw.map(point) : bucketed(raw, bucket === '1h' ? HOUR : DAY);
-      send(200, cursorPageOf(series, url));
+      const order = url.searchParams.get('order') ?? 'asc';
+      if (!['asc', 'desc'].includes(order)) {
+        throw new MockHttpError(400, 'VALIDATION_FAILED', 'Validation failed', {
+          errors: [{ field: 'order', message: 'asc or desc' }],
+        });
+      }
+      send(200, cursorPageOf(order === 'desc' ? series.reverse() : series, url));
+    },
+  },
+  {
+    method: 'GET',
+    path: '/api/v2/telemetry/vessels/:mmsi/readings.csv',
+    permission: 'telemetry:read',
+    handler: ({ url, params, claims, send }) => {
+      const vessel = ownVessel(claims, params.mmsi);
+      const bucket = url.searchParams.get('bucket') ?? 'raw';
+      const defaults = {
+        raw: [DAY, 31 * DAY],
+        '1h': [7 * DAY, 366 * DAY],
+        '1d': [365 * DAY, 5 * 366 * DAY],
+      }[bucket];
+      if (!defaults) {
+        throw new MockHttpError(400, 'VALIDATION_FAILED', 'Validation failed', {
+          errors: [{ field: 'bucket', message: 'raw, 1h or 1d' }],
+        });
+      }
+      const { from, to } = rangeOf(url, defaults[0], defaults[1]);
+      const raw = rawReadings(vessel, from, to);
+      const series =
+        bucket === 'raw' ? raw.map(point) : bucketed(raw, bucket === '1h' ? HOUR : DAY);
+      const cell = (value) => (value === null || value === undefined ? '' : String(value));
+      const lines = [
+        'time,periodStart,fuelMeTon,fuelAeTon,totalFuelTon,readings,source,deviceId',
+        ...series.map((p) =>
+          [
+            p.time,
+            p.periodStart,
+            p.fuelMeTon,
+            p.fuelAeTon,
+            p.totalFuelTon,
+            p.readings,
+            p.source,
+            p.deviceId,
+          ]
+            .map(cell)
+            .join(','),
+        ),
+      ];
+      const day = (time) => new Date(time).toISOString().slice(0, 10);
+      send(200, `${lines.join('\r\n')}\r\n`, {
+        'Content-Type': 'text/csv; charset=utf-8; header=present',
+        'Content-Disposition': `attachment; filename="telemetry-${vessel.mmsi}-${bucket}-${day(from)}_${day(to)}.csv"`,
+        'Access-Control-Expose-Headers': 'Content-Disposition',
+      });
+    },
+  },
+  {
+    method: 'GET',
+    path: '/api/v2/telemetry/vessels/:mmsi/devices',
+    permission: 'telemetry:read',
+    handler: ({ url, params, claims, send }) => {
+      const vessel = ownVessel(claims, params.mmsi);
+      const items = devicesOf(vessel).map(({ id, name, kind, status, lastSeenAt }) => ({
+        id,
+        name,
+        kind,
+        status,
+        lastSeenAt,
+      }));
+      send(200, pageOf(items, url));
     },
   },
   {

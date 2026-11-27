@@ -2,7 +2,10 @@ import { ArrowUpRight, Cpu, Router } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 
-import { useDevicesControllerList } from '@/shared/api/generated/telemetry/devices/devices';
+import {
+  useDevicesControllerList,
+  useVesselDevicesControllerList,
+} from '@/shared/api/generated/telemetry/devices/devices';
 import { usePermission } from '@/shared/auth/hooks';
 import { EmptyState, ErrorState } from '@/shared/domain-ui/feedback';
 import { Section } from '@/shared/domain-ui/section';
@@ -11,20 +14,38 @@ import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
 import { Skeleton } from '@/shared/ui/skeleton';
 
-import { CopyText } from './copy-text';
+import { CopyText } from '@/shared/ui/copy-text';
+
+interface DeviceItem {
+  id: string;
+  name: string;
+  kind: string;
+  status: string;
+  lastSeenAt: string | null;
+  serialNumber?: string | null;
+  mqttTopic?: string | null;
+}
 
 /**
- * Devices of the vessel (`GET /telemetry/devices?mmsi=`, `device:manage`); others see the count
- * and who manages devices. Registration and changes live on the admin devices page.
+ * Devices of the vessel: with `device:manage` the registry (`GET /telemetry/devices?mmsi=`,
+ * serial numbers and MQTT topics), otherwise the read-only list of
+ * `GET /telemetry/vessels/:mmsi/devices` (`telemetry:read`). Registration and changes live on
+ * the admin devices page.
  */
 export function DevicesCard({ mmsi, count }: { mmsi: number; count: number }) {
   const { t, i18n } = useTranslation('telemetry');
   const canManage = usePermission('device:manage');
-  const devices = useDevicesControllerList(
+  const managed = useDevicesControllerList(
     { mmsi, pageSize: 20 },
     { query: { enabled: canManage } },
   );
-  const items = devices.data?.data ?? [];
+  const readOnly = useVesselDevicesControllerList(
+    String(mmsi),
+    { pageSize: 20 },
+    { query: { enabled: !canManage } },
+  );
+  const devices = canManage ? managed : readOnly;
+  const items: DeviceItem[] = devices.data?.data ?? [];
   return (
     <Section
       title={t('devices.title')}
@@ -39,12 +60,7 @@ export function DevicesCard({ mmsi, count }: { mmsi: number; count: number }) {
         ) : undefined
       }
     >
-      {!canManage ? (
-        <p className="flex items-start gap-2 rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
-          <Cpu className="mt-0.5 size-4 shrink-0" aria-hidden />
-          {t('devices.noPermission')}
-        </p>
-      ) : devices.isPending ? (
+      {devices.isPending ? (
         <div className="grid gap-2">
           <Skeleton className="h-16 w-full" />
           <Skeleton className="h-16 w-full" />
@@ -58,9 +74,11 @@ export function DevicesCard({ mmsi, count }: { mmsi: number; count: number }) {
           title={t('devices.empty')}
           description={t('devices.emptyHint')}
           action={
-            <Button asChild size="sm" variant="outline">
-              <Link to="/admin/devices">{t('devices.register')}</Link>
-            </Button>
+            canManage ? (
+              <Button asChild size="sm" variant="outline">
+                <Link to="/admin/devices">{t('devices.register')}</Link>
+              </Button>
+            ) : undefined
           }
         />
       ) : (
@@ -94,6 +112,12 @@ export function DevicesCard({ mmsi, count }: { mmsi: number; count: number }) {
             </li>
           ))}
         </ul>
+      )}
+      {!canManage && (
+        <p className="mt-3 flex items-start gap-2 text-xs text-muted-foreground">
+          <Cpu className="mt-0.5 size-3.5 shrink-0" aria-hidden />
+          {t('devices.readOnly')}
+        </p>
       )}
     </Section>
   );

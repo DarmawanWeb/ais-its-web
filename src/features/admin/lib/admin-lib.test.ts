@@ -3,50 +3,61 @@ import { describe, expect, it } from 'vitest';
 import { grantableRoles, grantableScopes, isLastOrgAdmin, slugify, SLUG_PATTERN } from './access';
 import { actionKey, actionTone, describeMeta, formatMetaValue, shortId } from './audit';
 import { connectionState } from './devices';
-import { checkFormula, previewFormula } from './fuel-formula';
+import {
+  checkFuelFormula,
+  evaluateFuelFormula,
+  previewFuelFormula,
+} from '@/shared/lib/fuel-formula';
 
-describe('fuel formula grammar', () => {
+describe('fuel formula grammar (contracts, as the fleet service)', () => {
   it('accepts the documented language and evaluates it', () => {
-    const check = checkFormula('-0.0382 * speedKnot ^ 2 + 0.8658 * speedKnot - 0.0197');
-    expect(check.valid).toBe(true);
-    if (check.valid) expect(check.evaluate(10)).toBeCloseTo(4.8183, 4);
-    const exp = checkFormula('1.5103 * Math.exp(-0.064 * speedKnot)');
-    expect(exp.valid && exp.evaluate(0)).toBeCloseTo(1.5103);
-    expect(checkFormula('max(0.5, ln(speedKnot + 1), sqrt(4))').valid).toBe(true);
+    expect(checkFuelFormula('-0.0382 * speedKnot ^ 2 + 0.8658 * speedKnot - 0.0197').valid).toBe(
+      true,
+    );
+    expect(
+      evaluateFuelFormula('-0.0382 * speedKnot ^ 2 + 0.8658 * speedKnot - 0.0197', 10),
+    ).toBeCloseTo(4.8183, 4);
+    expect(evaluateFuelFormula('1.5103 * Math.exp(-0.064 * speedKnot)', 0)).toBeCloseTo(1.5103);
+    expect(checkFuelFormula('max(0.5, ln(speedKnot + 1), sqrt(4))').valid).toBe(true);
     // ^ and ** are right-associative powers.
-    const power = checkFormula('2 ** 3 ^ 2');
-    expect(power.valid && power.evaluate(0)).toBe(512);
+    expect(evaluateFuelFormula('2 ** 3 ^ 2', 0)).toBe(512);
   });
 
   it('refuses anything else with the position of the problem', () => {
-    expect(checkFormula('process.exit(1)')).toMatchObject({
+    expect(checkFuelFormula('process.exit(1)')).toMatchObject({
       valid: false,
-      problem: { code: 'unknownName', position: 0, token: 'process.exit' },
+      issue: { code: 'unknownIdentifier', position: 0, text: 'process.exit' },
     });
-    expect(checkFormula('Math.random()')).toMatchObject({ problem: { code: 'unknownName' } });
-    expect(checkFormula('speed * 2')).toMatchObject({
-      problem: { code: 'unknownName', token: 'speed' },
+    expect(checkFuelFormula('Math.random()')).toMatchObject({
+      issue: { code: 'unknownIdentifier' },
     });
-    expect(checkFormula('constructor(1)')).toMatchObject({ problem: { code: 'unknownName' } });
-    expect(checkFormula('pow(speedKnot)')).toMatchObject({
-      problem: { code: 'arity', token: 'pow', expected: 2, actual: 1 },
+    expect(checkFuelFormula('speed * 2')).toMatchObject({
+      issue: { code: 'unknownIdentifier', text: 'speed' },
     });
-    expect(checkFormula('1 + ')).toMatchObject({ problem: { code: 'unexpectedEnd', position: 4 } });
-    expect(checkFormula('1 % 2')).toMatchObject({
-      problem: { code: 'unexpectedToken', position: 2, token: '%' },
+    expect(checkFuelFormula('pow(speedKnot)')).toMatchObject({
+      issue: { code: 'arity', text: 'pow', expected: 2, actual: 1 },
     });
-    expect(checkFormula('1e999')).toMatchObject({ problem: { code: 'badNumber' } });
-    expect(checkFormula('   ')).toMatchObject({ problem: { code: 'empty' } });
-    expect(checkFormula('1'.repeat(501))).toMatchObject({ problem: { code: 'tooLong' } });
-    expect(checkFormula(`${'('.repeat(40)}1${')'.repeat(40)}`)).toMatchObject({
-      problem: { code: 'tooDeep' },
+    expect(checkFuelFormula('1 + ')).toMatchObject({
+      issue: { code: 'unexpectedEnd', position: 4 },
+    });
+    expect(checkFuelFormula('1 % 2')).toMatchObject({
+      issue: { code: 'unexpectedCharacter', position: 2, text: '%' },
+    });
+    expect(checkFuelFormula('1 2')).toMatchObject({
+      issue: { code: 'unexpectedToken', text: '2' },
+    });
+    expect(checkFuelFormula('1e999')).toMatchObject({ issue: { code: 'numberOutOfRange' } });
+    expect(checkFuelFormula('   ')).toMatchObject({ issue: { code: 'empty' } });
+    expect(checkFuelFormula('1'.repeat(501))).toMatchObject({ issue: { code: 'tooLong' } });
+    expect(checkFuelFormula(`${'('.repeat(40)}1${')'.repeat(40)}`)).toMatchObject({
+      issue: { code: 'tooDeep' },
     });
   });
 
   it('previews the flow at a few speeds', () => {
-    expect(previewFormula('speedKnot * 2')).toEqual([0, 8, 16, 24, 32, 40]);
-    expect(previewFormula('1 / speedKnot')?.[0]).toBeNull();
-    expect(previewFormula('nope')).toBeNull();
+    expect(previewFuelFormula('speedKnot * 2')).toEqual([0, 8, 16, 24, 32, 40]);
+    expect(previewFuelFormula('1 / speedKnot')?.[0]).toBeNull();
+    expect(previewFuelFormula('nope')).toBeNull();
   });
 });
 
@@ -135,6 +146,15 @@ describe('devices', () => {
     expect(connectionState({ status: 'active', lastSeenAt: null }, now)).toBe('never');
     expect(connectionState({ status: 'inactive', lastSeenAt: '2026-11-22T09:59:00Z' }, now)).toBe(
       'inactive',
+    );
+  });
+
+  it('prefers the service state and its thresholds (telemetry 0.2)', () => {
+    const now = Date.parse('2026-11-22T10:00:00Z');
+    const device = { status: 'active', lastSeenAt: '2026-11-22T09:55:00Z' };
+    expect(connectionState({ ...device, connectionState: 'idle' }, now)).toBe('idle');
+    expect(connectionState({ ...device, activeWindowMin: 2, offlineAfterMin: 4 }, now)).toBe(
+      'offline',
     );
   });
 });

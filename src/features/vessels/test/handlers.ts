@@ -91,6 +91,10 @@ export function mockFleet(
     }),
     http.get('*/api/v2/fuel-formulas', () => HttpResponse.json(pageOf([FORMULA]))),
     http.get('*/api/v2/ports', () => HttpResponse.json(pageOf(PORTS))),
+    http.get('*/api/v2/ais/latest', ({ request }) => {
+      const mmsis = new URL(request.url).searchParams.get('mmsi')?.split(',') ?? [];
+      return HttpResponse.json(mmsis.includes(String(LATEST.mmsi)) ? [LATEST] : []);
+    }),
     http.get('*/api/v2/ais/vessels/:mmsi/latest', ({ params }) =>
       String(params.mmsi) === String(LATEST.mmsi)
         ? HttpResponse.json(LATEST)

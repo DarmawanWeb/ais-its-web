@@ -34,7 +34,7 @@ import { PageHeader } from '@/shared/domain-ui/page-header';
 import { StatCard } from '@/shared/domain-ui/stat-card';
 import { MmsiText } from '@/shared/domain-ui/values';
 import { useDebouncedValue } from '@/shared/hooks/use-debounced-value';
-import { downloadCsv } from '@/shared/lib/csv';
+import { fetchServerFile, saveTextFile } from '@/shared/api/download';
 import { formatDateTime, formatNumber, formatRelativeTime } from '@/shared/lib/format';
 import { useRealtimeConnection } from '@/shared/realtime/hooks';
 import { Badge } from '@/shared/ui/badge';
@@ -53,7 +53,7 @@ import { AlertDetailSheet } from '../components/alert-detail-sheet';
 import { useAlertFilters } from '../hooks/use-alert-filters';
 import { useAppLanguage } from '@/shared/i18n';
 import { useLiveAlerts } from '../hooks/use-live-alerts';
-import { alertCsvRows, exportFileName, fetchAlertsForExport } from '../lib/alert-csv';
+import { csvDataRows, exportFileName } from '../lib/alert-csv';
 import { localizeProblem } from '@/shared/api/problem-copy';
 import { alertProblemCopies } from '../lib/problems';
 import {
@@ -361,15 +361,22 @@ export function AlertsPage() {
   const exportCsv = async () => {
     setExporting(true);
     try {
-      const { limit: _limit, ...query } = toListParams(filters);
-      const { alerts, truncated } = await fetchAlertsForExport(query);
-      if (alerts.length === 0) {
+      // One streamed file of every matching alert (`GET /alerts/export.csv`, headers in the UI
+      // language; the service caps it at ALERT_EXPORT_MAX_ROWS and says so in X-Truncated).
+      const { limit: _limit, cursor: _cursor, ...query } = toListParams(filters);
+      const file = await fetchServerFile('/api/v2/alerts/export.csv', query, exportFileName(), {
+        headers: { 'Accept-Language': locale },
+      });
+      const rows = csvDataRows(file.text);
+      if (rows === 0) {
         toast.info(t('export.empty'));
         return;
       }
-      downloadCsv(exportFileName(), alertCsvRows(alerts, locale));
-      toast.success(t('export.done', { count: alerts.length }), {
-        ...(truncated ? { description: t('export.truncated', { count: alerts.length }) } : {}),
+      saveTextFile(file.filename, file.text);
+      toast.success(t('export.done', { count: rows }), {
+        ...(file.headers['x-truncated'] === 'true'
+          ? { description: t('export.truncated', { count: rows }) }
+          : {}),
       });
     } catch {
       toast.error(t('export.failed'));

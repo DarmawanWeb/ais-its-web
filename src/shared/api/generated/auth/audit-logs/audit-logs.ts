@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Auth Service
  * Identity, organizations, memberships and roles, sessions, JWT signing keys and JWKS, API keys, MFA and the central audit log
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import { useQuery } from '@tanstack/react-query';
 import type {
@@ -19,8 +19,11 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  AuditActionsDto,
+  AuditLogsControllerActionsParams,
   AuditLogsControllerList200,
   AuditLogsControllerListParams,
+  AuditLogsExportControllerExportCsvParams,
   ProblemDetails,
 } from '../model';
 
@@ -45,6 +48,7 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
 };
 
 /**
+ * Filters: actorId, actorEmail (case-insensitive), action (exact) or actionPrefix (e.g. membership.), targetType, targetId, from/to (default: the last 30 days). Records carry the names of their actor, organization and target as they were when the record was stored.
  * @summary Audit records of the active organization (super admins: all), newest first
  */
 export const auditLogsControllerList = (
@@ -94,7 +98,10 @@ export type AuditLogsControllerListQueryResult = NonNullable<
 >;
 export type AuditLogsControllerListQueryError = ErrorType<ProblemDetails>;
 
-/** @summary Audit records of the active organization (super admins: all), newest first */
+/**
+ * Filters: actorId, actorEmail (case-insensitive), action (exact) or actionPrefix (e.g. membership.), targetType, targetId, from/to (default: the last 30 days). Records carry the names of their actor, organization and target as they were when the record was stored.
+ * @summary Audit records of the active organization (super admins: all), newest first
+ */
 export function useAuditLogsControllerList<
   TData = Awaited<ReturnType<typeof auditLogsControllerList>>,
   TError = ErrorType<ProblemDetails>,
@@ -116,7 +123,10 @@ export function useAuditLogsControllerList<
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-/** @summary Audit records of the active organization (super admins: all), newest first */
+/**
+ * Filters: actorId, actorEmail (case-insensitive), action (exact) or actionPrefix (e.g. membership.), targetType, targetId, from/to (default: the last 30 days). Records carry the names of their actor, organization and target as they were when the record was stored.
+ * @summary Audit records of the active organization (super admins: all), newest first
+ */
 export function useAuditLogsControllerList<
   TData = Awaited<ReturnType<typeof auditLogsControllerList>>,
   TError = ErrorType<ProblemDetails>,
@@ -138,7 +148,10 @@ export function useAuditLogsControllerList<
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-/** @summary Audit records of the active organization (super admins: all), newest first */
+/**
+ * Filters: actorId, actorEmail (case-insensitive), action (exact) or actionPrefix (e.g. membership.), targetType, targetId, from/to (default: the last 30 days). Records carry the names of their actor, organization and target as they were when the record was stored.
+ * @summary Audit records of the active organization (super admins: all), newest first
+ */
 export function useAuditLogsControllerList<
   TData = Awaited<ReturnType<typeof auditLogsControllerList>>,
   TError = ErrorType<ProblemDetails>,
@@ -152,7 +165,10 @@ export function useAuditLogsControllerList<
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-/** @summary Audit records of the active organization (super admins: all), newest first */
+/**
+ * Filters: actorId, actorEmail (case-insensitive), action (exact) or actionPrefix (e.g. membership.), targetType, targetId, from/to (default: the last 30 days). Records carry the names of their actor, organization and target as they were when the record was stored.
+ * @summary Audit records of the active organization (super admins: all), newest first
+ */
 export function useAuditLogsControllerList<
   TData = Awaited<ReturnType<typeof auditLogsControllerList>>,
   TError = ErrorType<ProblemDetails>,
@@ -167,6 +183,298 @@ export function useAuditLogsControllerList<
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
   const queryOptions = getAuditLogsControllerListQueryOptions(params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+/**
+ * Same scope as GET /audit-logs (active organization; super admins all or ?orgId). Range from/to: default the last 30 days, at most 366 days (400 VALIDATION_FAILED beyond). Ordered by action, at most 500.
+ * @summary The distinct actions recorded in the scope and range, with their counts (filter suggestions)
+ */
+export const auditLogsControllerActions = (
+  params?: AuditLogsControllerActionsParams,
+  options?: SecondParameter<typeof apiClient>,
+  signal?: AbortSignal,
+) => {
+  return apiClient<AuditActionsDto>(
+    { url: `/api/v2/audit-logs/actions`, method: 'GET', params, signal },
+    options,
+  );
+};
+
+export const getAuditLogsControllerActionsQueryKey = (
+  params?: AuditLogsControllerActionsParams,
+) => {
+  return [`/api/v2/audit-logs/actions`, ...(params ? [params] : [])] as const;
+};
+
+export const getAuditLogsControllerActionsQueryOptions = <
+  TData = Awaited<ReturnType<typeof auditLogsControllerActions>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: AuditLogsControllerActionsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof auditLogsControllerActions>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getAuditLogsControllerActionsQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof auditLogsControllerActions>>> = ({
+    signal,
+  }) => auditLogsControllerActions(params, requestOptions, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof auditLogsControllerActions>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type AuditLogsControllerActionsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof auditLogsControllerActions>>
+>;
+export type AuditLogsControllerActionsQueryError = ErrorType<ProblemDetails>;
+
+/**
+ * Same scope as GET /audit-logs (active organization; super admins all or ?orgId). Range from/to: default the last 30 days, at most 366 days (400 VALIDATION_FAILED beyond). Ordered by action, at most 500.
+ * @summary The distinct actions recorded in the scope and range, with their counts (filter suggestions)
+ */
+export function useAuditLogsControllerActions<
+  TData = Awaited<ReturnType<typeof auditLogsControllerActions>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params: undefined | AuditLogsControllerActionsParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof auditLogsControllerActions>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof auditLogsControllerActions>>,
+          TError,
+          Awaited<ReturnType<typeof auditLogsControllerActions>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Same scope as GET /audit-logs (active organization; super admins all or ?orgId). Range from/to: default the last 30 days, at most 366 days (400 VALIDATION_FAILED beyond). Ordered by action, at most 500.
+ * @summary The distinct actions recorded in the scope and range, with their counts (filter suggestions)
+ */
+export function useAuditLogsControllerActions<
+  TData = Awaited<ReturnType<typeof auditLogsControllerActions>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: AuditLogsControllerActionsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof auditLogsControllerActions>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof auditLogsControllerActions>>,
+          TError,
+          Awaited<ReturnType<typeof auditLogsControllerActions>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Same scope as GET /audit-logs (active organization; super admins all or ?orgId). Range from/to: default the last 30 days, at most 366 days (400 VALIDATION_FAILED beyond). Ordered by action, at most 500.
+ * @summary The distinct actions recorded in the scope and range, with their counts (filter suggestions)
+ */
+export function useAuditLogsControllerActions<
+  TData = Awaited<ReturnType<typeof auditLogsControllerActions>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: AuditLogsControllerActionsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof auditLogsControllerActions>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Same scope as GET /audit-logs (active organization; super admins all or ?orgId). Range from/to: default the last 30 days, at most 366 days (400 VALIDATION_FAILED beyond). Ordered by action, at most 500.
+ * @summary The distinct actions recorded in the scope and range, with their counts (filter suggestions)
+ */
+export function useAuditLogsControllerActions<
+  TData = Awaited<ReturnType<typeof auditLogsControllerActions>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: AuditLogsControllerActionsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof auditLogsControllerActions>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getAuditLogsControllerActionsQueryOptions(params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+/**
+ * The records of GET /audit-logs with the same filters, scope and default range (newest first) as one streamed RFC 4180 file (`Content-Disposition: attachment`): the header line `id,at,source,actorType,actorId,actorName,actorEmail,orgId,orgName,action,targetType,targetId,targetLabel,ip,userAgent,meta`, CRLF line ends, the values of the JSON records (empty for null, meta as JSON). Text cells that start with =, +, -, @, tab or CR get a leading apostrophe, so spreadsheet programs never run them as formulas (OWASP CSV injection). Errors before the first byte are problem details; a failure during the transfer aborts the connection, so a cut file never looks complete.
+ * @summary Export the audit records as CSV (compliance requests)
+ */
+export const auditLogsExportControllerExportCsv = (
+  params?: AuditLogsExportControllerExportCsvParams,
+  options?: SecondParameter<typeof apiClient>,
+  signal?: AbortSignal,
+) => {
+  return apiClient<string>(
+    { url: `/api/v2/audit-logs.csv`, method: 'GET', params, signal },
+    options,
+  );
+};
+
+export const getAuditLogsExportControllerExportCsvQueryKey = (
+  params?: AuditLogsExportControllerExportCsvParams,
+) => {
+  return [`/api/v2/audit-logs.csv`, ...(params ? [params] : [])] as const;
+};
+
+export const getAuditLogsExportControllerExportCsvQueryOptions = <
+  TData = Awaited<ReturnType<typeof auditLogsExportControllerExportCsv>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: AuditLogsExportControllerExportCsvParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof auditLogsExportControllerExportCsv>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getAuditLogsExportControllerExportCsvQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof auditLogsExportControllerExportCsv>>> = ({
+    signal,
+  }) => auditLogsExportControllerExportCsv(params, requestOptions, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof auditLogsExportControllerExportCsv>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type AuditLogsExportControllerExportCsvQueryResult = NonNullable<
+  Awaited<ReturnType<typeof auditLogsExportControllerExportCsv>>
+>;
+export type AuditLogsExportControllerExportCsvQueryError = ErrorType<ProblemDetails>;
+
+/**
+ * The records of GET /audit-logs with the same filters, scope and default range (newest first) as one streamed RFC 4180 file (`Content-Disposition: attachment`): the header line `id,at,source,actorType,actorId,actorName,actorEmail,orgId,orgName,action,targetType,targetId,targetLabel,ip,userAgent,meta`, CRLF line ends, the values of the JSON records (empty for null, meta as JSON). Text cells that start with =, +, -, @, tab or CR get a leading apostrophe, so spreadsheet programs never run them as formulas (OWASP CSV injection). Errors before the first byte are problem details; a failure during the transfer aborts the connection, so a cut file never looks complete.
+ * @summary Export the audit records as CSV (compliance requests)
+ */
+export function useAuditLogsExportControllerExportCsv<
+  TData = Awaited<ReturnType<typeof auditLogsExportControllerExportCsv>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params: undefined | AuditLogsExportControllerExportCsvParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof auditLogsExportControllerExportCsv>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof auditLogsExportControllerExportCsv>>,
+          TError,
+          Awaited<ReturnType<typeof auditLogsExportControllerExportCsv>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * The records of GET /audit-logs with the same filters, scope and default range (newest first) as one streamed RFC 4180 file (`Content-Disposition: attachment`): the header line `id,at,source,actorType,actorId,actorName,actorEmail,orgId,orgName,action,targetType,targetId,targetLabel,ip,userAgent,meta`, CRLF line ends, the values of the JSON records (empty for null, meta as JSON). Text cells that start with =, +, -, @, tab or CR get a leading apostrophe, so spreadsheet programs never run them as formulas (OWASP CSV injection). Errors before the first byte are problem details; a failure during the transfer aborts the connection, so a cut file never looks complete.
+ * @summary Export the audit records as CSV (compliance requests)
+ */
+export function useAuditLogsExportControllerExportCsv<
+  TData = Awaited<ReturnType<typeof auditLogsExportControllerExportCsv>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: AuditLogsExportControllerExportCsvParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof auditLogsExportControllerExportCsv>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof auditLogsExportControllerExportCsv>>,
+          TError,
+          Awaited<ReturnType<typeof auditLogsExportControllerExportCsv>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * The records of GET /audit-logs with the same filters, scope and default range (newest first) as one streamed RFC 4180 file (`Content-Disposition: attachment`): the header line `id,at,source,actorType,actorId,actorName,actorEmail,orgId,orgName,action,targetType,targetId,targetLabel,ip,userAgent,meta`, CRLF line ends, the values of the JSON records (empty for null, meta as JSON). Text cells that start with =, +, -, @, tab or CR get a leading apostrophe, so spreadsheet programs never run them as formulas (OWASP CSV injection). Errors before the first byte are problem details; a failure during the transfer aborts the connection, so a cut file never looks complete.
+ * @summary Export the audit records as CSV (compliance requests)
+ */
+export function useAuditLogsExportControllerExportCsv<
+  TData = Awaited<ReturnType<typeof auditLogsExportControllerExportCsv>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: AuditLogsExportControllerExportCsvParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof auditLogsExportControllerExportCsv>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * The records of GET /audit-logs with the same filters, scope and default range (newest first) as one streamed RFC 4180 file (`Content-Disposition: attachment`): the header line `id,at,source,actorType,actorId,actorName,actorEmail,orgId,orgName,action,targetType,targetId,targetLabel,ip,userAgent,meta`, CRLF line ends, the values of the JSON records (empty for null, meta as JSON). Text cells that start with =, +, -, @, tab or CR get a leading apostrophe, so spreadsheet programs never run them as formulas (OWASP CSV injection). Errors before the first byte are problem details; a failure during the transfer aborts the connection, so a cut file never looks complete.
+ * @summary Export the audit records as CSV (compliance requests)
+ */
+export function useAuditLogsExportControllerExportCsv<
+  TData = Awaited<ReturnType<typeof auditLogsExportControllerExportCsv>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  params?: AuditLogsExportControllerExportCsvParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof auditLogsExportControllerExportCsv>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiClient>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getAuditLogsExportControllerExportCsvQueryOptions(params, options);
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
     queryKey: DataTag<QueryKey, TData, TError>;

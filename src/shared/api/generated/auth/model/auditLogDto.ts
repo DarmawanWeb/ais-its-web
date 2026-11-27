@@ -3,7 +3,7 @@
  * Do not edit manually.
  * AIS Maritime Intelligence — AIS ITS Auth Service
  * Identity, organizations, memberships and roles, sessions, JWT signing keys and JWKS, API keys, MFA and the central audit log
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import type { AuditLogDtoActorType } from './auditLogDtoActorType';
 import type { AuditLogDtoMeta } from './auditLogDtoMeta';
@@ -17,13 +17,33 @@ export interface AuditLogDto {
   actorType: AuditLogDtoActorType;
   /** @nullable */
   actorId: string | null;
+  /**
+   * Name of the user, or of the API key, that acted, captured when the record was stored (records stored before 0.2.0: the current name); null for system actors and unknown ids
+   * @nullable
+   */
+  actorName: string | null;
+  /**
+   * E-mail of the acting user, captured when the record was stored (older records: the current one); null for API keys and system actors
+   * @nullable
+   */
+  actorEmail: string | null;
   /** @nullable */
   orgId: string | null;
+  /**
+   * Name of the organization, captured when the record was stored (older records: the current name)
+   * @nullable
+   */
+  orgName: string | null;
   action: string;
   /** @nullable */
   targetType: string | null;
   /** @nullable */
   targetId: string | null;
+  /**
+   * Label of the target when the record was stored: users 'Name <e-mail>', organizations and API keys by name, invitations by address; other services' targets by the producer's meta.targetLabel or meta.name; else null
+   * @nullable
+   */
+  targetLabel: string | null;
   /** @nullable */
   ip: string | null;
   /** @nullable */

@@ -1,4 +1,3 @@
-import { CII_GRADE_LABELS } from '@darmawanweb/ais-its-contracts/domain';
 import {
   ArrowRight,
   Cog,
@@ -15,11 +14,10 @@ import { useTranslation } from 'react-i18next';
 
 import { EmptyState, ErrorState } from '@/shared/domain-ui/feedback';
 import { MethodChips as SharedMethodChips } from '@/shared/domain-ui/method-chips';
+import { CiiGradeBadge } from '@/shared/domain-ui/badges';
+import { YearSelect } from '@/shared/domain-ui/year-select';
 import { cn } from '@/shared/lib/utils';
-import { gradeClassName } from '@/shared/theme/grade';
 import { Badge } from '@/shared/ui/badge';
-import { Label } from '@/shared/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select';
 import { useEmissionMethodName } from '@/shared/methodology';
 
 import { type CiiGrade, gradeSteps } from '../lib/grade-style';
@@ -27,47 +25,9 @@ import type { MeasureCategory } from '../lib/measures';
 import { seempProblemKey } from '../lib/problems';
 
 /** CII grade letter on its IMO colour (contrast-safe text) with the label as accessible text. */
-export function GradeChip({
-  grade,
-  size = 'md',
-  showLabel = false,
-  className,
-}: {
-  grade: CiiGrade | null | undefined;
-  size?: 'sm' | 'md' | 'lg';
-  showLabel?: boolean;
-  className?: string;
-}) {
-  const { t, i18n } = useTranslation('seemp');
-  const locale = i18n.language === 'en' ? 'en' : 'id';
-  if (!grade) {
-    return (
-      <span className={cn('text-muted-foreground', className)}>
-        —<span className="sr-only">{t('grade.none')}</span>
-      </span>
-    );
-  }
-  const label = CII_GRADE_LABELS[grade][locale];
-  return (
-    <span className={cn('inline-flex items-center gap-2', className)} title={label}>
-      <span
-        className={cn(
-          'inline-flex shrink-0 items-center justify-center rounded-md font-bold shadow-xs ring-1 ring-black/10 ring-inset',
-          gradeClassName(grade),
-          size === 'sm' && 'size-5 text-[11px]',
-          size === 'md' && 'size-7 text-sm',
-          size === 'lg' && 'size-11 text-xl',
-        )}
-      >
-        <span aria-hidden>{grade}</span>
-        <span className="sr-only">{t('grade.aria', { grade, label })}</span>
-      </span>
-      {showLabel && <span className="text-sm text-muted-foreground">{label}</span>}
-    </span>
-  );
-}
+/** The CII grade chip of the SEEMP pages: the shared badge. */
+export const GradeChip = CiiGradeBadge;
 
-/** Grade before → after with the number of grades gained (text, not colour alone). */
 export function GradeChange({
   before,
   after,
@@ -117,14 +77,8 @@ export function CategoryIcon({ category, className }: { category: string; classN
 }
 
 /** Year picker with an "automatic" choice (the service default). */
-export function YearPicker({
-  id,
-  label,
-  value,
-  years,
-  autoLabel,
-  onChange,
-}: {
+/** Year picker with an "automatic" entry (`null`): the shared `YearSelect`. */
+export function YearPicker(props: {
   id: string;
   label: string;
   value: number | null;
@@ -132,29 +86,7 @@ export function YearPicker({
   autoLabel: string;
   onChange: (year: number | null) => void;
 }) {
-  return (
-    <div className="flex items-center gap-2">
-      <Label htmlFor={id} className="text-xs whitespace-nowrap text-muted-foreground">
-        {label}
-      </Label>
-      <Select
-        value={value === null ? 'auto' : String(value)}
-        onValueChange={(next) => onChange(next === 'auto' ? null : Number(next))}
-      >
-        <SelectTrigger id={id} size="sm" className="w-32">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="auto">{autoLabel}</SelectItem>
-          {years.map((year) => (
-            <SelectItem key={year} value={String(year)} className="font-mono">
-              {year}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
-  );
+  return <YearSelect {...props} />;
 }
 
 /** Chips naming the methodology entries behind a figure, each with its ⓘ popover. */

@@ -218,12 +218,7 @@ const VESSEL: VesselSummaryDto = {
   updatedAt: new Date().toISOString(),
 };
 
-export function problemResponse(status: number, code: string) {
-  return HttpResponse.json(
-    { type: `urn:ais-its:problem:${code.toLowerCase()}`, title: code, status, code },
-    { status, headers: { 'Content-Type': 'application/problem+json' } },
-  );
-}
+export { problemResponse } from '@/test/msw/problem';
 
 /** The SEEMP endpoints; `overrides` replace single handlers. */
 export function mockSeemp(

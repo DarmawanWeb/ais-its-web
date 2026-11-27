@@ -38,9 +38,9 @@ import {
   useAllMembers,
   useCancelInvitation,
   useInvitations,
-  useInviteMember,
   useMembers,
   useRemoveMember,
+  useResendInvitation,
 } from '../api/auth-admin';
 import { OrgContextPicker } from '../components/common';
 import { ChangeRoleDialog, InviteMemberDialog } from '../components/member-dialogs';
@@ -62,7 +62,7 @@ export function MembersPage() {
   const invitations = useInvitations(orgId, invitationPaging.page, invitationPaging.pageSize);
   const remove = useRemoveMember();
   const cancel = useCancelInvitation();
-  const resend = useInviteMember();
+  const resend = useResendInvitation();
   const [inviting, setInviting] = useState(false);
   const [changing, setChanging] = useState<MemberDto | null>(null);
   const [removing, setRemoving] = useState<MemberDto | null>(null);
@@ -227,14 +227,7 @@ export function MembersPage() {
               onClick={() => {
                 if (!orgId) return;
                 resend.mutate(
-                  {
-                    orgId,
-                    body: {
-                      email: row.original.email,
-                      name: row.original.name,
-                      role: row.original.role,
-                    },
-                  },
+                  { orgId, invitationId: row.original.id },
                   {
                     onSuccess: () =>
                       toast.success(t('members.toasts.resent', { email: row.original.email })),

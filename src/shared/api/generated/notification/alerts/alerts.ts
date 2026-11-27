@@ -532,7 +532,7 @@ export const useAlertsControllerMarkRead = <TError = ErrorType<ProblemDetails>, 
   return useMutation(getAlertsControllerMarkReadMutationOptions(options), queryClient);
 };
 /**
- * Visible alerts (the tenancy of GET /alerts) per local hour or day of `tz` of their first occurrence, counted by `groupBy`, every bucket from the one containing `from` to the one containing `to` (zeros included). Default range: 7 days (`1d`) or 24 hours (`1h`) up to now; at most 1000 buckets.
+ * Visible alerts (the tenancy of GET /alerts) per local hour or day of `tz` of their first occurrence, counted by `groupBy`, every bucket from the one containing `from` to the one containing `to` (zeros included). The first bucket starts at `from` and the last ends at `to` (inclusive), so partial buckets count only their part of the range and the totals add up to GET /alerts with the same filters; when `to` is a bucket start, that instant ends the bucket before. Default range: 7 days (`1d`) or 24 hours (`1h`) up to now; at most 1000 buckets (400 beyond).
  * @summary Alert counts over time by severity, type or domain
  */
 export const alertsControllerSeries = (
@@ -582,7 +582,7 @@ export type AlertsControllerSeriesQueryResult = NonNullable<
 export type AlertsControllerSeriesQueryError = ErrorType<ProblemDetails>;
 
 /**
- * Visible alerts (the tenancy of GET /alerts) per local hour or day of `tz` of their first occurrence, counted by `groupBy`, every bucket from the one containing `from` to the one containing `to` (zeros included). Default range: 7 days (`1d`) or 24 hours (`1h`) up to now; at most 1000 buckets.
+ * Visible alerts (the tenancy of GET /alerts) per local hour or day of `tz` of their first occurrence, counted by `groupBy`, every bucket from the one containing `from` to the one containing `to` (zeros included). The first bucket starts at `from` and the last ends at `to` (inclusive), so partial buckets count only their part of the range and the totals add up to GET /alerts with the same filters; when `to` is a bucket start, that instant ends the bucket before. Default range: 7 days (`1d`) or 24 hours (`1h`) up to now; at most 1000 buckets (400 beyond).
  * @summary Alert counts over time by severity, type or domain
  */
 export function useAlertsControllerSeries<
@@ -607,7 +607,7 @@ export function useAlertsControllerSeries<
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
- * Visible alerts (the tenancy of GET /alerts) per local hour or day of `tz` of their first occurrence, counted by `groupBy`, every bucket from the one containing `from` to the one containing `to` (zeros included). Default range: 7 days (`1d`) or 24 hours (`1h`) up to now; at most 1000 buckets.
+ * Visible alerts (the tenancy of GET /alerts) per local hour or day of `tz` of their first occurrence, counted by `groupBy`, every bucket from the one containing `from` to the one containing `to` (zeros included). The first bucket starts at `from` and the last ends at `to` (inclusive), so partial buckets count only their part of the range and the totals add up to GET /alerts with the same filters; when `to` is a bucket start, that instant ends the bucket before. Default range: 7 days (`1d`) or 24 hours (`1h`) up to now; at most 1000 buckets (400 beyond).
  * @summary Alert counts over time by severity, type or domain
  */
 export function useAlertsControllerSeries<
@@ -632,7 +632,7 @@ export function useAlertsControllerSeries<
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
- * Visible alerts (the tenancy of GET /alerts) per local hour or day of `tz` of their first occurrence, counted by `groupBy`, every bucket from the one containing `from` to the one containing `to` (zeros included). Default range: 7 days (`1d`) or 24 hours (`1h`) up to now; at most 1000 buckets.
+ * Visible alerts (the tenancy of GET /alerts) per local hour or day of `tz` of their first occurrence, counted by `groupBy`, every bucket from the one containing `from` to the one containing `to` (zeros included). The first bucket starts at `from` and the last ends at `to` (inclusive), so partial buckets count only their part of the range and the totals add up to GET /alerts with the same filters; when `to` is a bucket start, that instant ends the bucket before. Default range: 7 days (`1d`) or 24 hours (`1h`) up to now; at most 1000 buckets (400 beyond).
  * @summary Alert counts over time by severity, type or domain
  */
 export function useAlertsControllerSeries<
@@ -649,7 +649,7 @@ export function useAlertsControllerSeries<
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
- * Visible alerts (the tenancy of GET /alerts) per local hour or day of `tz` of their first occurrence, counted by `groupBy`, every bucket from the one containing `from` to the one containing `to` (zeros included). Default range: 7 days (`1d`) or 24 hours (`1h`) up to now; at most 1000 buckets.
+ * Visible alerts (the tenancy of GET /alerts) per local hour or day of `tz` of their first occurrence, counted by `groupBy`, every bucket from the one containing `from` to the one containing `to` (zeros included). The first bucket starts at `from` and the last ends at `to` (inclusive), so partial buckets count only their part of the range and the totals add up to GET /alerts with the same filters; when `to` is a bucket start, that instant ends the bucket before. Default range: 7 days (`1d`) or 24 hours (`1h`) up to now; at most 1000 buckets (400 beyond).
  * @summary Alert counts over time by severity, type or domain
  */
 export function useAlertsControllerSeries<

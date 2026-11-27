@@ -1,7 +1,7 @@
 import { keepPreviousData, useQueries, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useMemo } from 'react';
 
-import { positionsControllerVesselLatest } from '@/shared/api/generated/ais-processor/ais/ais';
+import { positionsControllerLatest } from '@/shared/api/generated/ais-processor/ais/ais';
 import type { VesselLatestDto } from '@/shared/api/generated/ais-processor/model';
 import {
   getCiiControllerFleetSummaryQueryOptions,
@@ -19,7 +19,6 @@ import {
   useVesselsControllerGetByMmsi,
   useVesselsControllerList,
 } from '@/shared/api/generated/fleet/vessels/vessels';
-import { isApiProblem } from '@/shared/api/problem';
 import { serviceKeys } from '@/shared/api/query-keys';
 
 import { currentYear } from '@/shared/lib/clock';
@@ -78,34 +77,42 @@ export function useVesselCache() {
 }
 
 const aisKeys = serviceKeys('ais-processor').resource('vessel-latest');
+/** MMSIs per `GET /ais/latest?mmsi=` request (the processor's batch limit). */
+const LAST_SEEN_BATCH = 100;
 
 /**
- * Latest AIS position of each MMSI ("last seen"; `GET /ais/vessels/:mmsi/latest`, 404 = never
- * seen). One request per vessel of the page: the processor has no batch lookup.
+ * Latest AIS position of each MMSI ("last seen"): one batch lookup per 100 vessels
+ * (`GET /ais/latest?mmsi=a,b,c`, no age limit); a vessel the processor never saw is `null`.
  */
 export function useLastSeen(mmsis: readonly number[], enabled = true) {
+  const batches = useMemo(() => {
+    const unique = [...new Set(mmsis)].sort((a, b) => a - b);
+    const chunks: number[][] = [];
+    for (let index = 0; index < unique.length; index += LAST_SEEN_BATCH)
+      chunks.push(unique.slice(index, index + LAST_SEEN_BATCH));
+    return chunks;
+  }, [mmsis]);
   const combine = useCallback(
-    (results: { data?: VesselLatestDto | null; isPending: boolean }[]) => {
+    (results: { data?: VesselLatestDto[]; isPending: boolean }[]) => {
       const byMmsi = new Map<number, VesselLatestDto | null>();
       results.forEach((result, index) => {
-        const mmsi = mmsis[index];
-        if (mmsi !== undefined && result.data !== undefined) byMmsi.set(mmsi, result.data);
+        if (!result.data) return;
+        for (const mmsi of batches[index] ?? []) byMmsi.set(mmsi, null);
+        for (const position of result.data) byMmsi.set(position.mmsi, position);
       });
       return { byMmsi, pending: enabled && results.some((result) => result.isPending) };
     },
-    [mmsis, enabled],
+    [batches, enabled],
   );
   return useQueries({
-    queries: mmsis.map((mmsi) => ({
-      queryKey: aisKeys.detail(mmsi),
-      queryFn: async ({ signal }: { signal: AbortSignal }): Promise<VesselLatestDto | null> => {
-        try {
-          return await positionsControllerVesselLatest(String(mmsi), undefined, signal);
-        } catch (error) {
-          if (isApiProblem(error) && error.status === 404) return null;
-          throw error;
-        }
-      },
+    queries: batches.map((batch) => ({
+      queryKey: aisKeys.list({ mmsi: batch }),
+      queryFn: ({ signal }: { signal: AbortSignal }) =>
+        positionsControllerLatest(
+          { mmsi: batch.join(','), limit: batch.length },
+          undefined,
+          signal,
+        ),
       staleTime: 60_000,
       refetchInterval: 120_000,
       enabled,

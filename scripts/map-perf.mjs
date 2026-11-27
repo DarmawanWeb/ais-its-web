@@ -14,7 +14,7 @@
  * shows them, and the JS heap. Prints a JSON summary.
  */
 /* global window, document, requestAnimationFrame -- page.evaluate callbacks run in the browser */
-import { chromium } from 'playwright';
+import { chromium } from '@playwright/test';
 
 const WEB = process.env.PERF_WEB_URL ?? 'http://localhost:4574';
 const MOCK = process.env.PERF_MOCK_URL ?? 'http://localhost:8974';
@@ -77,8 +77,11 @@ async function panFrames(page, ms = 3_000) {
 
 async function heapMb(page) {
   const cdp = await page.context().newCDPSession(page);
+  // getMetrics answers an empty list until the domain is enabled.
+  await cdp.send('Performance.enable');
   await cdp.send('HeapProfiler.collectGarbage');
   const { metrics } = await cdp.send('Performance.getMetrics');
+  await cdp.detach();
   const used = metrics.find((m) => m.name === 'JSHeapUsedSize')?.value ?? 0;
   return Number((used / 1024 / 1024).toFixed(1));
 }
@@ -90,7 +93,10 @@ const context = await browser.newContext({
   locale: 'id-ID',
 });
 const page = await context.newPage();
-await page.context().newCDPSession(page).then((cdp) => cdp.send('Performance.enable'));
+await page
+  .context()
+  .newCDPSession(page)
+  .then((cdp) => cdp.send('Performance.enable'));
 
 await page.goto('/login');
 await page.getByLabel('Email').fill('admin@ais-its.local');
@@ -121,9 +127,12 @@ const position = (k) => ({
 });
 const started = Date.now();
 for (let offset = 0; offset < VESSELS; offset += 2_000)
-  await push(Array.from({ length: Math.min(2_000, VESSELS - offset) }, (_, i) => position(offset + i)));
+  await push(
+    Array.from({ length: Math.min(2_000, VESSELS - offset) }, (_, i) => position(offset + i)),
+  );
 await page.waitForFunction(
-  (expected) => Number(document.querySelector('[data-testid="vessel-count"]')?.textContent) >= expected,
+  (expected) =>
+    Number(document.querySelector('[data-testid="vessel-count"]')?.textContent) >= expected,
   Math.floor(VESSELS * 0.9),
   { timeout: 60_000 },
 );
@@ -138,7 +147,11 @@ const result = {
   countVisibleAfterMs: visibleAfterMs,
   baseline,
   loaded,
-  jsHeapMb: { before: heapBefore, after: heapAfter, delta: Number((heapAfter - heapBefore).toFixed(1)) },
+  jsHeapMb: {
+    before: heapBefore,
+    after: heapAfter,
+    delta: Number((heapAfter - heapBefore).toFixed(1)),
+  },
 };
 console.log(JSON.stringify(result, null, 2));
 await browser.close();

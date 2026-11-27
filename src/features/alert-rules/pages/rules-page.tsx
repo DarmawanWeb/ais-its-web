@@ -36,7 +36,7 @@ import { ToggleGroup, ToggleGroupItem } from '@/shared/ui/toggle-group';
 import {
   RULES_PAGE_SIZE,
   useDeleteRule,
-  useDeliveries,
+  useDeliverySummary,
   useOrganizations,
   useRotateSecret,
   useRules,
@@ -94,7 +94,7 @@ export function RulesPage() {
     orgId: actor.isPlatformAdmin && orgFilter !== ALL_ORGS ? orgFilter : undefined,
     enabled: status === 'all' ? undefined : status === 'enabled',
   });
-  const recent = useDeliveries({ limit: 50 });
+  const summary = useDeliverySummary();
   const toggle = useToggleRule();
   const remove = useDeleteRule();
   const rotate = useRotateSecret();
@@ -120,22 +120,21 @@ export function RulesPage() {
 
   const stats = useMemo(() => {
     const channels = countChannels(list.flatMap((rule) => rule.channels));
-    const deliveries = recent.data?.data ?? [];
-    const finished = deliveries.filter(
-      (d) => d.status === 'sent' || d.status === 'queued' || d.status === 'failed',
-    );
-    const failed = deliveries.filter((d) => d.status === 'failed').length;
-    const rate = finished.length > 0 ? ((finished.length - failed) / finished.length) * 100 : null;
+    const counts = summary.data;
     return {
       enabled: list.filter((rule) => rule.enabled).length,
       channels,
       totalChannels: channels.email + channels.telegram + channels.webhook,
-      rate,
-      failed,
-      sample: deliveries.length,
-      last: deliveries[0]?.sentAt ?? deliveries[0]?.createdAt ?? null,
+      // Success rate and last delivery over the whole period, counted by the service.
+      rate:
+        counts?.successRate === null || counts?.successRate === undefined
+          ? null
+          : counts.successRate * 100,
+      failed: counts?.failed ?? 0,
+      sample: counts?.total ?? 0,
+      last: counts?.lastDeliveredAt ?? null,
     };
-  }, [list, recent.data]);
+  }, [list, summary.data]);
 
   const onToggle = (rule: AlertRuleDto, enabled: boolean) =>
     toggle.mutate(
@@ -252,7 +251,7 @@ export function RulesPage() {
           methodId="notify.delivery_retry_backoff"
           icon={CircleCheck}
           tone={stats.failed > 0 ? 'warning' : 'success'}
-          loading={recent.isPending}
+          loading={summary.isPending}
         />
         <StatCard
           label={t('stats.lastDelivery')}
@@ -268,7 +267,7 @@ export function RulesPage() {
           }
           description={t('stats.lastDeliveryHint')}
           icon={Webhook}
-          loading={recent.isPending}
+          loading={summary.isPending}
         />
       </section>
 

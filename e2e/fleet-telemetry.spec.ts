@@ -63,7 +63,8 @@ test.describe('fleet: telemetry', () => {
       page.waitForEvent('download'),
       page.getByRole('button', { name: 'Ekspor CSV' }).click(),
     ]);
-    expect(download.suggestedFilename()).toMatch(/^telemetri-525019006-raw-.+\.csv$/);
+    // The service names the file (`Content-Disposition` of `GET /readings.csv`).
+    expect(download.suggestedFilename()).toMatch(/^telemetry-525019006-raw-.+\.csv$/);
     const csv = await readFile((await download.path()) ?? '', 'utf8');
     const [header, ...rows] = csv
       .replace(/^\uFEFF/, '')

@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { Link, useSearchParams } from 'react-router';
 
 import {
-  readingsControllerSeries,
   useReadingsControllerStatus,
   useReadingsControllerSummary,
 } from '@/shared/api/generated/telemetry/readings/readings';
@@ -15,7 +14,6 @@ import { MethodInfo } from '@/shared/domain-ui/method-info';
 import { PageHeader } from '@/shared/domain-ui/page-header';
 import { Section } from '@/shared/domain-ui/section';
 import { StatCard } from '@/shared/domain-ui/stat-card';
-import { downloadCsv } from '@/shared/lib/csv';
 import { formatDateTime, formatNumber, formatRelativeTime } from '@/shared/lib/format';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
@@ -32,6 +30,7 @@ import { MqttCard } from '../components/mqtt-card';
 import { SeriesChart, SeriesLegend } from '../components/series-chart';
 import { VesselPicker } from '../components/vessel-picker';
 import { useReadingColumns } from '../hooks/use-reading-columns';
+import { downloadServerFile } from '@/shared/api/download';
 import { localizeProblem, problemSummary } from '@/shared/api/problem-copy';
 import { telemetryProblemCopies } from '../lib/problems';
 import {
@@ -45,9 +44,6 @@ import {
   type RangePreset,
 } from '../lib/range';
 import { nowMs } from '@/shared/lib/clock';
-
-const CSV_PAGE_LIMIT = 500;
-const CSV_MAX_PAGES = 40;
 
 /** Readings explorer: fleet telemetry state, per-vessel series, manual entry, devices, MQTT. */
 export function TelemetryPage() {
@@ -101,35 +97,13 @@ export function TelemetryPage() {
     if (mmsi === null) return;
     setExporting(true);
     try {
-      const rows = [];
-      let cursor: string | null = null;
-      for (let page = 0; page < CSV_MAX_PAGES; page += 1) {
-        const result = await readingsControllerSeries(String(mmsi), {
-          from: range.from,
-          to: range.to,
-          bucket,
-          limit: CSV_PAGE_LIMIT,
-          ...(cursor ? { cursor } : {}),
-        });
-        rows.push(...result.data);
-        cursor = result.page.nextCursor;
-        if (!cursor) break;
-      }
-      downloadCsv(
+      // One streamed file from the service (`GET /readings.csv`, same range and bucket).
+      await downloadServerFile(
+        `/api/v2/telemetry/vessels/${mmsi}/readings.csv`,
+        { from: range.from, to: range.to, bucket },
         `telemetri-${mmsi}-${bucket}-${range.from.slice(0, 10)}_${range.to.slice(0, 10)}.csv`,
-        rows.map((point) => ({
-          time: point.time,
-          periodStart: point.periodStart ?? '',
-          fuelMeTon: point.fuelMeTon,
-          fuelAeTon: point.fuelAeTon,
-          totalFuelTon: point.totalFuelTon,
-          readings: point.readings,
-          source: point.source ?? '',
-          deviceId: point.deviceId ?? '',
-        })),
       );
-      toast.success(t('export.done', { count: rows.length }));
-      if (cursor) toast.warning(t('export.truncated', { count: rows.length }));
+      toast.success(t('export.done', { count: series.points.length }));
     } catch (error) {
       toast.error(t('export.failed'), { description: problemSummary(error, copies) });
     } finally {

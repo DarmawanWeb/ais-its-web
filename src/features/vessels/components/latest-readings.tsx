@@ -16,8 +16,8 @@ import { latestReadingsWindow } from '../lib/telemetry';
 export const LATEST_READINGS = 8;
 
 /**
- * The newest raw fuel readings of a vessel. The readings API pages ascending only, so the list
- * reads the raw series of the hours before the newest reading and keeps the last ones.
+ * The newest raw fuel readings of a vessel: one newest-first page (`order=desc`) of the raw
+ * series in the 30 days up to the newest reading.
  */
 export function LatestReadings({
   mmsi,
@@ -30,10 +30,16 @@ export function LatestReadings({
   const window = latestReadingsWindow(lastReadingAt);
   const readings = useReadingsControllerSeries(
     String(mmsi),
-    { from: window?.from ?? '', to: window?.to ?? '', bucket: 'raw', limit: 500 },
+    {
+      from: window?.from ?? '',
+      to: window?.to ?? '',
+      bucket: 'raw',
+      order: 'desc',
+      limit: LATEST_READINGS,
+    },
     { query: { enabled: window !== null, staleTime: 30_000 } },
   );
-  const rows = (readings.data?.data ?? []).slice(-LATEST_READINGS).reverse();
+  const rows = readings.data?.data ?? [];
   const n = (value: number) =>
     formatNumber(value, i18n.language, { minimumFractionDigits: 3, maximumFractionDigits: 3 });
 

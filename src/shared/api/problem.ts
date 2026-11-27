@@ -108,6 +108,15 @@ export function parseRetryAfter(value: string | undefined, now = Date.now()): nu
 }
 
 /** Maps any thrown value (axios error, problem document, Error) to an {@link ApiProblem}. */
+function parseJsonText(data: unknown): unknown {
+  if (typeof data !== 'string' || !data.trimStart().startsWith('{')) return data;
+  try {
+    return JSON.parse(data) as unknown;
+  } catch {
+    return data;
+  }
+}
+
 export function toApiProblem(error: unknown): ApiProblem {
   if (isApiProblem(error)) return error;
 
@@ -140,7 +149,8 @@ export function toApiProblem(error: unknown): ApiProblem {
     }
 
     const { status, headers } = error.response;
-    const data: unknown = error.response.data;
+    // Text responses (CSV downloads) carry their problem details as a JSON string.
+    const data: unknown = parseJsonText(error.response.data);
     const retryAfterSeconds = parseRetryAfter(headerValue(headers, 'retry-after'));
     const parsed = ProblemDetailsSchema.safeParse(data);
     if (parsed.success) {
